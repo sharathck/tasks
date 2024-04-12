@@ -68,6 +68,8 @@ function App() {
         task: newTask,
         status: false,
         userId: user.uid,
+        createtedDate: new Date(),
+        uemail: user.email
       });
       setNewTask('');
     }
@@ -94,7 +96,6 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Todo List</h1>
       {user ? (
         <div>
           <p>Welcome, {user.displayName}!</p>
