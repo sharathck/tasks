@@ -98,7 +98,7 @@ function App() {
     <div className="app">
       {user ? (
         <div>
-          <p>Welcome, {user.displayName}!</p>
+          <p> {user.displayName}!</p>
           <button onClick={handleSignOut}>Sign Out</button>
           <form onSubmit={handleAddTask}>
             <input
