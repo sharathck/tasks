@@ -47,13 +47,13 @@ function App() {
         }));
         setTasks(tasksData);
       });
-  
+
       return () => unsubscribe();
     }
   }, [user]);
 
   const handleSignIn = () => {
-    const provider = new GoogleAuthProvider(); 
+    const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
   };
 
@@ -149,6 +149,9 @@ function App() {
                   .map((task) => (
                     <li key={task.id} className="completed">
                       {task.task}
+                      <button onClick={() => handleToggleStatus(task.id, task.status)}>
+                        <FaCheck />
+                      </button>
                     </li>
                   ))}
               </ul>
