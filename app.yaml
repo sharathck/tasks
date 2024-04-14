@@ -1,0 +1,12 @@
+runtime: nodejs
+env: flex
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_num_instances: 1
+  max_num_instances: 10
+
+handlers:
+- url: /
+  static_files: https://storage.googleapis.com/audio-genai/build/index.html
+  upload: www/index.html
