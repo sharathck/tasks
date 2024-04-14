@@ -5,6 +5,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { Readability } from '@mozilla/readability';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
@@ -64,8 +65,29 @@ function App() {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
+      let textresponse = '';
+
+      if (newTask.substring(0, 4) === 'http') {
+        const response = await fetch(newTask);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        // Initialize Readability with the document
+        const reader = new Readability(doc);
+        const article = reader.parse();
+        try {
+          textresponse = article.title + ' ' + article.textContent;
+        }
+        catch (error) {
+          textresponse = error + '   Could not parse url : ' + newTask;
+        }
+      }
+      else {
+        textresponse = newTask;
+      }
+
       await addDoc(collection(db, 'todo'), {
-        task: newTask,
+        task: textresponse,
         status: false,
         userId: user.uid,
         createtedDate: new Date(),
