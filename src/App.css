@@ -29,7 +29,7 @@ li {
 }
 
 li span {
-  flex: 1;
+  flex-basis: 0;
 }
 
 .completed {
