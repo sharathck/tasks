@@ -5,7 +5,12 @@
 h1 {
   text-align: center;
 }
-
+input[type='text'] {
+  padding: 5px;
+  font-size: 30px;
+  height: 30%; /* Increase the height */
+  width: 80%; /* Increase the width */
+}
 
 button {
   padding: 5px 10px;
@@ -28,9 +33,6 @@ li {
   width: 100%; /* Add this line */
 }
 
-li span {
-  flex-basis: 0;
-}
 
 .completed {
   text-decoration: line-through;
@@ -60,10 +62,4 @@ button {
   padding: 5px 10px;
   font-size: 14px; /* make the button text extremely small */
 }
-input[type='text'] {
-  flex-basis: 0;
-  padding: 5px;
-  font-size: 30px;
-  height: 100px; /* Increase the height */
-  width: 60%; /* Increase the width */
-}
+
