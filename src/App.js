@@ -167,6 +167,8 @@ function App() {
               placeholder="Enter a new task"
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Shift') { handleAddTask(e); } }}
+              autoFocus
             />
             <button type="submit">
               <FaPlus />
