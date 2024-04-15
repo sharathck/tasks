@@ -4,7 +4,6 @@ input[type='text'] {
   height: 30%; /* Increase the height */
   width: 80%; /* Increase the width */
 }
-
 button {
   padding: 5px 10px;
   margin-left: 20px;
@@ -24,6 +23,8 @@ ul {
 li {
   margin-bottom: 20px;
   width: 100%; /* Add this line */
+  -webkit-font-smoothing: antialiased; /* Add this line */
+  -moz-osx-font-smoothing: grayscale; /* Add this line */
 }
 
 
@@ -36,10 +37,23 @@ form {
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  justify-content: left;
-  width: 65%;
-  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+}
+.inputtextbox
+{
+  padding: 5px;
+  font-size: 16px;
+  height: 30%; /* Increase the height */
+  width: 55%; /* Increase the width */
+  margin-left: 10px;
+}
+.addbutton {
+  background-color:green;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  height: 30%; /* Increase the height */
+  width: 10%; /* Increase the width */
 }
 
 button {
@@ -81,13 +95,4 @@ button {
   margin-right: 8px;
   padding: 10px 10px;
   font-size: 16px; /* make the button text extremely small */
-}
-.addbutton {
-  background-color:green;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  margin-left: 1px;
-  padding: 5px 10px;
-  font-size: 24px; /* make the button text extremely small */
 }

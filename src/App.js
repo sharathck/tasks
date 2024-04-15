@@ -163,6 +163,7 @@ function App() {
           <button className='textbutton' onClick={generateText}>TXT</button>
           <form onSubmit={handleAddTask}>
             <input
+              className="inputtextbox"
               type="text"
               placeholder="Enter a new task"
               value={newTask}
