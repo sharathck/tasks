@@ -7,6 +7,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 11px;
 }
+/* Increase font size for mobile devices */
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 24px;
+  }
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
