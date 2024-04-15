@@ -71,6 +71,7 @@ button {
 }
 input[type='text'] {
   flex: 1;
+  font-size: 20px;
   padding: 5px;
   height: 100px; /* Increase the height */
   width: 70%; /* Increase the width */

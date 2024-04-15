@@ -72,7 +72,8 @@ function App() {
     if (newTask.trim() !== '') {
       let textresponse = '';
       if (newTask.substring(0, 4) == 'http') {
-        const response = await fetch('https://corsproxy.io/?'+ encodeURIComponent(newTask));
+        const urlWithoutProtocol = newTask.replace(/^https?:\/\//, '');
+        const response = await fetch('https://proxyserver-9p6xblv2ihbq.runkit.sh/proxy?url='+ newTask);
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
