@@ -4,7 +4,7 @@ import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit } from 'firebase/firestore';
 import { Readability } from '@mozilla/readability';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -43,7 +43,7 @@ function App() {
   useEffect(() => {
     if (user) {
       const todoCollection = collection(db, 'todo');
-      const q = query(todoCollection, where('userId', '==', user.uid), orderBy('createdDate','desc'));
+      const q = query(todoCollection, where('userId', '==', user.uid), orderBy('createdDate','desc'), limit(6));
       
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
@@ -203,7 +203,7 @@ function App() {
                 </li>
               ))}
           </ul>
-          <button onClick={() => setShowCompleted(!showCompleted)}>
+          <button className='showcompletedbutton' onClick={() => setShowCompleted(!showCompleted)}>
             <FaEye /> {showCompleted ? 'Hide' : 'Show'} Completed Tasks
           </button>
           {showCompleted && (
@@ -214,10 +214,10 @@ function App() {
                   .filter((task) => task.status)
                   .map((task) => (
                     <li key={task.id} className="completed">
-                      {task.task}
-                      <button onClick={() => handleToggleStatus(task.id, task.status)}>
+                   <button onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
+                         {task.task}
                     </li>
                   ))}
               </ul>
