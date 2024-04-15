@@ -20,6 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+var articles = '';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -47,6 +48,7 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
+        articles += tasksData.map((task) => task.task).join(' ');
         setTasks(tasksData);
       });
 
@@ -114,6 +116,29 @@ function App() {
     });
   };
 
+  const generateDocx = async () => {
+    const doc = new docx.Document({
+      sections: [{
+        properties: {},
+        children: [
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun(articles),
+            ],
+          }),
+        ],
+      }]
+    });
+  
+    docx.Packer.toBlob(doc).then(blob => {
+      console.log(blob);
+      const now = new Date();
+      const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+      const dateTime = `${date}__${time}`;
+      saveAs(blob, dateTime + "_" + tag + ".docx");
+      console.log("Document created successfully");
+    });  };
 
 
   return (
@@ -122,6 +147,7 @@ function App() {
         <div>
             {/* <p> {user.displayName}!</p> */}
           <button onClick={handleSignOut}>Sign Out</button>
+          <button onClick={generateDocx}>Docx</button>
           <form onSubmit={handleAddTask}>
             <input
               type="text"
