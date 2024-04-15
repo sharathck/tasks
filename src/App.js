@@ -4,7 +4,7 @@ import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { Readability } from '@mozilla/readability';
 
 const firebaseConfig = {
@@ -40,7 +40,8 @@ function App() {
   useEffect(() => {
     if (user) {
       const todoCollection = collection(db, 'todo');
-      const q = query(todoCollection, where('userId', '==', user.uid));
+      const q = query(todoCollection, where('userId', '==', user.uid), orderBy('createdDate','desc'));
+      
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -66,9 +67,8 @@ function App() {
     e.preventDefault();
     if (newTask.trim() !== '') {
       let textresponse = '';
-
-      if (newTask.substring(0, 4) === 'http') {
-        const response = await fetch(newTask);
+      if (newTask.substring(0, 4) == 'http') {
+        const response = await fetch('https://corsproxy.io/?'+ encodeURIComponent(newTask));
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
@@ -76,7 +76,7 @@ function App() {
         const reader = new Readability(doc);
         const article = reader.parse();
         try {
-          textresponse = article.title + ' ' + article.textContent;
+          textresponse = article.title + ' . ' + article.textContent;
         }
         catch (error) {
           textresponse = error + '   Could not parse url : ' + newTask;
@@ -90,7 +90,7 @@ function App() {
         task: textresponse,
         status: false,
         userId: user.uid,
-        createtedDate: new Date(),
+        createdDate: new Date(),
         uemail: user.email
       });
       setNewTask('');
