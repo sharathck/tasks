@@ -4,7 +4,7 @@ import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit, and } from 'firebase/firestore';
 import { Readability } from '@mozilla/readability';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -43,8 +43,10 @@ function App() {
   useEffect(() => {
     if (user) {
       const todoCollection = collection(db, 'todo');
-      const q = query(todoCollection, where('userId', '==', user.uid), orderBy('createdDate','desc'), limit(6));
-      
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : 12;
+      const q = query(todoCollection, where('userId', '==', user.uid), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
