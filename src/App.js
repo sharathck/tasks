@@ -6,6 +6,8 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { Readability } from '@mozilla/readability';
+import { saveAs } from 'file-saver';
+import * as docx from 'docx';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
@@ -136,7 +138,7 @@ function App() {
       const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
       const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
       const dateTime = `${date}__${time}`;
-      saveAs(blob, dateTime + "_" + tag + ".docx");
+      saveAs(blob, dateTime + "_" +  ".docx");
       console.log("Document created successfully");
     });  };
 
