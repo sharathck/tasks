@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 11px;
+  font-size: 16px;
 }
 /* Increase font size for mobile devices */
 @media screen and (max-width: 768px) {
