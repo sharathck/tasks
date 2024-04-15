@@ -158,9 +158,9 @@ function App() {
       {user ? (
         <div>
             {/* <p> {user.displayName}!</p> */}
-          <button onClick={handleSignOut}>Sign Out</button>
+          <button className="signoutbutton" onClick={handleSignOut}>Sign Out</button>
           <button onClick={generateDocx}>Docx</button>
-          <button onClick={generateText}>TXT</button>
+          <button className='textbutton' onClick={generateText}>TXT</button>
           <form onSubmit={handleAddTask}>
             <input
               type="text"
@@ -170,7 +170,7 @@ function App() {
               onKeyDown={(e) => { if (e.key === 'Shift') { handleAddTask(e); } }}
               autoFocus
             />
-            <button type="submit">
+            <button className="addbutton" type="submit">
               <FaPlus />
             </button>
           </form>
@@ -192,10 +192,11 @@ function App() {
                     </form>
                   ) : (
                     <>
-                      <span>{task.task}</span>
-                      <button onClick={() => handleToggleStatus(task.id, task.status)}>
+                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
+                      <span>{task.task}</span>
+
                     </>
                   )}
                 </li>
