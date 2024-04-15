@@ -61,7 +61,7 @@ button {
   font-size: 14px; /* make the button text extremely small */
 }
 input[type='text'] {
-  flex: 1;
+  flex-basis: 0;
   padding: 5px;
   font-size: 30px;
   height: 100px; /* Increase the height */
