@@ -46,7 +46,7 @@ function App() {
       const todoCollection = collection(db, 'todo');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 12;
+      const limitValue = limitParam ? parseInt(limitParam) : 6;
       //print limit value
       console.log('limit value: ',limitValue);
       const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
@@ -68,7 +68,7 @@ function App() {
       const todoCollection = collection(db, 'todo');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 12;
+      const limitValue = limitParam ? parseInt(limitParam) : 6;
       //print limit value
       console.log('limit value: ',limitValue);
       const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
@@ -189,9 +189,7 @@ function App() {
       const todoCollection = collection(db, 'todo');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 12;
-      //print limit value
-      console.log('limit value: ',limitValue);
+      const limitValue = limitParam ? parseInt(limitParam) : 6;
       const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const completedTasksData = snapshot.docs.map((doc) => ({
@@ -272,6 +270,7 @@ function App() {
                     </li>
                   ))}
               </ul>
+              <div style={{ marginBottom: '110px' }}></div>
             </div>
           )}
         </div>
