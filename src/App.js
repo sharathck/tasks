@@ -27,6 +27,7 @@ var articles = '';
 function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [completedTasks, setCompletedTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
   const [editTask, setEditTask] = useState(null);
   const [editTaskText, setEditTaskText] = useState('');
@@ -46,7 +47,9 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 12;
-      const q = query(todoCollection, where('userId', '==', user.uid), orderBy('createdDate', 'desc'), limit(limitValue));
+      //print limit value
+      console.log('limit value: ',limitValue);
+      const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -60,6 +63,33 @@ function App() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      const todoCollection = collection(db, 'todo');
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : 12;
+      //print limit value
+      console.log('limit value: ',limitValue);
+      const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const completedTasksData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCompletedTasks(completedTasksData);
+      });
+  
+      return () => unsubscribe();
+    }
+  }, [user]);
+  
+  useEffect(() => {
+    if (showCompleted) {
+      handleShowCompleted();
+    }
+  }, [showCompleted]);
+  
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
@@ -155,6 +185,25 @@ function App() {
       saveAs(blob, dateTime + ".txt");
     }
   
+    const handleShowCompleted = () => {
+      const todoCollection = collection(db, 'todo');
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : 12;
+      //print limit value
+      console.log('limit value: ',limitValue);
+      const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const completedTasksData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCompletedTasks(completedTasksData);
+      });
+    
+      return () => unsubscribe();
+    };
+    
   return (
     <div className="app">
       {user ? (
@@ -212,7 +261,7 @@ function App() {
             <div>
               <h2>Completed Tasks</h2>
               <ul>
-                {tasks
+                {completedTasks
                   .filter((task) => task.status)
                   .map((task) => (
                     <li key={task.id} className="completed">
