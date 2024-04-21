@@ -105,7 +105,7 @@ function App() {
       let textresponse = '';
       if (newTask.substring(0, 4) == 'http') {
         const urlWithoutProtocol = newTask.replace(/^https?:\/\//, '');
-        const response = await fetch('https://proxyserver-9p6xblv2ihbq.runkit.sh/proxy?url='+ newTask);
+        const response = await fetch('https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-9?url='+ newTask);
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
