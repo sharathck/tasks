@@ -186,7 +186,6 @@ function App() {
     <div className="app" style={{fontSize: '24px' }}>
       {user ? (
         <div>
-            /* <p> {user.displayName}!</p> */}
               <button className="signoutbutton" onClick={handleSignOut}>
               <FaSignOutAlt />
               </button>
