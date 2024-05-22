@@ -195,7 +195,7 @@ function App() {
               <input
               className="inputtextbox"
               type="text"
-              placeholder="Enter a new task"
+              placeholder=""
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Shift') { handleAddTask(e); } }}
