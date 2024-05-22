@@ -182,7 +182,7 @@ function App() {
     };
     
   return (
-    <div className="app">
+    <div className="app" style={{fontSize: '24px' }}>
       {user ? (
         <div>
             {/* <p> {user.displayName}!</p> */}
