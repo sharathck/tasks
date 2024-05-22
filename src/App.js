@@ -7,6 +7,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit, and } from 'firebase/firestore';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
+import { FaSignOutAlt, FaFileWord, FaFileAlt } from 'react-icons/fa';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
@@ -185,12 +186,14 @@ function App() {
     <div className="app" style={{fontSize: '24px' }}>
       {user ? (
         <div>
-            {/* <p> {user.displayName}!</p> */}
-          <button className="signoutbutton" onClick={handleSignOut}>Sign Out</button>
-          <button onClick={generateDocx}>Docx</button>
-          <button className='textbutton' onClick={generateText}>TXT</button>
-          <form onSubmit={handleAddTask}>
-            <input
+            /* <p> {user.displayName}!</p> */}
+              <button className="signoutbutton" onClick={handleSignOut}>
+              <FaSignOutAlt />
+              </button>
+              <button onClick={generateDocx}><FaFileWord /></button>
+              <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
+              <form onSubmit={handleAddTask}>
+              <input
               className="inputtextbox"
               type="text"
               placeholder="Enter a new task"
