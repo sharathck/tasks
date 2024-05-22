@@ -5,7 +5,6 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit, and } from 'firebase/firestore';
-import { Readability } from '@mozilla/readability';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 
@@ -43,13 +42,13 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const todoCollection = collection(db, 'todo');
+      const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 6;
       //print limit value
       console.log('limit value: ',limitValue);
-      const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -65,13 +64,13 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const todoCollection = collection(db, 'todo');
+      const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 6;
       //print limit value
       console.log('limit value: ',limitValue);
-      const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const completedTasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -102,28 +101,8 @@ function App() {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
-      let textresponse = '';
-      if (newTask.substring(0, 4) == 'http') {
-        const urlWithoutProtocol = newTask.replace(/^https?:\/\//, '');
-        const response = await fetch('https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-9?url='+ newTask);
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        // Initialize Readability with the document
-        const reader = new Readability(doc);
-        const article = reader.parse();
-        try {
-          textresponse = article.title + ' . ' + article.textContent;
-        }
-        catch (error) {
-          textresponse = error + '   Could not parse url : ' + newTask;
-        }
-      }
-      else {
-        textresponse = newTask;
-      }
-
-      await addDoc(collection(db, 'todo'), {
+      let textresponse = newTask.trim();
+      await addDoc(collection(db, 'tasks'), {
         task: textresponse,
         status: false,
         userId: user.uid,
@@ -136,7 +115,7 @@ function App() {
 
   const handleUpdateTask = async (taskId, newTaskText) => {
     if (newTaskText.trim() !== '') {
-      const taskDocRef = doc(db, 'todo', taskId);
+      const taskDocRef = doc(db, 'tasks', taskId);
       await updateDoc(taskDocRef, {
         task: newTaskText,
       });
@@ -145,7 +124,7 @@ function App() {
 
 
   const handleToggleStatus = async (taskId, status) => {
-    const taskDocRef = doc(db, 'todo', taskId);
+    const taskDocRef = doc(db, 'tasks', taskId);
     await updateDoc(taskDocRef, {
       status: !status,
     });
@@ -186,11 +165,11 @@ function App() {
     }
   
     const handleShowCompleted = () => {
-      const todoCollection = collection(db, 'todo');
+      const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 6;
-      const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const completedTasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
