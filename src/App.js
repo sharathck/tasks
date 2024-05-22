@@ -198,7 +198,6 @@ function App() {
               placeholder=""
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Shift') { handleAddTask(e); } }}
               autoFocus
             />
             <button className="addbutton" type="submit">
