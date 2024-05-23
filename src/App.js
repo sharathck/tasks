@@ -223,7 +223,7 @@ function App() {
                         value={editTaskText}
                         onChange={(e) => setEditTaskText(e.target.value)}
                       />
-                      <button type="submit">
+                      <button type="submit" {...handlers}>
                         <FaCheck />
                       </button>
                     </form>
@@ -232,7 +232,7 @@ function App() {
                       <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
-                      <span>{task.task}</span>
+                      <span {...handlers}>{task.task}</span>
                     </>
                   )}
                 </li>
