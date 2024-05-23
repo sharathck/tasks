@@ -135,7 +135,7 @@ function App() {
         let dayIndex = daysOfWeek.indexOf(dayOfWeek);
         let dayDiff = dayIndex - currentDate.getDay();
         if (dayDiff < 0) {
-          dayDiff += 7;
+          dayDiff -= 7;
         }
         dueDate.setDate(dueDate.getDate() + dayDiff);
       }
@@ -327,7 +327,8 @@ function App() {
                       <button onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
-                      {task.task}
+                      {task.task} &nbsp;&nbsp;
+                      {task.recurrence}
                       <button onClick={() => handleDeleteTask(task.id)} className='deletebutton'>
                         <FaTrash />
                       </button>
