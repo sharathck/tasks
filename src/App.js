@@ -109,21 +109,44 @@ function App() {
     e.preventDefault();
     if (newTask.trim() !== '') {
       let taskDesc = newTask.trim();
+      console.log('taskDesc: ', taskDesc);
       const taskParts = newTask.trim().split(' ');
       let recurrence = taskParts.pop().toLowerCase();
       recurrence = recurrence.toLowerCase();
+      const dueDate = new Date();
       const trueRecurrences = ['daily', 'weekly', 'monthly', 'yearly'];
       if (!trueRecurrences.includes(recurrence)) {
-        taskDesc = taskParts.join(' ');
         recurrence = 'ad-hoc';
       }
+      else {
+        taskDesc = taskParts.join(' ');
+      }
+      // if last three words of the newTask are like "weekly on monday" or "weekly on tuesday" or "weekly on wednesday" or "weekly on thursday" or "weekly on friday" or "weekly on saturday" or "weekly on sunday" then set dueDate to respective day of the week
+      let newTaskDesc = taskDesc.split(' ');
+      console.log('newTaskDesc: ', newTaskDesc);
+      const dayOfWeek = newTaskDesc.pop().toLowerCase();
+      console.log('dayOfWeek: ', dayOfWeek);
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      if (daysOfWeek.includes(dayOfWeek)) {
+        console.log('inside if dayOfWeek: ', dayOfWeek);
+        taskDesc = newTaskDesc.join(' ');
+        recurrence = 'weekly';
+        const currentDate = new Date();
+        let dayIndex = daysOfWeek.indexOf(dayOfWeek);
+        let dayDiff = dayIndex - currentDate.getDay();
+        if (dayDiff < 0) {
+          dayDiff += 7;
+        }
+        dueDate.setDate(dueDate.getDate() + dayDiff);
+      }
+
       await addDoc(collection(db, 'tasks'), {
         task: taskDesc,
         recurrence: recurrence,
         status: false,
         userId: user.uid,
         createdDate: new Date(),
-        dueDate: new Date(),
+        dueDate: dueDate,
         uemail: user.email
       });
       setNewTask('');
