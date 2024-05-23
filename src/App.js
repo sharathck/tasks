@@ -103,15 +103,26 @@ function App() {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
-      let textresponse = newTask.trim();
-      await addDoc(collection(db, 'tasks'), {
-        task: textresponse,
-        status: false,
-        userId: user.uid,
-        createdDate: new Date(),
-        uemail: user.email
-      });
-      setNewTask('');
+      const taskParts = newTask.trim().split(' ');
+      let recurrence = taskParts.pop().toLowerCase();
+      // cover recurrence field to lowercase and default it to ad-hoc if not daily, weekly, monthly, yearly
+      recurrence = recurrence.toLowerCase();
+      const trueRecurrences = ['daily', 'weekly', 'monthly', 'yearly'];
+      if (!trueRecurrences.includes(recurrence)) {
+        recurrence = 'ad-hoc';
+      }
+
+        await addDoc(collection(db, 'tasks'), {
+          task: newTask,
+          recurrence: recurrence,
+          status: false,
+          userId: user.uid,
+          createdDate: new Date(),
+          dueDate: new Date(),
+          uemail: user.email
+        });
+        setNewTask('');
+
     }
   };
 
@@ -124,11 +135,58 @@ function App() {
     }
   };
 
-  const handleToggleStatus = async (taskId, status) => {
+  const handleToggleStatus = async (taskId, status, recurrence, dueDate) => {
     const taskDocRef = doc(db, 'tasks', taskId);
-    await updateDoc(taskDocRef, {
-      status: !status,
-    });
+    const currentDate = new Date();
+    let nextDueDate = new Date(dueDate);
+
+    if (!status) {
+      switch (recurrence) {
+        case 'daily':
+          nextDueDate.setDate(nextDueDate.getDate() + 1);
+          break;
+        case 'weekly':
+          nextDueDate.setDate(nextDueDate.getDate() + 7);
+          break;
+        case 'monthly':
+          nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          break;
+        case 'yearly':
+          nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+          break;
+        default:
+          break;
+      }
+
+      // Loop through the recurrence frequency to set the next due date correctly if it's in the past.
+      while (nextDueDate < currentDate) {
+        switch (recurrence) {
+          case 'daily':
+            nextDueDate.setDate(nextDueDate.getDate() + 1);
+            break;
+          case 'weekly':
+            nextDueDate.setDate(nextDueDate.getDate() + 7);
+            break;
+          case 'monthly':
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+            break;
+          case 'yearly':
+            nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+            break;
+          default:
+            break;
+        }
+      }
+
+      await updateDoc(taskDocRef, {
+        status: !status,
+        dueDate: nextDueDate,
+      });
+    } else {
+      await updateDoc(taskDocRef, {
+        status: !status,
+      });
+    }
   };
 
   const generateDocx = async () => {
@@ -182,7 +240,6 @@ function App() {
     return () => unsubscribe();
   };
 
-
   const handlers = useSwipeable({
     onSwipedRight: (eventData) => handleToggleStatus(eventData.event.target.dataset.taskId, eventData.event.target.dataset.status),
     preventDefaultTouchmoveEvent: true,
@@ -229,10 +286,15 @@ function App() {
                     </form>
                   ) : (
                     <>
-                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status)}>
+                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate())}>
                         <FaCheck />
                       </button>
-                      <span {...handlers}>{task.task}</span>
+                      <span {...handlers}>
+                        {task.task}
+                        {task.recurrence && (
+                          <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                        )}
+                      </span>
                     </>
                   )}
                 </li>
