@@ -18,11 +18,11 @@ ul {
   padding: 0;
   margin-right: 0;
   width: 100%; 
-  font: 28px Arial, sans-serif;
+  font: 24px Arial, sans-serif;
 }
 
 li {
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   width: 100%; /* Add this line */
 }
 
@@ -36,7 +36,7 @@ form {
   position: fixed;
   bottom: 0;
   left: 0;
-  margin-bottom: 50px; /* Move the text box up 10 pixels */
+  margin-bottom: 20px; /* Move the text box up 10 pixels */
 }
 .inputtextbox
 {
@@ -44,7 +44,8 @@ form {
   font-size: 16px;
   height: 30%; /* Increase the height */
   width: 55%; /* Increase the width */
-  margin-left: 10px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
 }
 .addbutton {
   background-color:green;
