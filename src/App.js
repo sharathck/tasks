@@ -108,16 +108,17 @@ function App() {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
+      let taskDesc = newTask.trim();
       const taskParts = newTask.trim().split(' ');
       let recurrence = taskParts.pop().toLowerCase();
       recurrence = recurrence.toLowerCase();
       const trueRecurrences = ['daily', 'weekly', 'monthly', 'yearly'];
       if (!trueRecurrences.includes(recurrence)) {
+        taskDesc = taskParts.join(' ');
         recurrence = 'ad-hoc';
       }
-
       await addDoc(collection(db, 'tasks'), {
-        task: taskParts.join(' '),
+        task: taskDesc,
         recurrence: recurrence,
         status: false,
         userId: user.uid,
