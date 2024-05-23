@@ -29,10 +29,12 @@ function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
+  const [futureTasks, setFutureTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
   const [editTask, setEditTask] = useState(null);
   const [editTaskText, setEditTaskText] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
+  const [showFuture, setShowFuture] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -90,6 +92,12 @@ function App() {
       handleShowCompleted();
     }
   }, [showCompleted]);
+
+  useEffect(() => {
+    if (showFuture) {
+      handleShowFuture();
+    }
+  }, [showFuture]);
 
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
@@ -240,6 +248,20 @@ function App() {
     return () => unsubscribe();
   };
 
+  const handleShowFuture = () => {
+    const tasksCollection = collection(db, 'tasks');
+    const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', new Date()), orderBy('dueDate', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const futureTasksData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setFutureTasks(futureTasksData);
+    });
+
+    return () => unsubscribe();
+  };
+
   const handlers = useSwipeable({
     onSwipedRight: (eventData) => handleToggleStatus(eventData.event.target.dataset.taskId, eventData.event.target.dataset.status),
     preventDefaultTouchmoveEvent: true,
@@ -317,6 +339,22 @@ function App() {
                       {task.task}
                     </li>
                   ))}
+              </ul>
+              <div style={{ marginBottom: '110px' }}></div>
+            </div>
+          )}
+          <button className='showfuturebutton' onClick={() => setShowFuture(!showFuture)}>
+            <FaEye /> {showFuture ? 'Hide' : 'Show'} Future Tasks
+          </button>
+          {showFuture && (
+            <div>
+              <h2>Future Tasks</h2>
+              <ul>
+                {futureTasks.map((task) => (
+                  <li key={task.id}>
+                    {task.task} - {task.dueDate.toDate().toLocaleDateString()}
+                  </li>
+                ))}
               </ul>
               <div style={{ marginBottom: '110px' }}></div>
             </div>
