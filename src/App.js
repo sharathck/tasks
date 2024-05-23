@@ -183,20 +183,16 @@ function App() {
     };
     
   return (
-    <div className="app">
+    <div className="app" style={{fontSize: '24px' }}>
       {user ? (
         <div>
-          <button className="signoutbutton" onClick={handleSignOut}>
-            <FaSignOutAlt />
-          </button>
-          <button onClick={generateDocx}>
-            <FaFileWord />
-          </button>
-          <button className="textbutton" onClick={generateText}>
-            <FaFileAlt />
-          </button>
-          <form onSubmit={handleAddTask}>
-            <input
+              <button className="signoutbutton" onClick={handleSignOut}>
+              <FaSignOutAlt />
+              </button>
+              <button onClick={generateDocx}><FaFileWord /></button>
+              <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
+              <form onSubmit={handleAddTask}>
+              <input
               className="inputtextbox"
               type="text"
               placeholder=""
@@ -212,12 +208,7 @@ function App() {
             {tasks
               .filter((task) => !task.status)
               .map((task) => (
-                <li
-                  key={task.id}
-                  onTouchStart={(e) => handleTouchStart(e, task.id)}
-                  onTouchMove={(e) => handleTouchMove(e, task.id)}
-                  onTouchEnd={(e) => handleTouchEnd(e, task.id)}
-                >
+                <li key={task.id}>
                   {editTask === task.id ? (
                     <form onSubmit={handleUpdateTask}>
                       <input
@@ -231,22 +222,17 @@ function App() {
                     </form>
                   ) : (
                     <>
-                      <button
-                        className="markcompletebutton"
-                        onClick={() => handleToggleStatus(task.id, task.status)}
-                      >
+                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
                       <span>{task.task}</span>
+
                     </>
                   )}
                 </li>
               ))}
           </ul>
-          <button
-            className="showcompletedbutton"
-            onClick={() => setShowCompleted(!showCompleted)}
-          >
+          <button className='showcompletedbutton' onClick={() => setShowCompleted(!showCompleted)}>
             <FaEye /> {showCompleted ? 'Hide' : 'Show'} Completed Tasks
           </button>
           {showCompleted && (
@@ -257,12 +243,10 @@ function App() {
                   .filter((task) => task.status)
                   .map((task) => (
                     <li key={task.id} className="completed">
-                      <button
-                        onClick={() => handleToggleStatus(task.id, task.status)}
-                      >
+                   <button onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
-                      {task.task}
+                         {task.task}
                     </li>
                   ))}
               </ul>
