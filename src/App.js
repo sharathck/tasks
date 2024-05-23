@@ -8,7 +8,6 @@ import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, 
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import { FaSignOutAlt, FaFileWord, FaFileAlt } from 'react-icons/fa';
-import { useSwipeable } from 'react-swipeable';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
@@ -49,16 +48,16 @@ function App() {
       const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 6;
+      const limitValue = limitParam ? parseInt(limitParam) : 500;
       //print limit value
       console.log('limit value: ', limitValue);
-      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('dueDate', 'desc'), limit(limitValue));
+
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        articles += tasksData.map((task) => task.task).join(' ');
         setTasks(tasksData);
       });
 
@@ -71,10 +70,10 @@ function App() {
       const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 6;
+      const limitValue = limitParam ? parseInt(limitParam) : 500;
       //print limit value
       console.log('limit value: ', limitValue);
-      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('dueDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const completedTasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -121,7 +120,7 @@ function App() {
       }
 
         await addDoc(collection(db, 'tasks'), {
-          task: newTask,
+          task: taskParts.join(' '),
           recurrence: recurrence,
           status: false,
           userId: user.uid,
@@ -134,21 +133,17 @@ function App() {
     }
   };
 
-  const handleUpdateTask = async (taskId, newTaskText) => {
-    if (newTaskText.trim() !== '') {
-      const taskDocRef = doc(db, 'tasks', taskId);
-      await updateDoc(taskDocRef, {
-        task: newTaskText,
-      });
-    }
-  };
-
   const handleToggleStatus = async (taskId, status, recurrence, dueDate) => {
     const taskDocRef = doc(db, 'tasks', taskId);
     const currentDate = new Date();
     let nextDueDate = new Date(dueDate);
-
+    console.log('recurrence: ', recurrence);
+    console.log('dueDate: ', dueDate);
+    console.log('currentDate: ', currentDate);
+    console.log('status: ', status);
     if (!status) {
+      console.log('INSIDE IF LOOP currentDate: ', currentDate);
+      console.log('status: ', status);
       switch (recurrence) {
         case 'daily':
           nextDueDate.setDate(nextDueDate.getDate() + 1);
@@ -167,7 +162,7 @@ function App() {
       }
 
       // Loop through the recurrence frequency to set the next due date correctly if it's in the past.
-      while (nextDueDate < currentDate) {
+      while (recurrence != 'ad-hoc' && nextDueDate < currentDate) {
         switch (recurrence) {
           case 'daily':
             nextDueDate.setDate(nextDueDate.getDate() + 1);
@@ -185,12 +180,15 @@ function App() {
             break;
         }
       }
-
+      console.log('third : ', currentDate);
+      console.log('status: ', status);
       await updateDoc(taskDocRef, {
         status: !status,
         dueDate: nextDueDate,
       });
     } else {
+      console.log('else fourth currentDate: ', currentDate);
+      console.log('status: ', status);
       await updateDoc(taskDocRef, {
         status: !status,
       });
@@ -235,7 +233,7 @@ function App() {
     const tasksCollection = collection(db, 'tasks');
     const urlParams = new URLSearchParams(window.location.search);
     const limitParam = urlParams.get('limit');
-    const limitValue = limitParam ? parseInt(limitParam) : 6;
+    const limitValue = limitParam ? parseInt(limitParam) : 50;
     const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const completedTasksData = snapshot.docs.map((doc) => ({
@@ -261,12 +259,6 @@ function App() {
 
     return () => unsubscribe();
   };
-
-  const handlers = useSwipeable({
-    onSwipedRight: (eventData) => handleToggleStatus(eventData.event.target.dataset.taskId, eventData.event.target.dataset.status),
-    preventDefaultTouchmoveEvent: true,
-    trackMouse: true
-  });
 
   return (
     <div className="app" style={{ fontSize: '24px' }}>
@@ -294,31 +286,18 @@ function App() {
             {tasks
               .filter((task) => !task.status)
               .map((task) => (
-                <li key={task.id} {...handlers} data-task-id={task.id} data-status={task.status}>
-                  {editTask === task.id ? (
-                    <form onSubmit={handleUpdateTask}>
-                      <input
-                        type="text"
-                        value={editTaskText}
-                        onChange={(e) => setEditTaskText(e.target.value)}
-                      />
-                      <button type="submit" {...handlers}>
-                        <FaCheck />
-                      </button>
-                    </form>
-                  ) : (
+                <li key={task.id} data-task-id={task.id} data-status={task.status}>
                     <>
-                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate())}>
+                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
                         <FaCheck />
                       </button>
-                      <span {...handlers}>
+                      <span>
                         {task.task}
-                        {task.recurrence && (
+                        {task.recurrence !== 'ad-hoc' && (
                           <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                         )}
                       </span>
                     </>
-                  )}
                 </li>
               ))}
           </ul>
@@ -352,7 +331,7 @@ function App() {
               <ul>
                 {futureTasks.map((task) => (
                   <li key={task.id}>
-                    {task.task} - {task.dueDate.toDate().toLocaleDateString()}
+                    {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()}
                   </li>
                 ))}
               </ul>
@@ -363,6 +342,7 @@ function App() {
       ) : (
         <button onClick={handleSignIn}>Sign In with Google</button>
       )}
+      <div style={{ marginBottom: '110px' }}></div>
     </div>
   );
 }
