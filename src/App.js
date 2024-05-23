@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaCheck, FaEye } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaEye, FaTrash } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import { FaSignOutAlt, FaFileWord, FaFileAlt } from 'react-icons/fa';
@@ -49,7 +49,6 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 500;
-      //print limit value
       console.log('limit value: ', limitValue);
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('dueDate', 'desc'), limit(limitValue));
 
@@ -71,7 +70,6 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 500;
-      //print limit value
       console.log('limit value: ', limitValue);
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('dueDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -112,24 +110,22 @@ function App() {
     if (newTask.trim() !== '') {
       const taskParts = newTask.trim().split(' ');
       let recurrence = taskParts.pop().toLowerCase();
-      // cover recurrence field to lowercase and default it to ad-hoc if not daily, weekly, monthly, yearly
       recurrence = recurrence.toLowerCase();
       const trueRecurrences = ['daily', 'weekly', 'monthly', 'yearly'];
       if (!trueRecurrences.includes(recurrence)) {
         recurrence = 'ad-hoc';
       }
 
-        await addDoc(collection(db, 'tasks'), {
-          task: taskParts.join(' '),
-          recurrence: recurrence,
-          status: false,
-          userId: user.uid,
-          createdDate: new Date(),
-          dueDate: new Date(),
-          uemail: user.email
-        });
-        setNewTask('');
-
+      await addDoc(collection(db, 'tasks'), {
+        task: taskParts.join(' '),
+        recurrence: recurrence,
+        status: false,
+        userId: user.uid,
+        createdDate: new Date(),
+        dueDate: new Date(),
+        uemail: user.email
+      });
+      setNewTask('');
     }
   };
 
@@ -137,13 +133,7 @@ function App() {
     const taskDocRef = doc(db, 'tasks', taskId);
     const currentDate = new Date();
     let nextDueDate = new Date(dueDate);
-    console.log('recurrence: ', recurrence);
-    console.log('dueDate: ', dueDate);
-    console.log('currentDate: ', currentDate);
-    console.log('status: ', status);
     if (!status) {
-      console.log('INSIDE IF LOOP currentDate: ', currentDate);
-      console.log('status: ', status);
       switch (recurrence) {
         case 'daily':
           nextDueDate.setDate(nextDueDate.getDate() + 1);
@@ -161,7 +151,6 @@ function App() {
           break;
       }
 
-      // Loop through the recurrence frequency to set the next due date correctly if it's in the past.
       while (recurrence != 'ad-hoc' && nextDueDate < currentDate) {
         switch (recurrence) {
           case 'daily':
@@ -180,19 +169,20 @@ function App() {
             break;
         }
       }
-      console.log('third : ', currentDate);
-      console.log('status: ', status);
+
       await updateDoc(taskDocRef, {
         status: !status,
         dueDate: nextDueDate,
       });
     } else {
-      console.log('else fourth currentDate: ', currentDate);
-      console.log('status: ', status);
       await updateDoc(taskDocRef, {
         status: !status,
       });
     }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    await deleteDoc(doc(db, 'tasks', taskId));
   };
 
   const generateDocx = async () => {
@@ -210,13 +200,11 @@ function App() {
     });
 
     docx.Packer.toBlob(doc).then(blob => {
-      console.log(blob);
       const now = new Date();
       const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
       const time = `${now.getHours()}-${now.getMinutes()}}-${now.getSeconds()}`;
       const dateTime = `${date}__${time}`;
       saveAs(blob, dateTime + "_" + ".docx");
-      console.log("Document created successfully");
     });
   };
 
@@ -228,7 +216,7 @@ function App() {
     const dateTime = `${date}__${time}`;
     saveAs(blob, dateTime + ".txt");
   }
-  
+
   const handleShowCompleted = () => {
     const tasksCollection = collection(db, 'tasks');
     const urlParams = new URLSearchParams(window.location.search);
@@ -316,6 +304,9 @@ function App() {
                         <FaCheck />
                       </button>
                       {task.task}
+                      <button onClick={() => handleDeleteTask(task.id)} className='deletebutton'>
+                        <FaTrash />
+                      </button>
                     </li>
                   ))}
               </ul>
