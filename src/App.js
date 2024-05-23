@@ -4,10 +4,11 @@ import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit, and } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, limit } from 'firebase/firestore';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import { FaSignOutAlt, FaFileWord, FaFileAlt } from 'react-icons/fa';
+import { useSwipeable } from 'react-swipeable';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
@@ -48,7 +49,7 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 6;
       //print limit value
-      console.log('limit value: ',limitValue);
+      console.log('limit value: ', limitValue);
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
@@ -70,7 +71,7 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 6;
       //print limit value
-      console.log('limit value: ',limitValue);
+      console.log('limit value: ', limitValue);
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const completedTasksData = snapshot.docs.map((doc) => ({
@@ -79,17 +80,17 @@ function App() {
         }));
         setCompletedTasks(completedTasksData);
       });
-  
+
       return () => unsubscribe();
     }
   }, [user]);
-  
+
   useEffect(() => {
     if (showCompleted) {
       handleShowCompleted();
     }
   }, [showCompleted]);
-  
+
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
@@ -123,7 +124,6 @@ function App() {
     }
   };
 
-
   const handleToggleStatus = async (taskId, status) => {
     const taskDocRef = doc(db, 'tasks', taskId);
     await updateDoc(taskDocRef, {
@@ -149,50 +149,57 @@ function App() {
       console.log(blob);
       const now = new Date();
       const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-      const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+      const time = `${now.getHours()}-${now.getMinutes()}}-${now.getSeconds()}`;
       const dateTime = `${date}__${time}`;
-      saveAs(blob, dateTime + "_" +  ".docx");
+      saveAs(blob, dateTime + "_" + ".docx");
       console.log("Document created successfully");
-    });  };
+    });
+  };
 
-
-    const generateText = async () => {
-      const blob = new Blob([articles], { type: "text/plain;charset=utf-8" });
-      const now = new Date();
-      const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-      const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-      const dateTime = `${date}__${time}`;
-      saveAs(blob, dateTime + ".txt");
-    }
+  const generateText = async () => {
+    const blob = new Blob([articles], { type: "text/plain;charset=utf-8" });
+    const now = new Date();
+    const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    const time = `${now.getHours()}-${now.getMinutes()}}-${now.getSeconds()}`;
+    const dateTime = `${date}__${time}`;
+    saveAs(blob, dateTime + ".txt");
+  }
   
-    const handleShowCompleted = () => {
-      const tasksCollection = collection(db, 'tasks');
-      const urlParams = new URLSearchParams(window.location.search);
-      const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 6;
-      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const completedTasksData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setCompletedTasks(completedTasksData);
-      });
-    
-      return () => unsubscribe();
-    };
-    
+  const handleShowCompleted = () => {
+    const tasksCollection = collection(db, 'tasks');
+    const urlParams = new URLSearchParams(window.location.search);
+    const limitParam = urlParams.get('limit');
+    const limitValue = limitParam ? parseInt(limitParam) : 6;
+    const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const completedTasksData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCompletedTasks(completedTasksData);
+    });
+
+    return () => unsubscribe();
+  };
+
+
+  const handlers = useSwipeable({
+    onSwipedRight: (eventData) => handleToggleStatus(eventData.event.target.dataset.taskId, eventData.event.target.dataset.status),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true
+  });
+
   return (
-    <div className="app" style={{fontSize: '24px' }}>
+    <div className="app" style={{ fontSize: '24px' }}>
       {user ? (
         <div>
-              <button className="signoutbutton" onClick={handleSignOut}>
-              <FaSignOutAlt />
-              </button>
-              <button onClick={generateDocx}><FaFileWord /></button>
-              <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
-              <form onSubmit={handleAddTask}>
-              <input
+          <button className="signoutbutton" onClick={handleSignOut}>
+            <FaSignOutAlt />
+          </button>
+          <button onClick={generateDocx}><FaFileWord /></button>
+          <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
+          <form onSubmit={handleAddTask}>
+            <input
               className="inputtextbox"
               type="text"
               placeholder=""
@@ -208,7 +215,7 @@ function App() {
             {tasks
               .filter((task) => !task.status)
               .map((task) => (
-                <li key={task.id}>
+                <li key={task.id} {...handlers} data-task-id={task.id} data-status={task.status}>
                   {editTask === task.id ? (
                     <form onSubmit={handleUpdateTask}>
                       <input
@@ -226,7 +233,6 @@ function App() {
                         <FaCheck />
                       </button>
                       <span>{task.task}</span>
-
                     </>
                   )}
                 </li>
@@ -243,10 +249,10 @@ function App() {
                   .filter((task) => task.status)
                   .map((task) => (
                     <li key={task.id} className="completed">
-                   <button onClick={() => handleToggleStatus(task.id, task.status)}>
+                      <button onClick={() => handleToggleStatus(task.id, task.status)}>
                         <FaCheck />
                       </button>
-                         {task.task}
+                      {task.task}
                     </li>
                   ))}
               </ul>
