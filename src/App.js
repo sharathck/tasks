@@ -467,13 +467,12 @@ function App() {
           )}
           {editTask && (
             <div >
-              <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
-                <input style={{ width: '98%' }}
+              <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)', fontSize : '16px' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+                <input style={{ width: '80%' }}
                   type="text"
                   value={editTaskText}
                   onChange={(e) => setEditTaskText(e.target.value)}
                 />
-                <br />
                 <br />
                 <select
                   value={editRecurrence}
@@ -491,7 +490,6 @@ function App() {
                   value={editDueDate}
                   onChange={(e) => setEditDueDate(e.target.value)}
                 />
-                <br />
                 <br />
                 <button type="submit">Save</button>
                 <button onClick={() => setEditTask(null)}>Cancel</button>
