@@ -37,6 +37,7 @@ function App() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [showFuture, setShowFuture] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
+  const [showEditButtons, setShowEditButtons] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -354,6 +355,7 @@ function App() {
           <button onClick={() => setShowFuture(!showFuture)}>
           <img src="future.png" alt="Future" style={{width: '18px', height: '18px'}}/>
           </button>
+          <button onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
@@ -382,9 +384,11 @@ function App() {
                         <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                       )}
                     </span>
+                    {showEditButtons && (
                     <button className='editbutton' onClick={() => handleEditTask(task)}>
                       <FaEdit  style={{ color: 'Green', backgroundColor: 'whitesmoke' }}/>
                     </button>
+                    )}
                   </>
                 </li>
               ))}
@@ -418,9 +422,11 @@ function App() {
                   <li key={task.id}>
                     {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()} &nbsp;
                     <span className="recurrence"><strong>{task.recurrence}</strong></span> &nbsp;
+                    {showEditButtons && (
                     <button className='editbutton' onClick={() => handleEditTask(task)}>
                       <FaEdit  style={{ color: 'Green', backgroundColor: 'whitesmoke' }}/>
                     </button>
+                    )}
                     &nbsp;
                     <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
                       <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
