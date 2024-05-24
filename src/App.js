@@ -331,10 +331,10 @@ function App() {
           </button>
           <button onClick={generateDocx}><FaFileWord /></button>
           <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
-          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="/done.png" alt="Done" style={{width: '18px', height: '18px'}}/>
+          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="done.png" alt="Done" style={{width: '18px', height: '18px'}}/>
           </button>
           <button onClick={() => setShowFuture(!showFuture)}>
-          <img src="/future.png" alt="Future" style={{width: '18px', height: '18px'}}/>
+          <img src="future.png" alt="Future" style={{width: '18px', height: '18px'}}/>
           </button>
           <form onSubmit={handleAddTask}>
             <input
