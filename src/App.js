@@ -355,10 +355,10 @@ function App() {
           </button>
           <button onClick={generateDocx}><FaFileWord /></button>
           <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
-          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="done.png" alt="Done" style={{ width: '11px', height: '11px' }} />
+          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="done.png" style={{ width: '11px', height: '11px'}} />
           </button>
           <button onClick={() => setShowFuture(!showFuture)}>
-            <img src="future.png" alt="Future" style={{ width: '11px', height: '11px' }} />
+            <img src="future.png" style={{ width: '11px', height: '11px' }} />
           </button>
           <button onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
           <button onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
