@@ -331,6 +331,11 @@ function App() {
           </button>
           <button onClick={generateDocx}><FaFileWord /></button>
           <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
+          <button onClick={() => setShowCompleted(!showCompleted)}> <FaEye /> Done
+          </button>
+          <button onClick={() => setShowFuture(!showFuture)}>
+            <FaEye /> Future
+          </button>
           <form onSubmit={handleAddTask}>
             <input
               className="inputtextbox"
@@ -363,9 +368,6 @@ function App() {
                 </li>
               ))}
           </ul>
-          <button className='showcompletedbutton' onClick={() => setShowCompleted(!showCompleted)}>
-            <FaEye /> {showCompleted ? 'Hide' : 'Show'} Completed Tasks
-          </button>
           {showCompleted && (
             <div>
               <ul>
@@ -387,9 +389,6 @@ function App() {
               <div style={{ marginBottom: '110px' }}></div>
             </div>
           )}
-          <button className='showfuturebutton' onClick={() => setShowFuture(!showFuture)}>
-            <FaEye /> {showFuture ? 'Hide' : 'Show'} Future Tasks
-          </button>
           {showFuture && (
             <div>
               <h2>Future Tasks</h2>
