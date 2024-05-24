@@ -1,9 +1,10 @@
-input[type='text'] {
+.addTask{
   padding: 5px;
   font-size: 32px;
   height: 36%; /* Increase the height */
   width: 80%; /* Increase the width */
   margin-bottom: 50px; /* Add margin at bottom */
+  margin-left: 10px;
 }
 button {
   padding: 5px 10px;
