@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaCheck, FaEye, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaEdit } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
@@ -32,6 +32,8 @@ function App() {
   const [newTask, setNewTask] = useState('');
   const [editTask, setEditTask] = useState(null);
   const [editTaskText, setEditTaskText] = useState('');
+  const [editRecurrence, setEditRecurrence] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
   const [showFuture, setShowFuture] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
@@ -270,6 +272,23 @@ function App() {
     saveAs(blob, dateTime + ".txt");
   }
 
+  const handleEditTask = (task) => {
+    setEditTask(task);
+    setEditTaskText(task.task);
+    setEditRecurrence(task.recurrence);
+    setEditDueDate(new Date(task.dueDate.toDate()).toISOString().substring(0, 10));
+  };
+
+  const handleSaveTask = async () => {
+    const taskDocRef = doc(db, 'tasks', editTask.id);
+    await updateDoc(taskDocRef, {
+      task: editTaskText,
+      recurrence: editRecurrence,
+      dueDate: new Date(editDueDate),
+    });
+    setEditTask(null);
+  };
+
   const handleShowCurrent = () => {
     const tasksCollection = collection(db, 'tasks');
     const urlParams = new URLSearchParams(window.location.search);
@@ -289,7 +308,6 @@ function App() {
 
     return () => unsubscribe();
   };
-
 
   const handleShowCompleted = () => {
     const tasksCollection = collection(db, 'tasks');
@@ -364,6 +382,9 @@ function App() {
                         <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                       )}
                     </span>
+                    <button className='editbutton' onClick={() => handleEditTask(task)}>
+                      <FaEdit  style={{ color: 'Green', backgroundColor: 'whitesmoke' }}/>
+                    </button>
                   </>
                 </li>
               ))}
@@ -381,7 +402,7 @@ function App() {
                       {task.task} &nbsp;&nbsp;
                       <span className="recurrence"><strong>{task.recurrence}</strong></span>
                       <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
-                        <FaTrash />
+                        <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
                       </button>
                     </li>
                   ))}
@@ -395,12 +416,14 @@ function App() {
               <ul>
                 {futureTasks.map((task) => (
                   <li key={task.id}>
-                    {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()}
-                    &nbsp;
-                    <span className="recurrence"><strong>{task.recurrence}</strong></span>
+                    {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()} &nbsp;
+                    <span className="recurrence"><strong>{task.recurrence}</strong></span> &nbsp;
+                    <button className='editbutton' onClick={() => handleEditTask(task)}>
+                      <FaEdit  style={{ color: 'Green', backgroundColor: 'whitesmoke' }}/>
+                    </button>
                     &nbsp;
                     <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
-                      <FaTrash />
+                      <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
                     </button>
                   </li>
                 ))}
@@ -408,11 +431,39 @@ function App() {
               <div style={{ marginBottom: '10px' }}></div>
             </div>
           )}
+          {editTask && (
+            <div >
+              <form style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'whitesmoke', padding: '20px', borderRadius: '5px', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+                <input
+                  type="text"
+                  value={editTaskText}
+                  onChange={(e) => setEditTaskText(e.target.value)}
+                />
+                <select
+                  value={editRecurrence}
+                  onChange={(e) => setEditRecurrence(e.target.value)}
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="ad-hoc">Ad-hoc</option>
+                </select>
+                <input
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                />
+                <button type="submit">Save</button>
+                <button onClick={() => setEditTask(null)}>Cancel</button>
+              </form>
+            </div>
+          )}
         </div>
       ) : (
         <button onClick={handleSignIn}>Sign In with Google</button>
       )}
-      <div style={{ marginBottom: '190px' }}></div>
+      <div style={{ marginBottom: '120px' }}></div>
     </div>
   );
 }
