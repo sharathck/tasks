@@ -10,6 +10,7 @@
 color: orange;
 }
 button {
+  padding: 5px 5px;
   margin-left: 10px;
   border: 1px solid black;
   background-color: #92abd3;
