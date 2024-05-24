@@ -34,6 +34,7 @@ function App() {
   const [editTaskText, setEditTaskText] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
   const [showFuture, setShowFuture] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -84,6 +85,13 @@ function App() {
       return () => unsubscribe();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (showCurrent) {
+      handleShowCurrent();
+      setShowCurrent(false);
+    }
+  }, [showCurrent]);
 
   useEffect(() => {
     if (showCompleted) {
@@ -161,6 +169,7 @@ function App() {
         uemail: user.email
       });
       setNewTask('');
+      setShowCurrent(true);
     }
   };
 
@@ -168,7 +177,13 @@ function App() {
     const taskDocRef = doc(db, 'tasks', taskId);
     const currentDate = new Date();
     let nextDueDate = new Date(dueDate);
-    if (!status) {
+    console.log('recurrence: ', recurrence);
+    console.log('nextDueDate: ', nextDueDate);
+    console.log('currentDate: ', currentDate);
+    console.log('status: ', status);
+    console.log('taskId: ', taskId);
+    console.log('dueDate: ', dueDate);
+    if (recurrence !== 'ad-hoc') {
       switch (recurrence) {
         case 'daily':
           nextDueDate.setDate(nextDueDate.getDate() + 1);
@@ -204,22 +219,22 @@ function App() {
             break;
         }
       }
-
+      // if recurrence is not ad-hoc then update both dueDate and status, else update only dueDate
       await updateDoc(taskDocRef, {
-        status: !status,
         dueDate: nextDueDate,
       });
-    } else {
+    }
+    else {
       await updateDoc(taskDocRef, {
         status: !status,
       });
-    }
+    };
   };
 
   const handleDeleteTask = async (taskId, taskText) => {
     const confirmation = window.confirm(`Are you sure you want to delete this task: ${taskText.substring(0, 30)}...?`);
     if (confirmation) {
-    await deleteDoc(doc(db, 'tasks', taskId));
+      await deleteDoc(doc(db, 'tasks', taskId));
     }
   };
 
@@ -255,11 +270,32 @@ function App() {
     saveAs(blob, dateTime + ".txt");
   }
 
+  const handleShowCurrent = () => {
+    const tasksCollection = collection(db, 'tasks');
+    const urlParams = new URLSearchParams(window.location.search);
+    const limitParam = urlParams.get('limit');
+    const limitValue = limitParam ? parseInt(limitParam) : 500;
+    console.log('limit value: ', limitValue);
+    const currentDate = new Date();
+    const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const tasksData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTasks(tasksData);
+    });
+
+    return () => unsubscribe();
+  };
+
+
   const handleShowCompleted = () => {
     const tasksCollection = collection(db, 'tasks');
     const urlParams = new URLSearchParams(window.location.search);
     const limitParam = urlParams.get('limit');
-    const limitValue = limitParam ? parseInt(limitParam) : 50;
+    const limitValue = limitParam ? parseInt(limitParam) : 100;
     const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const completedTasksData = snapshot.docs.map((doc) => ({
@@ -337,11 +373,11 @@ function App() {
                   .filter((task) => task.status)
                   .map((task) => (
                     <li key={task.id} className="completed">
-                      <button onClick={() => handleToggleStatus(task.id, task.status)}>
+                      <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
                         <FaCheck />
                       </button>
                       {task.task} &nbsp;&nbsp;
-                    <span className="recurrence"><strong>{task.recurrence}</strong></span>
+                      <span className="recurrence"><strong>{task.recurrence}</strong></span>
                       <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
                         <FaTrash />
                       </button>
@@ -361,12 +397,12 @@ function App() {
                 {futureTasks.map((task) => (
                   <li key={task.id}>
                     {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()}
-                    &nbsp;                       
+                    &nbsp;
                     <span className="recurrence"><strong>{task.recurrence}</strong></span>
                     &nbsp;
                     <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
-                        <FaTrash />
-                      </button>
+                      <FaTrash />
+                    </button>
                   </li>
                 ))}
               </ul>
