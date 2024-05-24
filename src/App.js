@@ -216,8 +216,11 @@ function App() {
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
+  const handleDeleteTask = async (taskId, taskText) => {
+    const confirmation = window.confirm(`Are you sure you want to delete this task: ${taskText.substring(0, 30)}...?`);
+    if (confirmation) {
     await deleteDoc(doc(db, 'tasks', taskId));
+    }
   };
 
   const generateDocx = async () => {
@@ -317,7 +320,7 @@ function App() {
                     <span>
                       {task.task}
                       {task.recurrence !== 'ad-hoc' && (
-                        <span className="recurrence">{task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)}</span>
+                        <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                       )}
                     </span>
                   </>
@@ -339,7 +342,7 @@ function App() {
                       </button>
                       {task.task} &nbsp;&nbsp;
                     <span className="recurrence"><strong>{task.recurrence}</strong></span>
-                      <button onClick={() => handleDeleteTask(task.id)} className='deletebutton'>
+                      <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
                         <FaTrash />
                       </button>
                     </li>
@@ -361,7 +364,7 @@ function App() {
                     &nbsp;                       
                     <span className="recurrence"><strong>{task.recurrence}</strong></span>
                     &nbsp;
-                    <button onClick={() => handleDeleteTask(task.id)} className='deletebutton'>
+                    <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
                         <FaTrash />
                       </button>
                   </li>
