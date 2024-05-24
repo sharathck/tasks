@@ -355,14 +355,15 @@ function App() {
           </button>
           <button onClick={generateDocx}><FaFileWord /></button>
           <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
-          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="done.png" style={{ width: '11px', height: '11px'}} />
+          <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+            <img src="done.png" style={{ width: '15px', height: '15px' }} />
           </button>
-          <button onClick={() => setShowFuture(!showFuture)}>
-            <img src="future.png" style={{ width: '11px', height: '11px' }} />
+          <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+            <img src="future.png" style={{ width: '15px', height: '15px' }} />
           </button>
-          <button onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-          <button onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
-          <button onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
+          <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+          <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+          <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
@@ -417,15 +418,15 @@ function App() {
                       {task.recurrence !== 'ad-hoc' && (
                         <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                       )}
-                      &nbsp
+                      &nbsp;
                       {showDueDates && (
                         <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
                       )}
                       {showDeleteButtons && (
-                      <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
-                        <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
-                      </button>
-                    )}
+                        <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
+                          <FaTrash />
+                        </button>
+                      )}
                     </li>
                   ))}
               </ul>
@@ -454,9 +455,9 @@ function App() {
                       </button>
                     )}
                     &nbsp;
-                      {showDeleteButtons && (
-                      <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
-                        <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
+                    {showDeleteButtons && (
+                      <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
+                        <FaTrash />
                       </button>
                     )}
                   </li>
@@ -467,7 +468,7 @@ function App() {
           )}
           {editTask && (
             <div >
-              <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)', fontSize : '16px' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+              <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)', fontSize: '16px' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
                 <input style={{ width: '80%' }}
                   type="text"
                   value={editTaskText}
