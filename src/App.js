@@ -7,7 +7,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
-import { FaSignOutAlt, FaFileWord, FaFileAlt } from 'react-icons/fa';
+import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar } from 'react-icons/fa';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
@@ -38,6 +38,8 @@ function App() {
   const [showFuture, setShowFuture] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showEditButtons, setShowEditButtons] = useState(false);
+  const [showDueDates, setShowDueDates] = useState(false);
+  const [showDeleteButtons, setShowDeleteButtons] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -353,12 +355,14 @@ function App() {
           </button>
           <button onClick={generateDocx}><FaFileWord /></button>
           <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
-          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="done.png" alt="Done" style={{width: '18px', height: '18px'}}/>
+          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="done.png" alt="Done" style={{ width: '11px', height: '11px' }} />
           </button>
           <button onClick={() => setShowFuture(!showFuture)}>
-          <img src="future.png" alt="Future" style={{width: '18px', height: '18px'}}/>
+            <img src="future.png" alt="Future" style={{ width: '11px', height: '11px' }} />
           </button>
           <button onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+          <button onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+          <button onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
@@ -384,13 +388,16 @@ function App() {
                     <span>
                       {task.task}
                       {task.recurrence !== 'ad-hoc' && (
-                        <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                        <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                      )}
+                      {showDueDates && (
+                        <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
                       )}
                     </span>
                     {showEditButtons && (
-                    <button className='editbutton' onClick={() => handleEditTask(task)}>
-                      <FaEdit  style={{ color: 'Green', backgroundColor: 'whitesmoke' }}/>
-                    </button>
+                      <button className='editbutton' onClick={() => handleEditTask(task)}>
+                        <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                      </button>
                     )}
                   </>
                 </li>
@@ -407,10 +414,18 @@ function App() {
                         <FaCheck />
                       </button>
                       {task.task} &nbsp;&nbsp;
-                      <span className="recurrence"><strong>{task.recurrence}</strong></span>
+                      {task.recurrence !== 'ad-hoc' && (
+                        <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                      )}
+                      &nbsp
+                      {showDueDates && (
+                        <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
+                      )}
+                      {showDeleteButtons && (
                       <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
                         <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
                       </button>
+                    )}
                     </li>
                   ))}
               </ul>
@@ -423,17 +438,27 @@ function App() {
               <ul>
                 {futureTasks.map((task) => (
                   <li key={task.id}>
-                    {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()} &nbsp;
-                    <span className="recurrence"><strong>{task.recurrence}</strong></span> &nbsp;
-                    {showEditButtons && (
-                    <button className='editbutton' onClick={() => handleEditTask(task)}>
-                      <FaEdit  style={{ color: 'Green', backgroundColor: 'whitesmoke' }}/>
-                    </button>
+                    {task.task}
+                    &nbsp;
+                    {showDueDates && (
+                      <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
                     )}
                     &nbsp;
-                    <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
-                      <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
-                    </button>
+                    {task.recurrence !== 'ad-hoc' && (
+                      <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                    )}
+                    &nbsp;
+                    {showEditButtons && (
+                      <button className='editbutton' onClick={() => handleEditTask(task)}>
+                        <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                      </button>
+                    )}
+                    &nbsp;
+                      {showDeleteButtons && (
+                      <button onClick={() => handleDeleteTask(task.id, task.task)} className='deletebutton'>
+                        <FaTrash style={{ color: 'lightcoral', backgroundColor: 'whitesmoke' }} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -442,8 +467,8 @@ function App() {
           )}
           {editTask && (
             <div >
-              <form style={{ position: 'fixed', width:'60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid' ,backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
-                <input style={{width: '98%'}} 
+              <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+                <input style={{ width: '98%' }}
                   type="text"
                   value={editTaskText}
                   onChange={(e) => setEditTaskText(e.target.value)}
