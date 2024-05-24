@@ -62,6 +62,7 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
+        articles += tasksData.map((task) => task.task).join(' . ');
         setTasks(tasksData);
       });
 
@@ -82,6 +83,7 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
+        articles += completedTasksData.map((task) => task.task).join(' . ');
         setCompletedTasks(completedTasksData);
       });
 
@@ -306,7 +308,6 @@ function App() {
       }));
       setTasks(tasksData);
     });
-
     return () => unsubscribe();
   };
 
@@ -321,6 +322,7 @@ function App() {
         id: doc.id,
         ...doc.data(),
       }));
+      articles += completedTasksData.map((task) => task.task).join(' . ');
       setCompletedTasks(completedTasksData);
     });
 
@@ -335,6 +337,7 @@ function App() {
         id: doc.id,
         ...doc.data(),
       }));
+      articles += futureTasksData.map((task) => task.task).join(' . ');
       setFutureTasks(futureTasksData);
     });
 
