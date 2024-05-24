@@ -260,7 +260,7 @@ function App() {
     docx.Packer.toBlob(doc).then(blob => {
       const now = new Date();
       const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-      const time = `${now.getHours()}-${now.getMinutes()}}-${now.getSeconds()}`;
+      const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
       const dateTime = `${date}__${time}`;
       saveAs(blob, dateTime + "_" + ".docx");
     });
@@ -270,7 +270,7 @@ function App() {
     const blob = new Blob([articles], { type: "text/plain;charset=utf-8" });
     const now = new Date();
     const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-    const time = `${now.getHours()}-${now.getMinutes()}}-${now.getSeconds()}`;
+    const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
     const dateTime = `${date}__${time}`;
     saveAs(blob, dateTime + ".txt");
   }
