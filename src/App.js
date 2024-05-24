@@ -50,7 +50,8 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 500;
       console.log('limit value: ', limitValue);
-      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('dueDate', 'desc'), limit(limitValue));
+      const currentDate = new Date();
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
@@ -138,6 +139,16 @@ function App() {
           dayDiff -= 7;
         }
         dueDate.setDate(dueDate.getDate() + dayDiff);
+      }
+
+      const dayAdd = taskDesc.split(' ').pop().toLowerCase();
+      console.log('dayAdd: ', dayAdd);
+      //if dayAdd is Number then add that number of days to the dueDate
+      if (!isNaN(dayAdd)) {
+        taskDesc = taskDesc.split(' ').slice(0, -1).join(' ');
+        console.log('taskDesc: ', taskDesc);
+        dueDate.setDate(dueDate.getDate() + parseInt(dayAdd));
+        console.log('dueDate: ', dueDate);
       }
 
       await addDoc(collection(db, 'tasks'), {
@@ -299,17 +310,17 @@ function App() {
               .filter((task) => !task.status)
               .map((task) => (
                 <li key={task.id} data-task-id={task.id} data-status={task.status}>
-                    <>
-                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
-                        <FaCheck />
-                      </button>
-                      <span>
-                        {task.task}
-                        {task.recurrence !== 'ad-hoc' && (
-                          <span className="recurrence"> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                        )}
-                      </span>
-                    </>
+                  <>
+                    <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                      <FaCheck />
+                    </button>
+                    <span>
+                      {task.task}
+                      {task.recurrence !== 'ad-hoc' && (
+                        <span className="recurrence">{task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)}</span>
+                      )}
+                    </span>
+                  </>
                 </li>
               ))}
           </ul>
@@ -318,7 +329,6 @@ function App() {
           </button>
           {showCompleted && (
             <div>
-              <h2>Completed Tasks</h2>
               <ul>
                 {completedTasks
                   .filter((task) => task.status)
@@ -328,7 +338,7 @@ function App() {
                         <FaCheck />
                       </button>
                       {task.task} &nbsp;&nbsp;
-                      {task.recurrence}
+                    <span className="recurrence"><strong>{task.recurrence}</strong></span>
                       <button onClick={() => handleDeleteTask(task.id)} className='deletebutton'>
                         <FaTrash />
                       </button>
@@ -348,17 +358,23 @@ function App() {
                 {futureTasks.map((task) => (
                   <li key={task.id}>
                     {task.task} - {task.dueDate && task.dueDate.toDate().toLocaleDateString()}
+                    &nbsp;                       
+                    <span className="recurrence"><strong>{task.recurrence}</strong></span>
+                    &nbsp;
+                    <button onClick={() => handleDeleteTask(task.id)} className='deletebutton'>
+                        <FaTrash />
+                      </button>
                   </li>
                 ))}
               </ul>
-              <div style={{ marginBottom: '110px' }}></div>
+              <div style={{ marginBottom: '10px' }}></div>
             </div>
           )}
         </div>
       ) : (
         <button onClick={handleSignIn}>Sign In with Google</button>
       )}
-      <div style={{ marginBottom: '110px' }}></div>
+      <div style={{ marginBottom: '190px' }}></div>
     </div>
   );
 }
