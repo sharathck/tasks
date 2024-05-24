@@ -331,10 +331,10 @@ function App() {
           </button>
           <button onClick={generateDocx}><FaFileWord /></button>
           <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
-          <button onClick={() => setShowCompleted(!showCompleted)}> <FaEye /> Done
+          <button onClick={() => setShowCompleted(!showCompleted)}> <img src="/done.png" alt="Done" style={{width: '18px', height: '18px'}}/>
           </button>
           <button onClick={() => setShowFuture(!showFuture)}>
-            <FaEye /> Future
+          <img src="/future.png" alt="Future" style={{width: '18px', height: '18px'}}/>
           </button>
           <form onSubmit={handleAddTask}>
             <input
