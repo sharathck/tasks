@@ -1,7 +1,7 @@
 .addTask{
   padding: 5px;
   font-size: 32px;
-  height: 36%; /* Increase the height */
+  height: 40%; /* Increase the height */
   width: 80%; /* Increase the width */
   margin-bottom: 50px; /* Add margin at bottom */
   margin-left: 10px;
@@ -69,7 +69,7 @@ form {
   color: #fff;
   cursor: pointer;
   margin-left: 10px;
-  height: 30%; /* Increase the height */
+  height: 40%; /* Increase the height */
   width: 10%; /* Increase the width */
 }
 
