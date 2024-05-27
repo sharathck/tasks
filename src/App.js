@@ -7,7 +7,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
-import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar,FaDownload } from 'react-icons/fa';
+import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar,FaPlay } from 'react-icons/fa';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
@@ -138,39 +138,10 @@ function App() {
     }
   };
   
-  const downloadSpeech = async () => {
-    const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-    speechConfig.speechSynthesisVoiceName = voiceName;
-
-    // Set output format to MP3
-    const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
-    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
-
-    const read = articles.substring(0, 200);
-    try {
-      const result = await speechSynthesizer.speakTextAsync(read, speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
-        if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-          console.log(`Speech synthesized to audio data`);
-
-          // Create a blob from the audio data
-          const audioBlob = new Blob([result.audioData], { type: 'audio/mp3' });
-
-          // Create download link
-          const audioFileUrl = URL.createObjectURL(audioBlob);
-          const link = document.createElement('a');
-          link.href = audioFileUrl;
-          link.download = 'output.mp3';
-          link.click();
-        } else if (result.reason === speechsdk.ResultReason.Canceled) {
-          const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
-          console.error(`Speech synthesis canceled: ${cancellationDetails.reason}`);
-          if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
-            console.error(`Error details: ${cancellationDetails.errorDetails}`);
-          }
-        }
-    } catch (error) {
-      console.error(`Error synthesizing speech: ${error}`);
-    }
+  const speakContent = async () => {
+    const speechSynthesis = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(articles);
+    speechSynthesis.speak(utterance);
   };
   
   const handleAddTask = async (e) => {
@@ -417,7 +388,7 @@ function App() {
           <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
           <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
           <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '15px', height: '15px' }} /></button>
-          <button onClick={downloadSpeech}><FaDownload /></button>
+          <button onClick={speakContent}><FaPlay /></button>
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
