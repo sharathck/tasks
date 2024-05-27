@@ -128,7 +128,6 @@ function App() {
           console.log(`Speech synthesized to speaker for text: [${chunk}]`);
         } else if (result.reason === speechsdk.ResultReason.Canceled) {
           const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
-          console.error(`Speech synthesis canceled: ${cancellationDetails.reason}`);
           if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
             console.error(`Error details: ${cancellationDetails.errorDetails}`);
           }
