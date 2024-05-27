@@ -10,7 +10,7 @@ import * as docx from 'docx';
 import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar } from 'react-icons/fa';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 
-const speechKey = '55c4f5f13d764a77a683b5c225c52705';
+const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const voiceName = 'en-US-AvaNeural';
 const firebaseConfig = {
@@ -70,27 +70,6 @@ function App() {
         }));
         articles += tasksData.map((task) => task.task).join(' . ');
         setTasks(tasksData);
-      });
-
-      return () => unsubscribe();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      const tasksCollection = collection(db, 'tasks');
-      const urlParams = new URLSearchParams(window.location.search);
-      const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 500;
-      console.log('limit value: ', limitValue);
-      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('dueDate', 'desc'), limit(limitValue));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const completedTasksData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        articles += completedTasksData.map((task) => task.task).join(' . ');
-        setCompletedTasks(completedTasksData);
       });
 
       return () => unsubscribe();
