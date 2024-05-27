@@ -142,15 +142,25 @@ function App() {
     const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
     speechConfig.speechSynthesisVoiceName = voiceName;
 
-    const audioConfig = speechsdk.AudioConfig.fromAudioFileOutput('output.mp3');
+    // Set output format to MP3
+    const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
     const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
 
-    const chunks = splitMessage(articles);
-    for (const chunk of chunks) {
-      try {
-        const result = await speechSynthesizer.speakTextAsync(chunk);
+    const read = articles.substring(0, 2500);
+    try {
+      const result = await speechSynthesizer.speakTextAsync(read, speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
         if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-          console.log(`Speech synthesized to audio file for text: [${chunk}]`);
+          console.log(`Speech synthesized to audio data`);
+
+          // Create a blob from the audio data
+          const audioBlob = new Blob([result.audioData], { type: 'audio/mp3' });
+
+          // Create download link
+          const audioFileUrl = URL.createObjectURL(audioBlob);
+          const link = document.createElement('a');
+          link.href = audioFileUrl;
+          link.download = 'output.mp3';
+          link.click();
         } else if (result.reason === speechsdk.ResultReason.Canceled) {
           const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
           console.error(`Speech synthesis canceled: ${cancellationDetails.reason}`);
@@ -158,18 +168,11 @@ function App() {
             console.error(`Error details: ${cancellationDetails.errorDetails}`);
           }
         }
-      } catch (error) {
-        console.error(`Error synthesizing speech: ${error}`);
-      }
+    } catch (error) {
+      console.error(`Error synthesizing speech: ${error}`);
     }
-
-    const audioFileUrl = URL.createObjectURL(audioConfig.outputFile);
-    const link = document.createElement('a');
-    link.href = audioFileUrl;
-    link.download = 'output.mp3';
-    link.click();
   };
-
+  
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
