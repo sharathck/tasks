@@ -146,7 +146,7 @@ function App() {
     const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
     const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
 
-    const read = articles.substring(0, 2500);
+    const read = articles.substring(0, 200);
     try {
       const result = await speechSynthesizer.speakTextAsync(read, speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
         if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
