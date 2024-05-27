@@ -8,7 +8,11 @@ import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar } from 'react-icons/fa';
+import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 
+const speechKey = '55c4f5f13d764a77a683b5c225c52705';
+const serviceRegion = 'eastus';
+const voiceName = 'en-US-AvaNeural';
 const firebaseConfig = {
   apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
   authDomain: "reviewtext-ad5c6.firebaseapp.com",
@@ -121,6 +125,40 @@ function App() {
     auth.signOut();
   };
 
+  const splitMessage = (msg, chunkSize = 4000) => {
+    const chunks = [];
+    for (let i = 0; i < msg.length; i += chunkSize) {
+      chunks.push(msg.substring(i, i + chunkSize));
+    }
+    return chunks;
+  };
+  
+  const synthesizeSpeech = async () => {
+    const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+    speechConfig.speechSynthesisVoiceName = voiceName;
+  
+    const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+  
+    const chunks = splitMessage(articles);
+    for (const chunk of chunks) {
+      try {
+        const result = await speechSynthesizer.speakTextAsync(chunk);
+        if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+          console.log(`Speech synthesized to speaker for text: [${chunk}]`);
+        } else if (result.reason === speechsdk.ResultReason.Canceled) {
+          const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
+          console.error(`Speech synthesis canceled: ${cancellationDetails.reason}`);
+          if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
+            console.error(`Error details: ${cancellationDetails.errorDetails}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error synthesizing speech: ${error}`);
+      }
+    }
+  };
+  
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
@@ -364,6 +402,7 @@ function App() {
           <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
           <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
           <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
+          <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '22px', height: '18px' }} /></button>
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
