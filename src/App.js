@@ -7,7 +7,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
-import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar } from 'react-icons/fa';
+import { FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar,FaDownload } from 'react-icons/fa';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
@@ -139,6 +139,38 @@ function App() {
     }
   };
   
+  const downloadSpeech = async () => {
+    const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+    speechConfig.speechSynthesisVoiceName = voiceName;
+
+    const audioConfig = speechsdk.AudioConfig.fromAudioFileOutput('output.mp3');
+    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+    const chunks = splitMessage(articles);
+    for (const chunk of chunks) {
+      try {
+        const result = await speechSynthesizer.speakTextAsync(chunk);
+        if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+          console.log(`Speech synthesized to audio file for text: [${chunk}]`);
+        } else if (result.reason === speechsdk.ResultReason.Canceled) {
+          const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
+          console.error(`Speech synthesis canceled: ${cancellationDetails.reason}`);
+          if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
+            console.error(`Error details: ${cancellationDetails.errorDetails}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error synthesizing speech: ${error}`);
+      }
+    }
+
+    const audioFileUrl = URL.createObjectURL(audioConfig.outputFile);
+    const link = document.createElement('a');
+    link.href = audioFileUrl;
+    link.download = 'output.mp3';
+    link.click();
+  };
+
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (newTask.trim() !== '') {
@@ -382,7 +414,8 @@ function App() {
           <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
           <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
           <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
-          <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '22px', height: '18px' }} /></button>
+          <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '15px', height: '15px' }} /></button>
+          <button onClick={downloadSpeech}><FaDownload /></button>
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
