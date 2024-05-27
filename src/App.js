@@ -13,15 +13,6 @@ import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const voiceName = 'en-US-AvaNeural';
-/*const firebaseConfig = {
-  apiKey: "AIzaSyBNeonGTfBV2QhXxkufPueC-gQLCrcsB08",
-  authDomain: "reviewtext-ad5c6.firebaseapp.com",
-  databaseURL: "https://reviewtext-ad5c6.firebaseio.com",
-  projectId: "reviewtext-ad5c6",
-  storageBucket: "reviewtext-ad5c6.appspot.com",
-  messagingSenderId: "892085575649",
-  appId: "1:892085575649:web:b57abe0e1438f10dc6fca0"
-};*/
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
