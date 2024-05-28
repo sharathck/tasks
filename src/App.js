@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
+import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit,persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -22,7 +22,7 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig, {localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED});
 const db = getFirestore(app);
 const auth = getAuth(app);
 let articles = '';
