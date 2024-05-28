@@ -371,7 +371,7 @@ function App() {
               <FaSignOutAlt />
             </button>
             <button onClick={generateDocx}><FaFileWord /></button>
-            <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
+            <button onClick={generateText}><FaFileAlt /></button>
             <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
               <FaCheckDouble />
             </button>
