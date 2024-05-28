@@ -138,15 +138,11 @@ function App() {
     }
   };
   
-  const qspeakContent = async () => {
+  const speakContent = async () => {
     const speechSynthesis = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(articles);
     speechSynthesis.speak(utterance);
   };
-
-  const speakContent = async () => {
-    responsiveVoice.speak(articles);
-};
   
   const handleAddTask = async (e) => {
     e.preventDefault();
@@ -393,7 +389,7 @@ function App() {
           <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
           <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>
           <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '15px', height: '15px' }} /></button>
-          <button className={showEditButtons ? 'button_selected' : 'button'} onClick={speakContent}><FaPlay /></button>
+          {showEditButtons && <button onClick={speakContent}><FaPlay /></button>}
           <form onSubmit={handleAddTask}>
             <input
               className="addTask"
