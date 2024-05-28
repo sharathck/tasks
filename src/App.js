@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay,FaReadme, FaArrowLeft } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
@@ -360,7 +360,7 @@ function App() {
   return (
     <div className="app" style={{ fontSize: '24px' }}>
       {
-      readerMode ? (
+        readerMode ? (
           <div>
             <button onClick={handleBack}><FaArrowLeft /></button>
             <p>{articles}</p>
@@ -373,10 +373,10 @@ function App() {
             <button onClick={generateDocx}><FaFileWord /></button>
             <button className='textbutton' onClick={generateText}><FaFileAlt /></button>
             <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
-              <img src="done.png" style={{ width: '15px', height: '15px' }} />
+              <FaCheckDouble />
             </button>
             <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
-              <img src="future.png" style={{ width: '15px', height: '15px' }} />
+              <FaClock />
             </button>
             <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
@@ -518,8 +518,8 @@ function App() {
               </div>
             )}
           </div>
-        )} 
-        {!user && <button onClick={handleSignIn}>Sign In with Google</button>}
+        )}
+      {!user && <button onClick={handleSignIn}>Sign In with Google</button>}
       <div style={{ marginBottom: '120px' }}></div>
     </div>
   );
