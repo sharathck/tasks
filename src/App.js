@@ -3,7 +3,7 @@ import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, 
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit,persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
@@ -44,6 +44,9 @@ function App() {
   const [showDueDates, setShowDueDates] = useState(false);
   const [showDeleteButtons, setShowDeleteButtons] = useState(false);
   const [readerMode, setReaderMode] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -60,6 +63,7 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 500;
       const currentDate = new Date();
+      
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       if (user.uid === 'Rz4dYtnnXnftwbNEqVdnRaR5q303') {
         console.log('Admin user');
@@ -356,7 +360,18 @@ function App() {
   const handleReaderMode = () => {
     setReaderMode(true);
   };
-
+  const handleSignInWithEmail = async (e) => {
+    e.preventDefault();
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
   const handleBack = () => {
     setReaderMode(false);
   };
@@ -531,6 +546,34 @@ function App() {
       <br />
       <button onClick={handleSignIn}>Sign In with Google</button>
       </div>}
+    {!user && (
+        <div style={{ fontSize: '18px' }}>
+          <br />
+          <br />
+          <form onSubmit={handleSignInWithEmail} style={{ marginTop: '20px' }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <br />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <br />
+            <button type="submit">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
+          </form>
+          <p onClick={() => setIsSignUp((prev) => !prev)}>
+            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+          </p>
+        </div>
+      )}
    </div>
 );
 }
