@@ -362,7 +362,8 @@ function App() {
   };
 
   return (
-    <div className="app" style={{ fontSize: '24px' }}>
+    <div>
+    {user && <div className="app" style={{ fontSize: '24px' }}>
       {
         readerMode ? (
           <div>
@@ -374,7 +375,7 @@ function App() {
             <button className="signoutbutton" onClick={handleSignOut}>
               <FaSignOutAlt />
             </button>
-            <button onClick={generateDocx}><FaFileWord /></button>
+            <button onClick={generateDocx} title="This button downloads to word format"><FaFileWord /></button>
             <button onClick={generateText}><FaFileAlt /></button>
             <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
               <FaCheckDouble />
@@ -523,10 +524,15 @@ function App() {
             )}
           </div>
         )}
-      {!user && <button onClick={handleSignIn}>Sign In with Google</button>}
       <div style={{ marginBottom: '120px' }}></div>
-    </div>
-  );
+    </div>}
+    {!user && <div style={{ fontSize: '28px' }}>
+      <br />
+      <br />
+      <button onClick={handleSignIn}>Sign In with Google</button>
+      </div>}
+   </div>
+);
 }
 
 
