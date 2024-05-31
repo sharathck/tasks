@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit,persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -22,7 +22,7 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig, {localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED});
+const app = initializeApp(firebaseConfig, { localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const db = getFirestore(app);
 const auth = getAuth(app);
 let articles = '';
@@ -63,13 +63,13 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 500;
       const currentDate = new Date();
-      
+
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       if (user.uid === 'Rz4dYtnnXnftwbNEqVdnRaR5q303') {
         console.log('Admin user');
-         q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+        q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3','xEuLPGrEQSNvGglMYd9OOLiGFHs1','QSutzKPgnBbyjFpTTtuGt2roxzV2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       }
-      
+
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -363,11 +363,19 @@ function App() {
   const handleSignInWithEmail = async (e) => {
     e.preventDefault();
     try {
-      if (isSignUp) {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      try {
         await createUserWithEmailAndPassword(auth, email, password);
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        console.error('Error signing in:', error);
       }
+      console.error('Error signing in:', error);
+    }
+  };
+  const handleSignUpWithEmail = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.error('Error signing in:', error);
     }
@@ -378,90 +386,123 @@ function App() {
 
   return (
     <div>
-    {user && <div className="app" style={{ fontSize: '24px' }}>
-      {
-        readerMode ? (
-          <div>
-            <button onClick={handleBack}><FaArrowLeft /></button>
-            <p>{articles}</p>
-          </div>
-        ) : (
-          <div>
-            <button className="signoutbutton" onClick={handleSignOut}>
-              <FaSignOutAlt />
-            </button>
-            <button onClick={generateDocx} title="This button downloads to word format"><FaFileWord /></button>
-            <button onClick={generateText}><FaFileAlt /></button>
-            <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
-              <FaCheckDouble />
-            </button>
-            <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
-              <FaClock />
-            </button>
-            <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-            <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
-            {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-            <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '15px', height: '15px' }} /></button>
-            {showEditButtons && <button onClick={speakContent}><FaPlay /></button>}
-            <button onClick={handleReaderMode}><FaReadme /></button>
-            <form onSubmit={handleAddTask}>
-              <input
-                className="addTask"
-                type="text"
-                placeholder=""
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                autoFocus
-              />
-              <button className="addbutton" type="submit">
-                <FaPlus />
+      {user && <div className="app" style={{ fontSize: '24px' }}>
+        {
+          readerMode ? (
+            <div>
+              <button onClick={handleBack}><FaArrowLeft /></button>
+              <p>{articles}</p>
+            </div>
+          ) : (
+            <div>
+              <button className="signoutbutton" onClick={handleSignOut}>
+                <FaSignOutAlt />
               </button>
-            </form>
-            <ul>
-              {tasks
-                .filter((task) => !task.status)
-                .map((task) => (
-                  <li key={task.id} data-task-id={task.id} data-status={task.status}>
-                    <>
-                      <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
-                        <FaCheck />
-                      </button>
-                      <span>
-                        {task.task}
-                        {task.recurrence !== 'ad-hoc' && (
-                          <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                        )}
-                        {showDueDates && (
-                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
-                        )}
-                      </span>
-                      {showEditButtons && (
-                        <button className='editbutton' onClick={() => handleEditTask(task)}>
-                          <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
-                        </button>
-                      )}
-                    </>
-                  </li>
-                ))}
-            </ul>
-            {showCompleted && (
-              <div>
-                <ul>
-                  {completedTasks
-                    .filter((task) => task.status)
-                    .map((task) => (
-                      <li key={task.id} className="completed">
-                        <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+              <button onClick={generateDocx} title="This button downloads to word format"><FaFileWord /></button>
+              <button onClick={generateText}><FaFileAlt /></button>
+              <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+                <FaCheckDouble />
+              </button>
+              <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+                <FaClock />
+              </button>
+              <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+              <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+              {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+              <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '15px', height: '15px' }} /></button>
+              {showEditButtons && <button onClick={speakContent}><FaPlay /></button>}
+              <button onClick={handleReaderMode}><FaReadme /></button>
+              <form onSubmit={handleAddTask}>
+                <input
+                  className="addTask"
+                  type="text"
+                  placeholder=""
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)}
+                  autoFocus
+                />
+                <button className="addbutton" type="submit">
+                  <FaPlus />
+                </button>
+              </form>
+              <ul>
+                {tasks
+                  .filter((task) => !task.status)
+                  .map((task) => (
+                    <li key={task.id} data-task-id={task.id} data-status={task.status}>
+                      <>
+                        <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
                           <FaCheck />
                         </button>
-                        {task.task} &nbsp;&nbsp;
-                        {task.recurrence !== 'ad-hoc' && (
-                          <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                        <span>
+                          {task.task}
+                          {task.recurrence !== 'ad-hoc' && (
+                            <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                          )}
+                          {showDueDates && (
+                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
+                          )}
+                        </span>
+                        {showEditButtons && (
+                          <button className='editbutton' onClick={() => handleEditTask(task)}>
+                            <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                          </button>
                         )}
+                      </>
+                    </li>
+                  ))}
+              </ul>
+              {showCompleted && (
+                <div>
+                  <ul>
+                    {completedTasks
+                      .filter((task) => task.status)
+                      .map((task) => (
+                        <li key={task.id} className="completed">
+                          <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                            <FaCheck />
+                          </button>
+                          {task.task} &nbsp;&nbsp;
+                          {task.recurrence !== 'ad-hoc' && (
+                            <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                          )}
+                          &nbsp;
+                          {showDueDates && (
+                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
+                          )}
+                          {showDeleteButtons && (
+                            <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
+                              <FaTrash />
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                  <div style={{ marginBottom: '110px' }}></div>
+                </div>
+              )}
+              {showFuture && (
+                <div>
+                  <h2>Future Tasks</h2>
+                  <ul>
+                    {futureTasks.map((task) => (
+                      <li key={task.id}>
+                        {task.task}
                         &nbsp;
                         {showDueDates && (
                           <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
                         )}
+                        &nbsp;
+                        {task.recurrence !== 'ad-hoc' && (
+                          <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                        )}
+                        &nbsp;
+                        {showEditButtons && (
+                          <button className='editbutton' onClick={() => handleEditTask(task)}>
+                            <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                          </button>
+                        )}
+                        &nbsp;
                         {showDeleteButtons && (
                           <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
                             <FaTrash />
@@ -469,88 +510,55 @@ function App() {
                         )}
                       </li>
                     ))}
-                </ul>
-                <div style={{ marginBottom: '110px' }}></div>
-              </div>
-            )}
-            {showFuture && (
-              <div>
-                <h2>Future Tasks</h2>
-                <ul>
-                  {futureTasks.map((task) => (
-                    <li key={task.id}>
-                      {task.task}
-                      &nbsp;
-                      {showDueDates && (
-                        <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
-                      )}
-                      &nbsp;
-                      {task.recurrence !== 'ad-hoc' && (
-                        <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                      )}
-                      &nbsp;
-                      {showEditButtons && (
-                        <button className='editbutton' onClick={() => handleEditTask(task)}>
-                          <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
-                        </button>
-                      )}
-                      &nbsp;
-                      {showDeleteButtons && (
-                        <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
-                          <FaTrash />
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-                <div style={{ marginBottom: '10px' }}></div>
-              </div>
-            )}
-            {editTask && (
-              <div >
-                <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)', fontSize: '16px' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
-                  <input style={{ width: '80%' }}
-                    type="text"
-                    value={editTaskText}
-                    onChange={(e) => setEditTaskText(e.target.value)}
-                  />
-                  <br />
-                  <select
-                    value={editRecurrence}
-                    onChange={(e) => setEditRecurrence(e.target.value)}
-                  >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="ad-hoc">Ad-hoc</option>
-                  </select>
-                  &nbsp;&nbsp;
-                  <input
-                    type="date"
-                    value={editDueDate}
-                    onChange={(e) => setEditDueDate(e.target.value)}
-                  />
-                  <br />
-                  <button type="submit">Save</button>
-                  <button onClick={() => setEditTask(null)}>Cancel</button>
-                </form>
-              </div>
-            )}
-          </div>
-        )}
-      <div style={{ marginBottom: '120px' }}></div>
-    </div>}
-    {!user && <div style={{ fontSize: '28px' }}>
-      <br />
-      <br />
-      <button onClick={handleSignIn}>Sign In with Google</button>
+                  </ul>
+                  <div style={{ marginBottom: '10px' }}></div>
+                </div>
+              )}
+              {editTask && (
+                <div >
+                  <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)', fontSize: '16px' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+                    <input style={{ width: '80%' }}
+                      type="text"
+                      value={editTaskText}
+                      onChange={(e) => setEditTaskText(e.target.value)}
+                    />
+                    <br />
+                    <select
+                      value={editRecurrence}
+                      onChange={(e) => setEditRecurrence(e.target.value)}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                      <option value="ad-hoc">Ad-hoc</option>
+                    </select>
+                    &nbsp;&nbsp;
+                    <input
+                      type="date"
+                      value={editDueDate}
+                      onChange={(e) => setEditDueDate(e.target.value)}
+                    />
+                    <br />
+                    <button type="submit">Save</button>
+                    <button onClick={() => setEditTask(null)}>Cancel</button>
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+        <div style={{ marginBottom: '120px' }}></div>
       </div>}
-    {!user && (
+      {!user && <div style={{ fontSize: '18px' }}>
+        <br />
+        <br />
+        <button onClick={handleSignIn}>Sign In with Google</button>
+      </div>}
+      {!user && (
         <div style={{ fontSize: '18px' }}>
           <br />
           <br />
-          <form onSubmit={handleSignInWithEmail} style={{ marginTop: '20px' }}>
+          <form onSubmit={handleSignInWithEmail} style={{ marginTop: '2px' }}>
             <input
               type="email"
               placeholder="Email"
@@ -567,15 +575,14 @@ function App() {
               required
             />
             <br />
-            <button type="submit">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
+            <br />
+            <button type="submit">Sign In</button>
+            <button onClick={() => handleSignUpWithEmail()}>Sign Up</button>
           </form>
-          <p onClick={() => setIsSignUp((prev) => !prev)}>
-            {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-          </p>
         </div>
       )}
-   </div>
-);
+    </div>
+  );
 }
 
 
