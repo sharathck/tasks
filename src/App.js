@@ -60,8 +60,12 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 500;
       const currentDate = new Date();
-      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
-
+      let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+      if (user.uid === 'Rz4dYtnnXnftwbNEqVdnRaR5q303') {
+        console.log('Admin user');
+         q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+      }
+      
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
