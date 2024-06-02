@@ -5,6 +5,7 @@
   width: 80%; /* Increase the width */
   margin-bottom: 50px; /* Add margin at bottom */
   margin-left: 10px;
+  box-shadow: 2px 2px 8px rgba(1, 41, 11, 0.6);
 }
 .dueDate{
 color: orange;
@@ -13,14 +14,21 @@ button {
   padding: 5px 5px;
   margin-left: 10px;
   border: 1px solid black;
-  background-color: #92abd3;
-  color: white;
+  background-color: #e8ebef;
+  color: rgb(23, 82, 192);
   cursor: pointer;
 }
 
 .button_selected {
-  background-color: rgb(56, 236, 98);
+  background-color: rgb(28, 159, 59);
   color: white;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.button:hover {
+  background-color: rgb(21, 186, 32);
+  color: white;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .button_delete_selected {
@@ -64,13 +72,13 @@ form {
   border: 1px solid #ccc;
 }
 .addbutton {
-  background-color:green;
-  border: none;
+  background-color:rgb(16, 130, 16);
   color: #fff;
   cursor: pointer;
   margin-left: 10px;
-  height: 40%; /* Increase the height */
+  box-shadow: 2px 2px 8px rgba(1, 55, 20, 0.8);
   width: 10%; /* Increase the width */
+  height: 48px; /* Increase the height */
 }
 
 .signoutbutton {
@@ -89,6 +97,7 @@ form {
   cursor: pointer;
   margin-left: 10px;
   padding: 5px 5px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
   font-size: 18px; /* make the button text extremely small */
 }
 
@@ -113,9 +122,11 @@ form {
 }
 .textbutton:hover {
   background-color: #555;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 }
 .signoutbutton:hover {
   background-color: #555;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 }
 .textinput {
   padding: 5px;
@@ -123,5 +134,39 @@ form {
   height: 30%; /* Increase the height */
   width: 65%; /* Increase the width */
   margin-left: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #4a4343;
+  box-shadow: 2px 2px 8px rgba(97, 94, 94, 0.8);
+}
+
+.signonpagebutton {
+  background-color: rgb(58, 111, 58);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 18px; /* make the button text extremely small */
+}
+
+.signuppagebutton {
+  background-color: rgb(148, 118, 9);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 18px; /* make the button text extremely small */
+}
+
+.signgooglepagebutton {
+  background-color: rgb(31, 115, 211);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 18px; /* make the button text extremely small */
 }

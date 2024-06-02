@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
@@ -420,7 +420,7 @@ function App() {
         {
           readerMode ? (
             <div>
-              <button onClick={handleBack}><FaArrowLeft /></button>
+              <button className='button' onClick={handleBack}><FaArrowLeft /></button>
               <p>{articles}</p>
             </div>
           ) : (
@@ -428,8 +428,8 @@ function App() {
               <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
-              <button onClick={generateDocx} title="This button downloads to word format"><FaFileWord /></button>
-              <button onClick={generateText}><FaFileAlt /></button>
+              <button className='button' onClick={generateDocx} title="This button downloads to word format"><FaFileWord /></button>
+              <button className='button' onClick={generateText}><FaFileAlt /></button>
               <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
                 <FaCheckDouble />
               </button>
@@ -439,9 +439,9 @@ function App() {
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
               {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-              <button onClick={synthesizeSpeech}><img src="speak.png" style={{ width: '15px', height: '15px' }} /></button>
-              {showEditButtons && <button onClick={speakContent}><FaPlay /></button>}
-              <button onClick={handleReaderMode}><FaReadme /></button>
+              <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
+              {showEditButtons && <button className='button' onClick={speakContent}><FaPlay /></button>}
+              <button className='button' onClick={handleReaderMode}><FaReadme /></button>
               <form onSubmit={handleAddTask}>
                 <input
                   className="addTask"
@@ -582,7 +582,7 @@ function App() {
       <br />
         <br />
         <p>Sign In : Option-1</p>
-                <button onClick={handleSignIn}>Sign In with Google</button>
+                <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
         <br />
         <br />
         <br />
@@ -597,6 +597,7 @@ function App() {
               required
             />
             <br />
+            <br />
             <input
               type="password"
               className='textinput'
@@ -607,9 +608,9 @@ function App() {
             />
             <br />
             <br />
-            <button onClick={() => handleSignInWithEmail()}>Sign In</button>
+            <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button onClick={() => handleSignUpWithEmail()}>Sign Up</button>
+            <button className = 'signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
             <br />
             <br />
             <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
