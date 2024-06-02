@@ -361,7 +361,6 @@ function App() {
     setReaderMode(true);
   };
   const handleSignInWithEmail = async (e) => {
-    e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
@@ -377,6 +376,11 @@ function App() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        console.error('Error signing in:', error);
+      }
       console.error('Error signing in:', error);
     }
   };
@@ -386,7 +390,7 @@ function App() {
 
   return (
     <div>
-      {user && <div className="app" style={{ fontSize: '24px' }}>
+      {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
             <div>
@@ -547,19 +551,19 @@ function App() {
               )}
             </div>
           )}
-        <div style={{ marginBottom: '120px' }}></div>
       </div>}
-      {!user && <div style={{ fontSize: '18px' }}>
+      {!user && <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
+      <br />
+        <br />
+        <p>Sign In : Option-1</p>
+                <button onClick={handleSignIn}>Sign In with Google</button>
         <br />
         <br />
-        <button onClick={handleSignIn}>Sign In with Google</button>
-      </div>}
-      {!user && (
-        <div style={{ fontSize: '18px' }}>
-          <br />
-          <br />
-          <form onSubmit={handleSignInWithEmail} style={{ marginTop: '2px' }}>
+        <br />
+                <p>Sign In : Option-2</p>
+
             <input
+              className='textinput'
               type="email"
               placeholder="Email"
               value={email}
@@ -569,6 +573,7 @@ function App() {
             <br />
             <input
               type="password"
+              className='textinput'
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -576,13 +581,12 @@ function App() {
             />
             <br />
             <br />
-            <button type="submit">Sign In</button>
+            <button onClick={() => handleSignInWithEmail()}>Sign In</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button onClick={() => handleSignUpWithEmail()}>Sign Up</button>
-          </form>
-        </div>
-      )}
+    </div>}
     </div>
-  );
+  )
 }
 
 

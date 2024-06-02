@@ -111,3 +111,17 @@ form {
   padding: 10px 10px;
   font-size: 16px; /* make the button text extremely small */
 }
+.textbutton:hover {
+  background-color: #555;
+}
+.signoutbutton:hover {
+  background-color: #555;
+}
+.textinput {
+  padding: 5px;
+  font-size: 16px;
+  height: 30%; /* Increase the height */
+  width: 65%; /* Increase the width */
+  margin-left: 5px;
+  border: 1px solid #ccc;
+}
