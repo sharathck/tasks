@@ -11,7 +11,8 @@ import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const voiceName = 'en-US-AvaNeural';
-
+const isiPhone = /iPhone/i.test(navigator.userAgent);
+console.log(isiPhone);
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -121,6 +122,10 @@ function App() {
   };
 
   const synthesizeSpeech = async () => {
+    if (isiPhone) {
+      speakContent();
+      return;
+    }
     const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
     speechConfig.speechSynthesisVoiceName = voiceName;
 
@@ -440,7 +445,6 @@ function App() {
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
               {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              {showEditButtons && <button className='button' onClick={speakContent}><FaPlay /></button>}
               <button className='button' onClick={handleReaderMode}><FaReadme /></button>
               <form onSubmit={handleAddTask}>
                 <input
@@ -474,7 +478,7 @@ function App() {
                           )}
                         </span>
                         {showEditButtons && (
-                          <button className='editbutton' onClick={() => handleEditTask(task)}>
+                          <button className='button' onClick={() => handleEditTask(task)}>
                             <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
                           </button>
                         )}
