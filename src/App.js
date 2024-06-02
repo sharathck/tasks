@@ -3,7 +3,7 @@ import { FaPlus, FaCheck, FaTrash, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, 
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
-import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
@@ -47,6 +47,7 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -67,7 +68,7 @@ function App() {
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       if (user.uid === 'Rz4dYtnnXnftwbNEqVdnRaR5q303') {
         console.log('Admin user');
-        q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3','xEuLPGrEQSNvGglMYd9OOLiGFHs1','QSutzKPgnBbyjFpTTtuGt2roxzV2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+        q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3', 'xEuLPGrEQSNvGglMYd9OOLiGFHs1', 'QSutzKPgnBbyjFpTTtuGt2roxzV2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       }
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -360,33 +361,58 @@ function App() {
   const handleReaderMode = () => {
     setReaderMode(true);
   };
+
   const handleSignInWithEmail = async (e) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        await auth.signOut();
+        alert('Please verify your email before signing in.');
+      }
     } catch (error) {
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } catch (error) {
+      if (error.code === 'auth/wrong-password') {
+        alert('Wrong password, please try again.');
+      } else {
+        alert('Error signing in, please try again.' + error.message);
         console.error('Error signing in:', error);
       }
-      console.error('Error signing in:', error);
     }
   };
+
   const handleSignUpWithEmail = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (error) {
-        console.error('Error signing in:', error);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(auth.currentUser);
+      const user = userCredential.user;
+      alert('Verification email sent! Please check your inbox. Ater verification, please sign in.');
+      if (!user.emailVerified) {
+        await auth.signOut();
       }
-      console.error('Error signing in:', error);
+    } catch (error) {
+      alert('Error signing up, please try again.' + error.message);
+      console.error('Error signing up:', error);
     }
   };
+
   const handleBack = () => {
     setReaderMode(false);
   };
+
+  const handlePasswordReset = async () => {
+    if (!email) {
+      alert('Please enter your email address.');
+      return;
+    }
+  
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert('Password reset email sent, please check your inbox.');
+    } catch (error) {
+      console.error('Error sending password reset email', error);
+    }
+  };
+
 
   return (
     <div>
@@ -584,6 +610,9 @@ function App() {
             <button onClick={() => handleSignInWithEmail()}>Sign In</button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button onClick={() => handleSignUpWithEmail()}>Sign Up</button>
+            <br />
+            <br />
+            <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
     </div>}
     </div>
   )
