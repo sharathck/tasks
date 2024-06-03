@@ -421,7 +421,7 @@ function App() {
 
   return (
     <div>
-       <p style={{ display: 'none' }}>{articles}</p>
+       <button title={articles} style={{ display: 'none' }}><FaPlay /></button>
       {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
