@@ -446,7 +446,7 @@ function App() {
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
               {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              <button className='button' onClick={handleReaderMode}><FaReadme /></button>
+              <button style={{ display: 'none' }} className='button' onClick={handleReaderMode}><FaReadme /></button>
               <form onSubmit={handleAddTask}>
                 <input
                   className="addTask"
