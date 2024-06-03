@@ -421,7 +421,7 @@ function App() {
 
   return (
     <div>
-      { 1 == 2 && <p>articles</p>}
+       <p style={{ display: 'none' }}>{articles}</p>
       {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
