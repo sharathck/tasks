@@ -421,6 +421,7 @@ function App() {
 
   return (
     <div>
+      { 1 == 2 && <p>articles</p>}
       {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
@@ -433,7 +434,7 @@ function App() {
               <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
-              <button className='button' onClick={generateDocx} title="This button downloads to word format"><FaFileWord /></button>
+              <button className='button' onClick={generateDocx}><FaFileWord /></button>
               <button className='button' onClick={generateText}><FaFileAlt /></button>
               <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
                 <FaCheckDouble />
