@@ -421,7 +421,7 @@ function App() {
 
   return (
     <div>
-       <button title={articles} style={{ display: 'none' }}><FaPlay /></button>
+       <p style={{ display: 'none' }}>{articles}</p>
       {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
@@ -431,7 +431,7 @@ function App() {
             </div>
           ) : (
             <div>
-              <button className="signoutbutton" onClick={handleSignOut}>
+              <button className="signoutbutton" title={articles} onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
               <button className='button' onClick={generateDocx}><FaFileWord /></button>
