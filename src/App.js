@@ -333,6 +333,7 @@ function App() {
   };
 
   const handleShowCompleted = () => {
+    setShowFuture(false);
     const tasksCollection = collection(db, 'tasks');
     const urlParams = new URLSearchParams(window.location.search);
     const limitParam = urlParams.get('limit');
@@ -351,6 +352,7 @@ function App() {
   };
 
   const handleShowFuture = () => {
+    setShowCompleted(false);
     const tasksCollection = collection(db, 'tasks');
     const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', new Date()), orderBy('dueDate', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -449,7 +451,8 @@ function App() {
               <button className="signoutbutton" title={articles} onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
-
+              {!showCompleted && !showFuture && (
+                <div>
               <form onSubmit={handleAddTask}>
                 <input
                   className="addTask"
@@ -490,8 +493,10 @@ function App() {
                     </li>
                   ))}
               </ul>
+              </div> )}
               {showCompleted && (
                 <div>
+                  <h2>Completed Tasks</h2>
                   <ul>
                     {completedTasks
                       .filter((task) => task.status)
