@@ -16,19 +16,20 @@ color: orange;
   border: 1px solid black;
   background-color: #e8ebef;
   color: rgb(23, 82, 192);
-  box-shadow: 2px 2px 8px rgba(69, 66, 66, 0.4);
+  box-shadow: 2px 2px 8px rgba(34, 33, 33, 0.4);
   cursor: pointer;
   font-size: 20px;
 }
 
 .button_selected {
-  padding: 1px 1px;
+  padding: 2px 2px;
   margin-left: 10px;
+  border: 1px solid black;
   background-color: rgb(28, 159, 59);
   color: white;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .button_delete_selected {
