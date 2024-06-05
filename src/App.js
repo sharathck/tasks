@@ -599,12 +599,7 @@ function App() {
       {!user && <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
         <br />
         <br />
-        <p>Sign In : Option-1</p>
-        <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
-        <br />
-        <br />
-        <br />
-        <p>Sign In : Option-2</p>
+        <p>Sign In</p>
         <input
           className='textinput'
           type="email"
@@ -628,6 +623,13 @@ function App() {
         <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
+        <br />
+        <br />
+        <br />
+        <br />
+        <p> OR </p>
+        <br />
+        <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
         <br />
         <br />
         <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
