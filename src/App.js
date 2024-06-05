@@ -433,22 +433,23 @@ function App() {
             </div>
           ) : (
             <div>
-              <button className="signoutbutton" title={articles} onClick={handleSignOut}>
-                <FaSignOutAlt />
-              </button>
-              <button className='button' onClick={generateDocx}><FaFileWord /></button>
-              <button className='button' onClick={generateText}><FaFileAlt /></button>
               <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
                 <FaCheckDouble />
               </button>
               <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
                 <FaClock />
               </button>
-              <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+              <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
               <button style={{ display: 'none' }} className='button' onClick={handleReaderMode}><FaReadme /></button>
+              <button className='button' onClick={generateDocx}><FaFileWord /></button>
+              <button className='button' onClick={generateText}><FaFileAlt /></button>
+              <button className="signoutbutton" title={articles} onClick={handleSignOut}>
+                <FaSignOutAlt />
+              </button>
+
               <form onSubmit={handleAddTask}>
                 <input
                   className="addTask"
