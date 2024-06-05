@@ -71,7 +71,7 @@ function App() {
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       if (user.uid === 'Rz4dYtnnXnftwbNEqVdnRaR5q303') {
         console.log('Admin user');
-        q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3', 'xEuLPGrEQSNvGglMYd9OOLiGFHs1', 'QSutzKPgnBbyjFpTTtuGt2roxzV2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+        q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
       }
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
