@@ -429,7 +429,6 @@ function App() {
 
   return (
     <div>
-      <p style={{ display: 'none' }}>{articles}</p>
       {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
@@ -449,9 +448,9 @@ function App() {
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              <button style={{ display: 'none' }} className='button' onClick={handleReaderMode}><FaReadme /></button>
               <button className='button' onClick={generateDocx}><FaFileWord /></button>
               <button className='button' onClick={generateText}><FaFileAlt /></button>
+              {!showCompleted && !showFuture && ( <button className='button' onClick={handleReaderMode}><FaReadme /></button>)}
               <button className="signoutbutton" title={articles} onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
