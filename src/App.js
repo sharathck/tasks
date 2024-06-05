@@ -7,6 +7,7 @@ import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEma
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
+import { set } from 'firebase/database';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -44,6 +45,7 @@ function App() {
   const [showEditButtons, setShowEditButtons] = useState(false);
   const [showDueDates, setShowDueDates] = useState(false);
   const [showDeleteButtons, setShowDeleteButtons] = useState(false);
+  const [canBeDeleted, setCanBeDeleted] = useState(false);
   const [readerMode, setReaderMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -334,6 +336,7 @@ function App() {
 
   const handleShowCompleted = () => {
     setShowFuture(false);
+    setCanBeDeleted(true);
     const tasksCollection = collection(db, 'tasks');
     const urlParams = new URLSearchParams(window.location.search);
     const limitParam = urlParams.get('limit');
@@ -353,6 +356,7 @@ function App() {
 
   const handleShowFuture = () => {
     setShowCompleted(false);
+    setCanBeDeleted(true);
     const tasksCollection = collection(db, 'tasks');
     const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', new Date()), orderBy('dueDate', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -443,7 +447,7 @@ function App() {
               </button>
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-              {showEditButtons && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+              {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
               <button style={{ display: 'none' }} className='button' onClick={handleReaderMode}><FaReadme /></button>
               <button className='button' onClick={generateDocx}><FaFileWord /></button>
@@ -460,7 +464,6 @@ function App() {
                   placeholder=""
                   value={newTask}
                   onChange={(e) => setNewTask(e.target.value)}
-                  autoFocus
                 />
                 <button className="addbutton" type="submit">
                   <FaPlus />
