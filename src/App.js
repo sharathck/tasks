@@ -624,6 +624,8 @@ function App() {
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
         <br />
+        <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
+        <br />
         <br />
         <br />
         <br />
@@ -631,8 +633,6 @@ function App() {
         <br />
         <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
         <br />
-        <br />
-        <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
       </div>}
     </div>
   )
