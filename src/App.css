@@ -177,3 +177,18 @@ form {
   padding: 5px 5px;
   font-size: 18px; /* make the button text extremely small */
 }
+.editForm {
+  position: fixed;
+  padding: 10px;
+  width: 60%;
+  bottom: 30%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  border: 2px solid;
+  background-color: whitesmoke;
+  box-shadow: 2px 4px 12px rgb(7, 7, 7);
+  margin-bottom: 5px; /* Move the text box up 10 pixels */
+  font-size: 18px;
+}
+
+

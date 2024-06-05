@@ -299,7 +299,9 @@ function App() {
     setEditTask(task);
     setEditTaskText(task.task);
     setEditRecurrence(task.recurrence);
-    setEditDueDate(new Date(task.dueDate.toDate()).toISOString().substring(0, 10));
+    const usTimezoneOffset = new Date().getTimezoneOffset() * 60000; // Get the offset in milliseconds
+    const taskDueDate = new Date(task.dueDate.toDate() - usTimezoneOffset);
+    setEditDueDate(taskDueDate.toISOString().slice(0, 16));
   };
 
   const handleSaveTask = async () => {
@@ -409,7 +411,7 @@ function App() {
       alert('Please enter your email address.');
       return;
     }
-  
+
     try {
       await sendPasswordResetEmail(auth, email);
       alert('Password reset email sent, please check your inbox.');
@@ -421,7 +423,7 @@ function App() {
 
   return (
     <div>
-       <p style={{ display: 'none' }}>{articles}</p>
+      <p style={{ display: 'none' }}>{articles}</p>
       {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
         {
           readerMode ? (
@@ -475,7 +477,7 @@ function App() {
                             <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                           )}
                           {showDueDates && (
-                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
+                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
                           )}
                         </span>
                         {showEditButtons && (
@@ -503,7 +505,7 @@ function App() {
                           )}
                           &nbsp;
                           {showDueDates && (
-                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
+                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
                           )}
                           {showDeleteButtons && (
                             <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
@@ -525,7 +527,7 @@ function App() {
                         {task.task}
                         &nbsp;
                         {showDueDates && (
-                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()}</span>
+                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
                         )}
                         &nbsp;
                         {task.recurrence !== 'ad-hoc' && (
@@ -551,12 +553,13 @@ function App() {
               )}
               {editTask && (
                 <div >
-                  <form style={{ position: 'fixed', width: '60%', bottom: '30%', left: '50%', transform: 'translate(-50%, -50%)', border: '2px solid', backgroundColor: 'whitesmoke', boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.15)', fontSize: '16px' }} onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+                  <form className='editForm' onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
                     <input style={{ width: '80%' }}
                       type="text"
                       value={editTaskText}
                       onChange={(e) => setEditTaskText(e.target.value)}
                     />
+                    <br />
                     <br />
                     <select
                       value={editRecurrence}
@@ -570,13 +573,15 @@ function App() {
                     </select>
                     &nbsp;&nbsp;
                     <input
-                      type="date"
+                      type="datetime-local"
                       value={editDueDate}
                       onChange={(e) => setEditDueDate(e.target.value)}
                     />
                     <br />
-                    <button type="submit">Save</button>
-                    <button onClick={() => setEditTask(null)}>Cancel</button>
+                    <br />
+                    <button className="button" type="submit">Save</button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button className="button" onClick={() => setEditTask(null)}>Cancel</button>
                   </form>
                 </div>
               )}
@@ -584,42 +589,41 @@ function App() {
           )}
       </div>}
       {!user && <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
-      <br />
+        <br />
         <br />
         <p>Sign In : Option-1</p>
-                <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
+        <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
         <br />
         <br />
         <br />
-                <p>Sign In : Option-2</p>
-
-            <input
-              className='textinput'
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <br />
-            <br />
-            <input
-              type="password"
-              className='textinput'
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <br />
-            <br />
-            <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button className = 'signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
-            <br />
-            <br />
-            <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
-    </div>}
+        <p>Sign In : Option-2</p>
+        <input
+          className='textinput'
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <br />
+        <br />
+        <input
+          type="password"
+          className='textinput'
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <br />
+        <br />
+        <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
+        <br />
+        <br />
+        <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
+      </div>}
     </div>
   )
 }
