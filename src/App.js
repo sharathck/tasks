@@ -27,6 +27,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, { localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const db = getFirestore(app);
 const auth = getAuth(app);
+const tasksLimit = 199;
 let articles = '';
 
 function App() {
@@ -50,8 +51,10 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [adminUser, setAdminUser] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
+  const [lastTask, setLastTask] = useState(null); // State for the limit of documents to show
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -63,24 +66,23 @@ function App() {
 
   useEffect(() => {
     if (user) {
+      if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+        setAdminUser(true);
+      }
       const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 500;
+      const limitValue = limitParam ? parseInt(limitParam) : tasksLimit;
       const currentDate = new Date();
-
+     
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
-      if (user.uid === 'Rz4dYtnnXnftwbNEqVdnRaR5q303') {
-        console.log('Admin user');
-        q = query(tasksCollection, where('userId', 'in', ['Rz4dYtnnXnftwbNEqVdnRaR5q303', 'czyqn8vSSQNFOm7f3Gg9MA3TNjE3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
-      }
-
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         articles += tasksData.map((task) => task.task).join(' . ');
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
         setTasks(tasksData);
       });
 
@@ -96,20 +98,22 @@ function App() {
   }, [showCurrent]);
 
   useEffect(() => {
-    const fetchCompletedData = async () => {
+    if (showCompleted) {
       const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 100;
+      const limitValue = limitParam ? parseInt(limitParam) : 99;
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
-      const tasksSnapshot = await getDocs(q);
-      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); // Set last visible document
-      setCompletedTasks(tasksList);
-    }
-
-    if (showCompleted) {
-      fetchCompletedData();
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const tasksData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        articles += tasksData.map((task) => task.task).join(' ');
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setCompletedTasks(tasksData);
+      });
+      return () => unsubscribe();
     }
   }, [showCompleted]);
 
@@ -425,20 +429,54 @@ function App() {
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : 100;
       const tasksCollection = collection(db, 'tasks');
-      let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
-    
       if (lastVisible) {
-        q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
-      }
-  
+        const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
       const tasksSnapshot = await getDocs(q);
       const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setCompletedTasks(prevData => [...prevData, ...tasksList]);
       setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); 
+      }
+      else {
+        alert('No more data to fetch');
+      }
     } catch (error) {
       console.error("Error fetching more data: ", error);
     }
   };
+
+  const fetchMoreTasks = async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : 100;
+      const tasksCollection = collection(db, 'tasks');
+      const currentDate = new Date();
+      if (lastVisible) {
+        const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), startAfter(lastVisible), limit(limitValue));
+      const tasksSnapshot = await getDocs(q);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTasks(prevData => [...prevData, ...tasksList]);
+      setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); 
+      }
+      else {
+        alert('No more data to fetch');
+      }
+    } catch (error) {
+      console.error("Error fetching more data: ", error);
+    }
+  };
+
+  const showSharedTasks = async () => {
+    if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+      const tasksCollection = collection(db, 'tasks');
+      const currentDate = new Date();
+      console.log('Admin user');
+      const sharedQuery = query(tasksCollection, where('userId', 'in', ['bTGBBpeYPmPJonItYpUOCYhdIlr1', 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
+      const tasksSnapshot = await getDocs(sharedQuery);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTasks(tasksList);
+    }
+  }
 
   return (
     <div>
@@ -508,6 +546,16 @@ function App() {
                         </li>
                       ))}
                   </ul>
+                  <button className="button" onClick={fetchMoreTasks}>Show More</button>
+                  <br />
+                  <br />
+                { adminUser && (
+                  <div>
+                    <button className="button" onClick={showSharedTasks}>Show Shared Tasks</button>
+                    <br />
+                    <br />
+                  </div>
+                )}
                 </div>
               )}
               {showCompleted && (
