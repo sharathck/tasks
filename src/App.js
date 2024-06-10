@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, deleteDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { getFirestore, doc, deleteDoc, collection,getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -51,6 +51,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -95,8 +96,20 @@ function App() {
   }, [showCurrent]);
 
   useEffect(() => {
+    const fetchCompletedData = async () => {
+      const tasksCollection = collection(db, 'tasks');
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : 100;
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+      const tasksSnapshot = await getDocs(q);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); // Set last visible document
+      setCompletedTasks(tasksList);
+    }
+
     if (showCompleted) {
-      handleShowCompleted();
+      fetchCompletedData();
     }
   }, [showCompleted]);
 
@@ -334,26 +347,6 @@ function App() {
     return () => unsubscribe();
   };
 
-  const handleShowCompleted = () => {
-    setShowFuture(false);
-    setCanBeDeleted(true);
-    const tasksCollection = collection(db, 'tasks');
-    const urlParams = new URLSearchParams(window.location.search);
-    const limitParam = urlParams.get('limit');
-    const limitValue = limitParam ? parseInt(limitParam) : 100;
-    const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const completedTasksData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      articles += completedTasksData.map((task) => task.task).join(' . ');
-      setCompletedTasks(completedTasksData);
-    });
-
-    return () => unsubscribe();
-  };
-
   const handleShowFuture = () => {
     setShowCompleted(false);
     setCanBeDeleted(true);
@@ -426,12 +419,32 @@ function App() {
     }
   };
 
+  const fetchMoreData = async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : 100;
+      const tasksCollection = collection(db, 'tasks');
+      let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+    
+      if (lastVisible) {
+        q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
+      }
+  
+      const tasksSnapshot = await getDocs(q);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCompletedTasks(prevData => [...prevData, ...tasksList]);
+      setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); 
+    } catch (error) {
+      console.error("Error fetching more data: ", error);
+    }
+  };
 
   return (
     <div>
-      {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
-        {
-          readerMode ? (
+      {user && (
+        <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
+          {readerMode ? (
             <div>
               <button className='button' onClick={handleBack}><FaArrowLeft /></button>
               <p>{articles}</p>
@@ -450,52 +463,53 @@ function App() {
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
               <button className='button' onClick={generateDocx}><FaFileWord /></button>
               <button className='button' onClick={generateText}><FaFileAlt /></button>
-              {!showCompleted && !showFuture && ( <button className='button' onClick={handleReaderMode}><FaReadme /></button>)}
+              {!showCompleted && !showFuture && (<button className='button' onClick={handleReaderMode}><FaReadme /></button>)}
               <button className="signoutbutton" title={articles} onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
               {!showCompleted && !showFuture && (
                 <div>
-              <form onSubmit={handleAddTask}>
-                <input
-                  className="addTask"
-                  type="text"
-                  placeholder=""
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)}
-                />
-                <button className="addbutton" type="submit">
-                  <FaPlus />
-                </button>
-              </form>
-              <ul>
-                {tasks
-                  .filter((task) => !task.status)
-                  .map((task) => (
-                    <li key={task.id} data-task-id={task.id} data-status={task.status}>
-                      <>
-                        <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
-                          <FaCheck />
-                        </button>
-                        <span>
-                          {task.task}
-                          {task.recurrence !== 'ad-hoc' && (
-                            <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                          )}
-                          {showDueDates && (
-                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
-                          )}
-                        </span>
-                        {showEditButtons && (
-                          <button className='button' onClick={() => handleEditTask(task)}>
-                            <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
-                          </button>
-                        )}
-                      </>
-                    </li>
-                  ))}
-              </ul>
-              </div> )}
+                  <form onSubmit={handleAddTask}>
+                    <input
+                      className="addTask"
+                      type="text"
+                      placeholder=""
+                      value={newTask}
+                      onChange={(e) => setNewTask(e.target.value)}
+                    />
+                    <button className="addbutton" type="submit">
+                      <FaPlus />
+                    </button>
+                  </form>
+                  <ul>
+                    {tasks
+                      .filter((task) => !task.status)
+                      .map((task) => (
+                        <li key={task.id} data-task-id={task.id} data-status={task.status}>
+                          <>
+                            <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                              <FaCheck />
+                            </button>
+                            <span>
+                              {task.task}
+                              {task.recurrence && task.recurrence !== 'ad-hoc' && (
+                                <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                              )}
+                              {showDueDates && (
+                                <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                              )}
+                            </span>
+                            {showEditButtons && (
+                              <button className='button' onClick={() => handleEditTask(task)}>
+                                <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                              </button>
+                            )}
+                          </>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              )}
               {showCompleted && (
                 <div>
                   <h2>Completed Tasks</h2>
@@ -508,7 +522,7 @@ function App() {
                             <FaCheck />
                           </button>
                           {task.task} &nbsp;&nbsp;
-                          {task.recurrence !== 'ad-hoc' && (
+                          {task.recurrence && task.recurrence !== 'ad-hoc' && (
                             <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                           )}
                           &nbsp;
@@ -523,6 +537,7 @@ function App() {
                         </li>
                       ))}
                   </ul>
+                  <button className="button" onClick={fetchMoreData}>Show More</button>
                   <div style={{ marginBottom: '110px' }}></div>
                 </div>
               )}
@@ -535,10 +550,10 @@ function App() {
                         {task.task}
                         &nbsp;
                         {showDueDates && (
-                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
                         )}
                         &nbsp;
-                        {task.recurrence !== 'ad-hoc' && (
+                        {task.recurrence && task.recurrence !== 'ad-hoc' && (
                           <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                         )}
                         &nbsp;
@@ -595,46 +610,49 @@ function App() {
               )}
             </div>
           )}
-      </div>}
-      {!user && <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
-        <br />
-        <br />
-        <p>Sign In</p>
-        <input
-          className='textinput'
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <br />
-        <br />
-        <input
-          type="password"
-          className='textinput'
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <br />
-        <br />
-        <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
-        <br />
-        <br />
-        <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
-        <br />
-        <br />
-        <br />
-        <br />
-        <p> OR </p>
-        <br />
-        <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
-        <br />
-      </div>}
+        </div>
+      )}
+      {!user && (
+        <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
+          <br />
+          <br />
+          <p>Sign In</p>
+          <input
+            className='textinput'
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <br />
+          <br />
+          <input
+            type="password"
+            className='textinput'
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <br />
+          <br />
+          <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
+          <br />
+          <br />
+          <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
+          <br />
+          <br />
+          <br />
+          <br />
+          <p> OR </p>
+          <br />
+          <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
+          <br />
+        </div>
+      )}
     </div>
   )
 }
