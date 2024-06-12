@@ -204,12 +204,6 @@ function App() {
         dueDate.setDate(dueDate.getDate() + dayDiff);
       }
 
-      const dayAdd = taskDesc.split(' ').pop().toLowerCase();
-      if (!isNaN(dayAdd)) {
-        taskDesc = taskDesc.split(' ').slice(0, -1).join(' ');
-        dueDate.setDate(dueDate.getDate() + parseInt(dayAdd));
-      }
-
       await addDoc(collection(db, 'tasks'), {
         task: taskDesc,
         recurrence: recurrence,
