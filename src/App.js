@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, deleteDoc, collection,getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { getFirestore, doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -28,6 +28,7 @@ const app = initializeApp(firebaseConfig, { localCache: persistentLocalCache(), 
 const db = getFirestore(app);
 const auth = getAuth(app);
 const tasksLimit = 199;
+const fetchMoreTasksLimit = 50;
 let articles = '';
 
 function App() {
@@ -45,6 +46,9 @@ function App() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showEditButtons, setShowEditButtons] = useState(false);
   const [showDueDates, setShowDueDates] = useState(false);
+  const [showMoreButton, setShowMoreButton] = useState(false);
+  const [showMoreCompletedButton, setShowMoreCompletedButton] = useState(false);
+  const [showMoreFutureButton, setShowMoreFutureButton] = useState(false);
   const [showDeleteButtons, setShowDeleteButtons] = useState(false);
   const [canBeDeleted, setCanBeDeleted] = useState(false);
   const [readerMode, setReaderMode] = useState(false);
@@ -55,6 +59,9 @@ function App() {
   const [resetEmail, setResetEmail] = useState('');
   const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
   const [lastTask, setLastTask] = useState(null); // State for the limit of documents to show
+  const urlParams = new URLSearchParams(window.location.search);
+  const limitParam = urlParams.get('limit');
+  const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -72,10 +79,10 @@ function App() {
       const tasksCollection = collection(db, 'tasks');
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : tasksLimit;
+      const showCurrentLimitValue = limitParam ? parseInt(limitParam) : tasksLimit;
       const currentDate = new Date();
-     
-      let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
+
+      let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(showCurrentLimitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -83,26 +90,23 @@ function App() {
         }));
         articles += tasksData.map((task) => task.task).join(' . ');
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        if (tasksData.length == tasksLimit) {
+          setShowMoreButton(true);
+        } else {
+          setShowMoreButton(false);
+        }
         setTasks(tasksData);
       });
 
       return () => unsubscribe();
     }
-  }, [user]);
-
-  useEffect(() => {
-    if (showCurrent) {
-      handleShowCurrent();
-      setShowCurrent(false);
-    }
-  }, [showCurrent]);
+  }, [user,showCurrent]);
 
   useEffect(() => {
     if (showCompleted) {
+      setShowFuture(false);
+      setCanBeDeleted(true);
       const tasksCollection = collection(db, 'tasks');
-      const urlParams = new URLSearchParams(window.location.search);
-      const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 99;
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
@@ -111,6 +115,11 @@ function App() {
         }));
         articles += tasksData.map((task) => task.task).join(' ');
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        if (tasksData.length == fetchMoreTasksLimit) {
+          setShowMoreCompletedButton(true);
+        } else {
+          setShowMoreCompletedButton(false);
+        }       
         setCompletedTasks(tasksData);
       });
       return () => unsubscribe();
@@ -119,7 +128,25 @@ function App() {
 
   useEffect(() => {
     if (showFuture) {
-      handleShowFuture();
+      setShowCompleted(false);
+      setCanBeDeleted(true);
+      const tasksCollection = collection(db, 'tasks');
+      const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', new Date()), orderBy('dueDate', 'asc'), limit(limitValue));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const futureTasksData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        articles += futureTasksData.map((task) => task.task).join(' . ');
+        if (futureTasksData.length == fetchMoreTasksLimit) {
+          setShowMoreFutureButton(true);
+        } else {
+          setShowMoreFutureButton(false);
+        }
+        setFutureTasks(futureTasksData);
+      });
+  
+      return () => unsubscribe();
     }
   }, [showFuture]);
 
@@ -327,43 +354,35 @@ function App() {
     setEditTask(null);
   };
 
-  const handleShowCurrent = () => {
-    const tasksCollection = collection(db, 'tasks');
-    const urlParams = new URLSearchParams(window.location.search);
-    const limitParam = urlParams.get('limit');
-    const limitValue = limitParam ? parseInt(limitParam) : 500;
-    const currentDate = new Date();
-    const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(limitValue));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const tasksData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTasks(tasksData);
-    });
-    return () => unsubscribe();
-  };
-
-  const handleShowFuture = () => {
-    setShowCompleted(false);
-    setCanBeDeleted(true);
-    const tasksCollection = collection(db, 'tasks');
-    const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', new Date()), orderBy('dueDate', 'asc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const futureTasksData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      articles += futureTasksData.map((task) => task.task).join(' . ');
-      setFutureTasks(futureTasksData);
-    });
-
-    return () => unsubscribe();
-  };
-
   const handleReaderMode = () => {
     setReaderMode(true);
+  };
+
+  const fetchMoreFutureData = async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const limitParam = urlParams.get('limit');
+      const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
+      const tasksCollection = collection(db, 'tasks');
+      const currentDate = new Date();
+      if (lastVisible) {
+        const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', currentDate), orderBy('dueDate', 'asc'), startAfter(lastVisible), limit(limitValue));
+        const tasksSnapshot = await getDocs(q);
+        const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+        if (tasksList.length == fetchMoreTasksLimit) {
+          setShowMoreFutureButton(true);
+        } else {
+          setShowMoreFutureButton(false);
+        }
+        setFutureTasks(prevData => [...prevData, ...tasksList]);
+      }
+      else {
+        alert('No more data to fetch');
+      }
+    } catch (error) {
+      console.error("Error fetching more data: ", error);
+    }
   };
 
   const handleSignInWithEmail = async (e) => {
@@ -421,14 +440,19 @@ function App() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 100;
+      const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
       const tasksCollection = collection(db, 'tasks');
       if (lastVisible) {
         const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
-      const tasksSnapshot = await getDocs(q);
-      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setCompletedTasks(prevData => [...prevData, ...tasksList]);
-      setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); 
+        const tasksSnapshot = await getDocs(q);
+        const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+        if (tasksList.length == fetchMoreTasksLimit) {
+          setShowMoreCompletedButton(true);
+        } else {
+          setShowMoreCompletedButton(false);
+        }    
+        setCompletedTasks(prevData => [...prevData, ...tasksList]);
       }
       else {
         alert('No more data to fetch');
@@ -442,15 +466,20 @@ function App() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
-      const limitValue = limitParam ? parseInt(limitParam) : 100;
+      const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
       const tasksCollection = collection(db, 'tasks');
       const currentDate = new Date();
       if (lastVisible) {
         const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), startAfter(lastVisible), limit(limitValue));
-      const tasksSnapshot = await getDocs(q);
-      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTasks(prevData => [...prevData, ...tasksList]);
-      setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); 
+        const tasksSnapshot = await getDocs(q);
+        const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setTasks(prevData => [...prevData, ...tasksList]);
+        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+        if (tasksList.length == fetchMoreTasksLimit) {
+          setShowMoreButton(true);
+        } else {
+          setShowMoreButton(false);
+        }
       }
       else {
         alert('No more data to fetch');
@@ -540,16 +569,16 @@ function App() {
                         </li>
                       ))}
                   </ul>
-                  <button className="button" onClick={fetchMoreTasks}>Show More</button>
+                  {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                   <br />
                   <br />
-                { adminUser && (
-                  <div>
-                    <button className="button" onClick={showSharedTasks}>Show Shared Tasks</button>
-                    <br />
-                    <br />
-                  </div>
-                )}
+                  {adminUser && (
+                    <div>
+                      <button className="button" onClick={showSharedTasks}>Show Shared Tasks</button>
+                      <br />
+                      <br />
+                    </div>
+                  )}
                 </div>
               )}
               {showCompleted && (
@@ -579,7 +608,7 @@ function App() {
                         </li>
                       ))}
                   </ul>
-                  <button className="button" onClick={fetchMoreData}>Show More</button>
+                  {showMoreCompletedButton && <button className="button" onClick={fetchMoreData}>Show More</button>}
                   <div style={{ marginBottom: '110px' }}></div>
                 </div>
               )}
@@ -613,7 +642,8 @@ function App() {
                       </li>
                     ))}
                   </ul>
-                  <div style={{ marginBottom: '10px' }}></div>
+                 {showMoreFutureButton && <button className="button" onClick={fetchMoreFutureData}>Show More</button>}
+                  <div style={{ marginBottom: '110px' }}></div>
                 </div>
               )}
               {editTask && (
