@@ -7,7 +7,6 @@ import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEma
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
-import { set } from 'firebase/database';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
