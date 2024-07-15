@@ -61,6 +61,8 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const limitParam = urlParams.get('limit');
   const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
+  const [hideRecurrentTasks, setHideRecurrentTasks] = useState(false);
+  const [sharedTasks, setSharedTasks] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -149,6 +151,10 @@ function App() {
     }
   }, [showFuture]);
 
+  const handleHideRecurrentTasks = async () => {
+    setHideRecurrentTasks(!hideRecurrentTasks);
+  };
+  
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
@@ -369,7 +375,7 @@ function App() {
         const tasksSnapshot = await getDocs(q);
         const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
-        if (tasksList.length == fetchMoreTasksLimit) {
+        if (tasksList.length === fetchMoreTasksLimit) {
           setShowMoreFutureButton(true);
         } else {
           setShowMoreFutureButton(false);
@@ -490,6 +496,7 @@ function App() {
 
   const showSharedTasks = async () => {
     if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+      if (!sharedTasks) {
       const tasksCollection = collection(db, 'tasks');
       const currentDate = new Date();
       console.log('Admin user');
@@ -497,8 +504,13 @@ function App() {
       const tasksSnapshot = await getDocs(sharedQuery);
       const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setTasks(tasksList);
-    }
+      }
+      else {
+        setShowCurrent(true);
+      }
+    setSharedTasks(!sharedTasks);
   }
+}
 
   return (
     <div>
@@ -543,7 +555,7 @@ function App() {
                   </form>
                   <ul>
                     {tasks
-                      .filter((task) => !task.status)
+                      .filter((task) => !task.status && (hideRecurrentTasks ? task.recurrence === 'ad-hoc' : true))
                       .map((task) => (
                         <li key={task.id} data-task-id={task.id} data-status={task.status}>
                           <>
@@ -571,9 +583,16 @@ function App() {
                   {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                   <br />
                   <br />
+                  <button className="button" onClick={handleHideRecurrentTasks}>
+                    {!hideRecurrentTasks ? 'Hide Recurrent Tasks' : 'Show All Tasks'}
+                  </button>
+                  <br />
+                  <br />
                   {adminUser && (
                     <div>
-                      <button className="button" onClick={showSharedTasks}>Show Shared Tasks</button>
+                      <button className="button" onClick={showSharedTasks}>
+                        {!sharedTasks ? 'Show Shared Tasks' : 'Hide Shared Tasks'}
+                        </button>
                       <br />
                       <br />
                     </div>
