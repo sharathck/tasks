@@ -247,7 +247,7 @@ function App() {
       });
       setNewTask('');
     }
-    setShowCurrent(true);
+    setShowCurrent(!showCurrent);
   };
 
   const handleToggleStatus = async (taskId, status, recurrence, dueDate) => {
@@ -506,7 +506,7 @@ function App() {
       setTasks(tasksList);
       }
       else {
-        setShowCurrent(true);
+        setShowCurrent(!showCurrent);
       }
     setSharedTasks(!sharedTasks);
   }
