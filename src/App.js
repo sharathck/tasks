@@ -584,7 +584,7 @@ function App() {
                   <br />
                   <br />
                   <button className="button" onClick={handleHideRecurrentTasks}>
-                    {!hideRecurrentTasks ? 'Hide Recurrent Tasks' : 'Show All Tasks'}
+                    {!hideRecurrentTasks ? 'Hide Recurrent Tasks' : 'Show Recurrent Tasks'}
                   </button>
                   <br />
                   <br />
