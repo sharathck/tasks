@@ -246,8 +246,8 @@ function App() {
         uemail: user.email
       });
       setNewTask('');
-      setShowCurrent(true);
     }
+    setShowCurrent(true);
   };
 
   const handleToggleStatus = async (taskId, status, recurrence, dueDate) => {
