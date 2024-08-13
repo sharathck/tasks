@@ -77,7 +77,8 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+      const adminUserIds = ['bTGBBpeYPmPJonItYpUOCYhdIlr1', 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2'];
+      if (adminUserIds.includes(user.uid)) {
         setAdminUser(true);
       }
       const tasksCollection = collection(db, 'tasks');
