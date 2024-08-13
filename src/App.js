@@ -516,7 +516,6 @@ function App() {
   };
 
   const showSharedTasks = async () => {
-    if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
       if (!sharedTasks) {
         const tasksCollection = collection(db, 'tasks');
         const currentDate = new Date();
@@ -530,7 +529,6 @@ function App() {
         setShowCurrent(!showCurrent);
       }
       setSharedTasks(!sharedTasks);
-    }
   }
 
   return (
