@@ -26,8 +26,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, { localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const db = getFirestore(app);
 const auth = getAuth(app);
-const tasksLimit = 199;
-const fetchMoreTasksLimit = 50;
+const tasksLimit = 499;
+const fetchMoreTasksLimit = 500;
 let articles = '';
 
 function App() {
