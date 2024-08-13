@@ -7,6 +7,16 @@
   margin-left: 10px;
   box-shadow: 2px 2px 8px rgba(1, 41, 11, 0.6);
 }
+.searchTask{
+  padding: 5px;
+  font-size: 28px;
+  height: 40%; /* Increase the height */
+  width: 80%; /* Increase the width */
+  margin-top: 10px; /* Add margin at bottom */
+  margin-bottom: 10px; /* Add margin at bottom */
+  margin-left: 5px;
+  box-shadow: 2px 2px 8px rgba(1, 41, 11, 0.6);
+}
 .dueDate{
 color: orange;
 }
@@ -92,7 +102,7 @@ form {
   border: none;
   color: #fff;
   cursor: pointer;
-  margin-left: 18px;
+  margin-left: 34px;
   padding: 5px 5px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
   font-size: 18px; /* make the button text extremely small */

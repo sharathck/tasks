@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
+import React, { useState, useEffect , useRef} from 'react';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
@@ -63,6 +63,9 @@ function App() {
   const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
   const [hideRecurrentTasks, setHideRecurrentTasks] = useState(false);
   const [sharedTasks, setSharedTasks] = useState(false);
+  const [showSearchBox, setShowSearchBox] = useState(false); // State for search box visibility 
+  const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const searchInputRef = useRef(null); // Reference for the search input
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -101,7 +104,7 @@ function App() {
 
       return () => unsubscribe();
     }
-  }, [user,showCurrent]);
+  }, [user, showCurrent]);
 
   useEffect(() => {
     if (showCompleted) {
@@ -120,7 +123,7 @@ function App() {
           setShowMoreCompletedButton(true);
         } else {
           setShowMoreCompletedButton(false);
-        }       
+        }
         setCompletedTasks(tasksData);
       });
       return () => unsubscribe();
@@ -146,7 +149,7 @@ function App() {
         }
         setFutureTasks(futureTasksData);
       });
-  
+
       return () => unsubscribe();
     }
   }, [showFuture]);
@@ -154,7 +157,7 @@ function App() {
   const handleHideRecurrentTasks = async () => {
     setHideRecurrentTasks(!hideRecurrentTasks);
   };
-  
+
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
@@ -170,6 +173,20 @@ function App() {
       chunks.push(msg.substring(i, i + chunkSize));
     }
     return chunks;
+  };
+
+  const handleSearchButtonClick = () => {
+    setShowSearchBox(prevShowSearchBox => {
+      const newShowSearchBox = !prevShowSearchBox;
+      if (newShowSearchBox) {
+        setTimeout(() => {
+          searchInputRef.current?.focus(); // Focus on the search input
+        }, 0);
+      } else {
+        setSearchQuery(''); // Reset search query if hiding the search box
+      }
+      return newShowSearchBox;
+    });
   };
 
   const synthesizeSpeech = async () => {
@@ -456,7 +473,7 @@ function App() {
           setShowMoreCompletedButton(true);
         } else {
           setShowMoreCompletedButton(false);
-        }    
+        }
         setCompletedTasks(prevData => [...prevData, ...tasksList]);
       }
       else {
@@ -493,24 +510,27 @@ function App() {
       console.error("Error fetching more data: ", error);
     }
   };
+  const handleClearSearch = () => {
+    setSearchQuery(''); // Clear the search query
+  };
 
   const showSharedTasks = async () => {
     if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
       if (!sharedTasks) {
-      const tasksCollection = collection(db, 'tasks');
-      const currentDate = new Date();
-      console.log('Admin user');
-      const sharedQuery = query(tasksCollection, where('userId', 'in', ['bTGBBpeYPmPJonItYpUOCYhdIlr1', 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
-      const tasksSnapshot = await getDocs(sharedQuery);
-      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTasks(tasksList);
+        const tasksCollection = collection(db, 'tasks');
+        const currentDate = new Date();
+        console.log('Admin user');
+        const sharedQuery = query(tasksCollection, where('userId', 'in', ['bTGBBpeYPmPJonItYpUOCYhdIlr1', 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
+        const tasksSnapshot = await getDocs(sharedQuery);
+        const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setTasks(tasksList);
       }
       else {
         setShowCurrent(!showCurrent);
       }
-    setSharedTasks(!sharedTasks);
+      setSharedTasks(!sharedTasks);
+    }
   }
-}
 
   return (
     <div>
@@ -533,12 +553,28 @@ function App() {
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              <button className='button' onClick={generateDocx}><FaFileWord /></button>
-              <button className='button' onClick={generateText}><FaFileAlt /></button>
               {!showCompleted && !showFuture && (<button className='button' onClick={handleReaderMode}><FaReadme /></button>)}
-              <button className="signoutbutton" title={articles} onClick={handleSignOut}>
+              <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
+                <FaSearch />
+              </button>
+              <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
+              {showSearchBox && (
+                <div> <input
+                  type="text"
+                  className="searchTask"
+                  placeholder="Search tasks"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  ref={searchInputRef}
+                />
+                  <button className='button' onClick={handleClearSearch} >
+                    <FaTimes />
+                  </button>
+                </div>
+
+              )}
               {!showCompleted && !showFuture && (
                 <div>
                   <form onSubmit={handleAddTask}>
@@ -555,7 +591,7 @@ function App() {
                   </form>
                   <ul>
                     {tasks
-                      .filter((task) => !task.status && (hideRecurrentTasks ? task.recurrence === 'ad-hoc' : true))
+                      .filter((task) => !task.status && (hideRecurrentTasks ? task.recurrence === 'ad-hoc' : true) && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
                       .map((task) => (
                         <li key={task.id} data-task-id={task.id} data-status={task.status}>
                           <>
@@ -592,7 +628,7 @@ function App() {
                     <div>
                       <button className="button" onClick={showSharedTasks}>
                         {!sharedTasks ? 'Show Shared Tasks' : 'Hide Shared Tasks'}
-                        </button>
+                      </button>
                       <br />
                       <br />
                     </div>
@@ -604,7 +640,7 @@ function App() {
                   <h2>Completed Tasks</h2>
                   <ul>
                     {completedTasks
-                      .filter((task) => task.status)
+                      .filter((task) => task.status && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
                       .map((task) => (
                         <li key={task.id} className="completed">
                           <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
@@ -634,33 +670,35 @@ function App() {
                 <div>
                   <h2>Future Tasks</h2>
                   <ul>
-                    {futureTasks.map((task) => (
-                      <li key={task.id}>
-                        {task.task}
-                        &nbsp;
-                        {showDueDates && (
-                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
-                        )}
-                        &nbsp;
-                        {task.recurrence && task.recurrence !== 'ad-hoc' && (
-                          <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                        )}
-                        &nbsp;
-                        {showEditButtons && (
-                          <button className='editbutton' onClick={() => handleEditTask(task)}>
-                            <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
-                          </button>
-                        )}
-                        &nbsp;
-                        {showDeleteButtons && (
-                          <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
-                            <FaTrash />
-                          </button>
-                        )}
-                      </li>
-                    ))}
+                    {futureTasks
+                      .filter((task) => (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
+                      .map((task) => (
+                        <li key={task.id}>
+                          {task.task}
+                          &nbsp;
+                          {showDueDates && (
+                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                          )}
+                          &nbsp;
+                          {task.recurrence && task.recurrence !== 'ad-hoc' && (
+                            <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                          )}
+                          &nbsp;
+                          {showEditButtons && (
+                            <button className='editbutton' onClick={() => handleEditTask(task)}>
+                              <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                            </button>
+                          )}
+                          &nbsp;
+                          {showDeleteButtons && (
+                            <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
+                              <FaTrash />
+                            </button>
+                          )}
+                        </li>
+                      ))}
                   </ul>
-                 {showMoreFutureButton && <button className="button" onClick={fetchMoreFutureData}>Show More</button>}
+                  {showMoreFutureButton && <button className="button" onClick={fetchMoreFutureData}>Show More</button>}
                   <div style={{ marginBottom: '110px' }}></div>
                 </div>
               )}
@@ -698,7 +736,10 @@ function App() {
                   </form>
                 </div>
               )}
+              <button className='button' onClick={generateDocx}><FaFileWord /></button>
+              <button className='button' onClick={generateText}><FaFileAlt /></button>
             </div>
+
           )}
         </div>
       )}
