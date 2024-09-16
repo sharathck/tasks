@@ -1,5 +1,5 @@
 import React, { useState, useEffect , useRef} from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaReply, FaConfluence } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
@@ -65,6 +65,7 @@ function App() {
   const [sharedTasks, setSharedTasks] = useState(false);
   const [showSearchBox, setShowSearchBox] = useState(false); // State for search box visibility 
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [showRecurrentTasks, setShowRecurrentTasks] = useState(false); // State for showing/hiding recurrent tasks
   const searchInputRef = useRef(null); // Reference for the search input
 
   useEffect(() => {
@@ -571,6 +572,9 @@ function App() {
               <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
                 <FaSearch />
               </button>
+              <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
+              <FaConfluence />
+              </button>
               <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />
               </button>
@@ -632,10 +636,6 @@ function App() {
                   </ul>
                   {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                   <br />
-                  <br />
-                  <button className="button" onClick={handleHideRecurrentTasks}>
-                    {!hideRecurrentTasks ? 'Hide Recurrent Tasks' : 'Show Recurrent Tasks'}
-                  </button>
                   <br />
                   <br />
                   {adminUser && (
