@@ -520,7 +520,7 @@ function App() {
         const tasksCollection = collection(db, 'tasks');
         const currentDate = new Date();
         console.log('Admin user');
-        const sharedQuery = query(tasksCollection, where('userId', 'in', ['bTGBBpeYPmPJonItYpUOCYhdIlr1', 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3', 'yvsWRZwjTQecvGap3pGXWNGHoTp2', 'lpwCpZkPk2h1ZWrESgkyXPUXEPQ2']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
+        const sharedQuery = query(tasksCollection, where('userId', 'in', ['qDzUX26K0dgtSMlN9PtCj6Q9L5J3']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
         const tasksSnapshot = await getDocs(sharedQuery);
         const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setTasks(tasksList);
@@ -531,6 +531,21 @@ function App() {
       setSharedTasks(!sharedTasks);
   }
 
+  const showAarushTasks = async () => {
+    if (!sharedTasks) {
+      const tasksCollection = collection(db, 'tasks');
+      const currentDate = new Date();
+      console.log('Admin user');
+      const sharedQuery = query(tasksCollection, where('userId', '==', 'yvsWRZwjTQecvGap3pGXWNGHoTp2'), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
+      const tasksSnapshot = await getDocs(sharedQuery);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTasks(tasksList);
+    }
+    else {
+      setShowCurrent(!showCurrent);
+    }
+    setSharedTasks(!sharedTasks);
+  }
   return (
     <div>
       {user && (
@@ -626,7 +641,16 @@ function App() {
                   {adminUser && (
                     <div>
                       <button className="button" onClick={showSharedTasks}>
-                        {!sharedTasks ? 'Show Shared Tasks' : 'Hide Shared Tasks'}
+                        {!sharedTasks ? 'Show Navya Tasks' : 'Hide Navya Tasks'}
+                      </button>
+                      <br />
+                      <br />
+                    </div>
+                  )}
+                  {adminUser && (
+                    <div>
+                      <button className="button" onClick={showAarushTasks}>
+                        {!sharedTasks ? 'Show Aarush Tasks' : 'Hide Aarush Tasks'}
                       </button>
                       <br />
                       <br />
