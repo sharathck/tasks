@@ -249,7 +249,7 @@ function App() {
 
   const synthesizeSpeech = async () => {
     if (isiPhone) {
-      speakContent();
+      handleReaderMode();
       return;
     }
     const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
@@ -639,7 +639,7 @@ function App() {
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              {!showCompleted && !showFuture && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
+              {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
               <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
                 <FaSearch />
               </button>
