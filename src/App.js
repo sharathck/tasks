@@ -249,8 +249,6 @@ function App() {
 
   const synthesizeSpeech = async () => {
     if (isiPhone) {
-      // show quick popup to let user know that audio is being generated
-      alert('Audio is being generated. Please wait for a few seconds.');
       handleReaderMode();
       return;
     }
