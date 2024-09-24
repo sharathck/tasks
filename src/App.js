@@ -163,7 +163,9 @@ function App() {
 
 
   // Function to call the TTS API
-  const callTTSAPI = async (message) => {
+  const callTTSAPI = async (message, appUrl) => {
+    let now = new Date();
+    console.log('before callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
     setIsGeneratingTTS(true); // Set generating state
     message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
     message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
@@ -171,9 +173,10 @@ function App() {
     message = message.replace(/[-*#_`~=^><]/g, '');
 
     console.log('Calling TTS API with message:', message);
+    console.log('Calling TTS API with appUrl:', appUrl);
 
     try {
-      const response = await fetch('https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/', {
+      const response = await fetch(appUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -203,6 +206,9 @@ function App() {
         setAnswerData(answer);
       }
       setIsGeneratingTTS(false); // Reset generating state
+      now = new Date();
+    console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+    
     }
   };
 
@@ -431,9 +437,22 @@ function App() {
 
   const handleReaderMode = () => {
     //   setReaderMode(true);
-    callTTSAPI(articles);
+    //log the exact date and time
+    if (articles.length > 3999) {
+      /* const chunks = [];
+       for (let i = 0; i < promptInput.length; i += 3999) {
+         chunks.push(promptInput.substring(i, i + 3999));
+       }
+       for (const chunk of chunks) {
+         callTTSAPI(chunk);
+       }*/
+      callTTSAPI(articles, 'https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/');
+    }
+    else {
+      callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
+    }
   };
-
+  
   const fetchMoreFutureData = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
