@@ -248,6 +248,7 @@ function App() {
   };
 
   const synthesizeSpeech = async () => {
+    setIsGeneratingTTS(true);
     if (isiPhone) {
       handleReaderMode();
       return;
@@ -264,16 +265,21 @@ function App() {
         const result = await speechSynthesizer.speakTextAsync(chunk);
         if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
           console.log(`Speech synthesized to speaker for text: [${chunk}]`);
+          setIsGeneratingTTS(false);
         } else if (result.reason === speechsdk.ResultReason.Canceled) {
           const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
+          setIsGeneratingTTS(false);
           if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
             console.error(`Error details: ${cancellationDetails.errorDetails}`);
+            setIsGeneratingTTS(false);
           }
         }
       } catch (error) {
         console.error(`Error synthesizing speech: ${error}`);
+        setIsGeneratingTTS(false);
       }
     }
+
   };
 
   const speakContent = async () => {
@@ -638,7 +644,7 @@ function App() {
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-              <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
+              <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
               {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
               <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
                 <FaSearch />
