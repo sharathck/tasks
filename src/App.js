@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaReply, FaConfluence } from 'react-icons/fa';
 import './App.css';
 import { initializeApp } from 'firebase/app';
@@ -162,50 +162,50 @@ function App() {
   }, [showFuture]);
 
 
-    // Function to call the TTS API
-    const callTTSAPI = async (message) => {
-      setIsGeneratingTTS(true); // Set generating state
-      message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
-      message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
-      // replace -,*,#,_,`,~,=,^,>,< with empty string
-      message = message.replace(/[-*#_`~=^><]/g, '');
+  // Function to call the TTS API
+  const callTTSAPI = async (message) => {
+    setIsGeneratingTTS(true); // Set generating state
+    message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
+    message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
+    // replace -,*,#,_,`,~,=,^,>,< with empty string
+    message = message.replace(/[-*#_`~=^><]/g, '');
 
-      console.log('Calling TTS API with message:', message);
-    
-      try {
-        const response = await fetch('https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ message: message , uid: uid})
-        });
-    
-        if (!response.ok) {
-          throw new Error([`Network response was not ok: ${response.statusText}`]);
-        }
-      } catch (error) {
-        console.error('Error calling TTS API:', error);
-        alert([`Error: ${error.message}`]);
-      } finally {
-            // Fetch the Firebase document data
-    const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
-    let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
-    const genaiSnapshot = await getDocs(q);
-    const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Get the answer from the first document
-    if (genaiList.length > 0) {
-      let answer = genaiList[0].answer;
-      //extract from the position where http starts and until end
-      answer = answer.substring(answer.indexOf('http'));
-      // replace ) with empty string
-      answer = answer.replace(')', '');
-      setAnswerData(answer);
-    }
-        setIsGeneratingTTS(false); // Reset generating state
+    console.log('Calling TTS API with message:', message);
+
+    try {
+      const response = await fetch('https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message, uid: uid })
+      });
+
+      if (!response.ok) {
+        throw new Error([`Network response was not ok: ${response.statusText}`]);
       }
+    } catch (error) {
+      console.error('Error calling TTS API:', error);
+      alert([`Error: ${error.message}`]);
+    } finally {
+      // Fetch the Firebase document data
+      const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
+      let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
+      const genaiSnapshot = await getDocs(q);
+      const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Get the answer from the first document
+      if (genaiList.length > 0) {
+        let answer = genaiList[0].answer;
+        //extract from the position where http starts and until end
+        answer = answer.substring(answer.indexOf('http'));
+        // replace ) with empty string
+        answer = answer.replace(')', '');
+        setAnswerData(answer);
+      }
+      setIsGeneratingTTS(false); // Reset generating state
+    }
   };
-  
+
   const handleHideRecurrentTasks = async () => {
     setHideRecurrentTasks(!hideRecurrentTasks);
   };
@@ -430,8 +430,8 @@ function App() {
   };
 
   const handleReaderMode = () => {
- //   setReaderMode(true);
-  callTTSAPI(articles);
+    //   setReaderMode(true);
+    callTTSAPI(articles);
   };
 
   const fetchMoreFutureData = async () => {
@@ -569,19 +569,19 @@ function App() {
   };
 
   const showSharedTasks = async () => {
-      if (!sharedTasks) {
-        const tasksCollection = collection(db, 'tasks');
-        const currentDate = new Date();
-        console.log('Admin user');
-        const sharedQuery = query(tasksCollection, where('userId', 'in', ['qDzUX26K0dgtSMlN9PtCj6Q9L5J3']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
-        const tasksSnapshot = await getDocs(sharedQuery);
-        const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTasks(tasksList);
-      }
-      else {
-        setShowCurrent(!showCurrent);
-      }
-      setSharedTasks(!sharedTasks);
+    if (!sharedTasks) {
+      const tasksCollection = collection(db, 'tasks');
+      const currentDate = new Date();
+      console.log('Admin user');
+      const sharedQuery = query(tasksCollection, where('userId', 'in', ['qDzUX26K0dgtSMlN9PtCj6Q9L5J3']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
+      const tasksSnapshot = await getDocs(sharedQuery);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTasks(tasksList);
+    }
+    else {
+      setShowCurrent(!showCurrent);
+    }
+    setSharedTasks(!sharedTasks);
   }
 
   const showAarushTasks = async () => {
@@ -620,12 +620,12 @@ function App() {
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              {!showCompleted && !showFuture && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}              
+              {!showCompleted && !showFuture && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
               <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
                 <FaSearch />
               </button>
               <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
-              <FaConfluence />
+                <FaConfluence />
               </button>
               <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />
@@ -645,11 +645,12 @@ function App() {
                 </div>
 
               )}
-                      {answerData && (
-          <div>
-            <a href={answerData} target="_blank" rel="noopener noreferrer">Play/Download</a>
-          </div>
-        )}
+              {answerData && (
+                <div>
+                  <br />
+                  <a href={answerData} target="_blank" rel="noopener noreferrer">Play/Download</a>
+                </div>
+              )}
               {!showCompleted && !showFuture && (
                 <div>
                   <form onSubmit={handleAddTask}>
