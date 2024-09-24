@@ -68,7 +68,9 @@ function App() {
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showRecurrentTasks, setShowRecurrentTasks] = useState(false); // State for showing/hiding recurrent tasks
   const [isGeneratingTTS, setIsGeneratingTTS] = useState(false); // State for generating TTS
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false); // State for showing audio player
   const searchInputRef = useRef(null); // Reference for the search input
+  const [answerData, setAnswerData] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -163,6 +165,11 @@ function App() {
     // Function to call the TTS API
     const callTTSAPI = async (message) => {
       setIsGeneratingTTS(true); // Set generating state
+      message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
+      message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
+      // replace all the special characters with empty string
+      message = message.replace(/[^\w\s]/gi, '');
+
       console.log('Calling TTS API with message:', message);
     
       try {
@@ -181,6 +188,20 @@ function App() {
         console.error('Error calling TTS API:', error);
         alert([`Error: ${error.message}`]);
       } finally {
+            // Fetch the Firebase document data
+    const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
+    let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
+    const genaiSnapshot = await getDocs(q);
+    const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Get the answer from the first document
+    if (genaiList.length > 0) {
+      let answer = genaiList[0].answer;
+      //extract from the position where http starts and until end
+      answer = answer.substring(answer.indexOf('http'));
+      // replace ) with empty string
+      answer = answer.replace(')', '');
+      setAnswerData(answer);
+    }
         setIsGeneratingTTS(false); // Reset generating state
       }
   };
@@ -256,6 +277,7 @@ function App() {
   };
 
   const handleAddTask = async (e) => {
+    setShowAudioPlayer(false);
     e.preventDefault();
     if (newTask.trim() !== '') {
       let taskDesc = newTask.trim();
@@ -623,6 +645,11 @@ function App() {
                 </div>
 
               )}
+                      {answerData && (
+          <div>
+            <a href={answerData} target="_blank" rel="noopener noreferrer">Play/Download</a>
+          </div>
+        )}
               {!showCompleted && !showFuture && (
                 <div>
                   <form onSubmit={handleAddTask}>
