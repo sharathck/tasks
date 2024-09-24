@@ -167,8 +167,8 @@ function App() {
       setIsGeneratingTTS(true); // Set generating state
       message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
       message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
-      // replace all the special characters with empty string
-      message = message.replace(/[^\w\s]/gi, '');
+      // replace -,*,#,_,`,~,=,^,>,< with empty string
+      message = message.replace(/[-*#_`~=^><]/g, '');
 
       console.log('Calling TTS API with message:', message);
     
