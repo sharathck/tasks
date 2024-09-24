@@ -248,8 +248,9 @@ function App() {
   };
 
   const synthesizeSpeech = async () => {
-    setIsGeneratingTTS(true);
     if (isiPhone) {
+      // show quick popup to let user know that audio is being generated
+      alert('Audio is being generated. Please wait for a few seconds.');
       handleReaderMode();
       return;
     }
@@ -265,18 +266,14 @@ function App() {
         const result = await speechSynthesizer.speakTextAsync(chunk);
         if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
           console.log(`Speech synthesized to speaker for text: [${chunk}]`);
-          setIsGeneratingTTS(false);
         } else if (result.reason === speechsdk.ResultReason.Canceled) {
           const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
-          setIsGeneratingTTS(false);
           if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
             console.error(`Error details: ${cancellationDetails.errorDetails}`);
-            setIsGeneratingTTS(false);
           }
         }
       } catch (error) {
         console.error(`Error synthesizing speech: ${error}`);
-        setIsGeneratingTTS(false);
       }
     }
 
@@ -670,6 +667,7 @@ function App() {
                 </div>
 
               )}
+              {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
               {answerData && (
                 <div>
                   <br />
