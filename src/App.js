@@ -29,6 +29,7 @@ const auth = getAuth(app);
 const tasksLimit = 499;
 const fetchMoreTasksLimit = 500;
 let articles = '';
+let uid = '';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -66,6 +67,7 @@ function App() {
   const [showSearchBox, setShowSearchBox] = useState(false); // State for search box visibility 
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showRecurrentTasks, setShowRecurrentTasks] = useState(false); // State for showing/hiding recurrent tasks
+  const [isGeneratingTTS, setIsGeneratingTTS] = useState(false); // State for generating TTS
   const searchInputRef = useRef(null); // Reference for the search input
 
   useEffect(() => {
@@ -87,6 +89,7 @@ function App() {
       const limitParam = urlParams.get('limit');
       const showCurrentLimitValue = limitParam ? parseInt(limitParam) : tasksLimit;
       const currentDate = new Date();
+      uid = user.uid;
 
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(showCurrentLimitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -156,6 +159,32 @@ function App() {
     }
   }, [showFuture]);
 
+
+    // Function to call the TTS API
+    const callTTSAPI = async (message) => {
+      setIsGeneratingTTS(true); // Set generating state
+      console.log('Calling TTS API with message:', message);
+    
+      try {
+        const response = await fetch('https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: message , uid: uid})
+        });
+    
+        if (!response.ok) {
+          throw new Error([`Network response was not ok: ${response.statusText}`]);
+        }
+      } catch (error) {
+        console.error('Error calling TTS API:', error);
+        alert([`Error: ${error.message}`]);
+      } finally {
+        setIsGeneratingTTS(false); // Reset generating state
+      }
+  };
+  
   const handleHideRecurrentTasks = async () => {
     setHideRecurrentTasks(!hideRecurrentTasks);
   };
@@ -379,7 +408,8 @@ function App() {
   };
 
   const handleReaderMode = () => {
-    setReaderMode(true);
+ //   setReaderMode(true);
+  callTTSAPI(articles);
   };
 
   const fetchMoreFutureData = async () => {
@@ -568,7 +598,7 @@ function App() {
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
               <button className='button' onClick={synthesizeSpeech}><FaHeadphones /></button>
-              {!showCompleted && !showFuture && (<button className='button' onClick={handleReaderMode}><FaReadme /></button>)}
+              {!showCompleted && !showFuture && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}              
               <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
                 <FaSearch />
               </button>
