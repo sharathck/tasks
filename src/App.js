@@ -879,11 +879,6 @@ function App() {
           <br />
           <br />
           <br />
-          <br />
-          <p> OR </p>
-          <br />
-          <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
-          <br />
         </div>
       )}
     </div>
