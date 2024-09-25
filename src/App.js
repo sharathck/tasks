@@ -439,7 +439,7 @@ function App() {
   const handleReaderMode = () => {
     //   setReaderMode(true);
     //log the exact date and time
-    if (articles.length > 200) {
+    if (articles.length > 2) {
       /* const chunks = [];
        for (let i = 0; i < promptInput.length; i += 3999) {
          chunks.push(promptInput.substring(i, i + 3999));
