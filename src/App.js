@@ -878,6 +878,8 @@ function App() {
           <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
           <br />
           <br />
+          <button className='signonpagebutton' onClick={handleSignIn}>Sign In with Google</button>
+          <br />
           <br />
         </div>
       )}
