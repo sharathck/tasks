@@ -100,6 +100,9 @@ function App() {
           ...doc.data(),
         }));
         articles += tasksData.map((task) => task.task).join(' . ');
+        console.log('Articles:', articles);
+        console.log('User:', user.uid);
+        console.log('Showcurrent:', showCurrent);
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
         if (tasksData.length == tasksLimit) {
           setShowMoreButton(true);
@@ -181,7 +184,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: message, uid: uid })
+        body: JSON.stringify({ message: message, uid: uid , source: 'ta'})
       });
 
       if (!response.ok) {
