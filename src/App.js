@@ -10,7 +10,6 @@ import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
-const voiceName = 'en-US-AvaNeural';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
 const firebaseConfig = {
@@ -28,12 +27,11 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const tasksLimit = 499;
 const fetchMoreTasksLimit = 500;
-let articles = '';
-let uid = '';
 
 function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [articles, setArticles] = useState('');
   const [completedTasks, setCompletedTasks] = useState([]);
   const [futureTasks, setFutureTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
@@ -71,6 +69,7 @@ function App() {
   const [showAudioPlayer, setShowAudioPlayer] = useState(false); // State for showing audio player
   const searchInputRef = useRef(null); // Reference for the search input
   const [answerData, setAnswerData] = useState('');
+  const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -91,7 +90,6 @@ function App() {
       const limitParam = urlParams.get('limit');
       const showCurrentLimitValue = limitParam ? parseInt(limitParam) : tasksLimit;
       const currentDate = new Date();
-      uid = user.uid;
 
       let q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(showCurrentLimitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -99,7 +97,7 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
-        articles += tasksData.map((task) => task.task).join(' . ');
+        setArticles(tasksData.map((task) => task.task).join(' . '));
         console.log('Articles:', articles);
         console.log('User:', user.uid);
         console.log('Showcurrent:', showCurrent);
@@ -127,7 +125,7 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
-        articles += tasksData.map((task) => task.task).join(' ');
+        setArticles(tasksData.map((task) => task.task).join(' . '));
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
         if (tasksData.length == fetchMoreTasksLimit) {
           setShowMoreCompletedButton(true);
@@ -151,7 +149,7 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
-        articles += futureTasksData.map((task) => task.task).join(' . ');
+        setArticles(futureTasksData.map((task) => task.task).join(' . '));
         if (futureTasksData.length == fetchMoreTasksLimit) {
           setShowMoreFutureButton(true);
         } else {
@@ -184,7 +182,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: message, uid: uid , source: 'ta'})
+        body: JSON.stringify({ message: message, uid: user.uid , source: 'ta', voice_name: voiceName })
       });
 
       if (!response.ok) {
@@ -195,7 +193,7 @@ function App() {
       alert([`Error: ${error.message}`]);
     } finally {
       // Fetch the Firebase document data
-      const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
+      const genaiCollection = collection(db, 'genai', user.uid, 'MyGenAI');
       let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
       const genaiSnapshot = await getDocs(q);
       const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -720,6 +718,14 @@ function App() {
                   <br />
                   <br />
                   <br />
+                          {/* Add the voice name input box */}
+        <input
+          type="text"
+          placeholder="Enter Voice Name"
+          value={voiceName}
+          onChange={(e) => setVoiceName(e.target.value)}
+          style={{ marginBottom: '10px', fontSize: '18px' }}
+        />
                   {adminUser && (
                     <div>
                       <button className="button" onClick={showSharedTasks}>
