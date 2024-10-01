@@ -448,7 +448,7 @@ function App() {
        for (const chunk of chunks) {
          callTTSAPI(chunk);
        }*/
-      callTTSAPI(articles, 'https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/');
+      callTTSAPI(articles, 'https://fastapi-tts-v21-892085575649.us-central1.run.app');
     }
     else {
       callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
