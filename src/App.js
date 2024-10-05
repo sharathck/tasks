@@ -1,30 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaReply, FaConfluence } from 'react-icons/fa';
 import './App.css';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
-import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
-
+import AudioApp from './AudioApp';
+import {  doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
+import {  signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
+import {auth, db } from './Firebase';
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
-};
-
-const app = initializeApp(firebaseConfig, { localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED });
-const db = getFirestore(app);
-const auth = getAuth(app);
 const tasksLimit = 499;
 const fetchMoreTasksLimit = 500;
 
@@ -70,6 +57,7 @@ function App() {
   const searchInputRef = useRef(null); // Reference for the search input
   const [answerData, setAnswerData] = useState('');
   const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
+  const [showAudioApp, setShowAudioApp] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -182,7 +170,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: message, uid: user.uid , source: 'ta', voice_name: voiceName })
+        body: JSON.stringify({ message: message, uid: user.uid, source: 'ta', voice_name: voiceName })
       });
 
       if (!response.ok) {
@@ -208,8 +196,8 @@ function App() {
       }
       setIsGeneratingTTS(false); // Reset generating state
       now = new Date();
-    console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
-    
+      console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+
     }
   };
 
@@ -454,7 +442,7 @@ function App() {
       callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
     }
   };
-  
+
   const fetchMoreFutureData = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -620,6 +608,12 @@ function App() {
     }
     setSharedTasks(!sharedTasks);
   }
+
+  if (showAudioApp){
+    return (
+      <AudioApp user={user} />
+    );
+  }
   return (
     <div>
       {user && (
@@ -634,9 +628,6 @@ function App() {
               <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
                 <FaCheckDouble />
               </button>
-              <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
-                <FaClock />
-              </button>
               <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
               <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
               {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
@@ -647,6 +638,9 @@ function App() {
               </button>
               <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
                 <FaConfluence />
+              </button>
+              <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+                <FaPlay />
               </button>
               <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />
@@ -718,14 +712,14 @@ function App() {
                   <br />
                   <br />
                   <br />
-                          {/* Add the voice name input box */}
-        <input
-          type="text"
-          placeholder="Enter Voice Name"
-          value={voiceName}
-          onChange={(e) => setVoiceName(e.target.value)}
-          style={{ marginBottom: '10px', fontSize: '18px' }}
-        />
+                  {/* Add the voice name input box */}
+                  <input
+                    type="text"
+                    placeholder="Enter Voice Name"
+                    value={voiceName}
+                    onChange={(e) => setVoiceName(e.target.value)}
+                    style={{ marginBottom: '10px', fontSize: '18px' }}
+                  />
                   {adminUser && (
                     <div>
                       <button className="button" onClick={showSharedTasks}>
@@ -847,6 +841,9 @@ function App() {
                   </form>
                 </div>
               )}
+              <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+                <FaClock />
+              </button>
               <button className='button' onClick={generateDocx}><FaFileWord /></button>
               <button className='button' onClick={generateText}><FaFileAlt /></button>
             </div>

@@ -1,0 +1,107 @@
+.AudioApp-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .AudioApp-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+li-audio {
+  line-height: 200%; /* Adjust as needed */
+  border: 1px solid #000; /* Adjust border color */
+  box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.3); /* Adjust shadow properties */
+  background-color: #f3f3eb; /* Adjust background color */
+  color: #000; /* Adjust text color */
+}
+
+.selected-file {
+  border: 3px solid #daeacc; /* Adjust border color */
+  background-color: #96c9e1; /* Adjust background color */
+  color: #ece5e5; /* Adjust text color */
+}
+
+.AudioApp-header {
+  background-color: white;
+  min-height: 100vh; ;
+  display: flex;
+  font-size: calc(10px + 2vmin);
+  color: black;
+  margin-left: 0px;
+  margin-right: 4px;
+}
+
+.AudioApp-link {
+  color: #61dafb;
+}
+ul {
+  margin-left: 0;
+}
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #000;
+}
+
+
+.signuppagebutton {
+  background-color: rgb(148, 118, 9);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 18px; /* make the button text extremely small */
+}
+
+.signgooglepagebutton {
+  background-color: rgb(31, 115, 211);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 18px; /* make the button text extremely small */
+}
+.editForm {
+  position: fixed;
+  padding: 10px;
+  width: 60%;
+  bottom: 30%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  border: 2px solid;
+  background-color: whitesmoke;
+  box-shadow: 2px 4px 12px rgb(7, 7, 7);
+  margin-bottom: 5px; /* Move the text box up 10 pixels */
+  font-size: 18px;
+}
+
+.signoutbutton {
+  background-color: orange;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 24px;
+  padding: 5px 5px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+  font-size: 18px; /* make the button text extremely small */
+}
