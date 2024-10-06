@@ -552,7 +552,11 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="openai"
-                            onChange={(e) => setIsOpenAI(e.target.checked)}
+                            onChange={(e) => {
+                                setIsOpenAI(e.target.checked);
+                                if (e.target.checked) setIsTTS(false);
+                                if (e.target.checked) setIsImage_Dall_e_3(false);
+                            }}
                             checked={isOpenAI}
                         />
                         ChatGPT
@@ -561,7 +565,10 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="anthropic"
-                            onChange={(e) => setIsAnthropic(e.target.checked)}
+                            onChange={(e) => {setIsAnthropic(e.target.checked);
+                                if (e.target.checked) setIsTTS(false);
+                                if (e.target.checked) setIsImage_Dall_e_3(false);
+                            }}
                             checked={isAnthropic}
                         />
                         Claude
@@ -570,7 +577,10 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="gemini"
-                            onChange={(e) => setIsGemini(e.target.checked)}
+                            onChange={(e) => {setIsGemini(e.target.checked);
+                                if (e.target.checked) setIsTTS(false);
+                                if (e.target.checked) setIsImage_Dall_e_3(false);
+                            }}
                             checked={isGemini}
                         />
                         Gemini
@@ -579,7 +589,10 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="o1-mini"
-                            onChange={(e) => setIsGpto1Mini(e.target.checked)}
+                            onChange={(e) => {setIsGpto1Mini(e.target.checked);
+                                if (e.target.checked) setIsTTS(false);
+                                if (e.target.checked) setIsImage_Dall_e_3(false);
+                            }}
                             checked={isGpto1Mini}
                         />
                         o1-mini
@@ -588,7 +601,10 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="o1"
-                            onChange={(e) => setIso1(e.target.checked)}
+                            onChange={(e) => {setIso1(e.target.checked);
+                                if (e.target.checked) setIsTTS(false);
+                                if (e.target.checked) setIsImage_Dall_e_3(false);
+                            }}
                             checked={iso1}
                         />
                         o1
@@ -617,7 +633,8 @@ const GenAIApp = () => {
                         onVoiceChange={setVoiceName} // Handler to update selected voice
                         />
                     )}
-                    <select id="promptSelect"
+                    {!isTTS && (
+                    <select id="promptS</label>elect"
                         onChange={(e) => {
                             handlePromptChange(e.target.value);
                             setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
@@ -630,7 +647,8 @@ const GenAIApp = () => {
                             <option key={prompt.id} value={prompt.fullText}>{prompt.tag}</option>
                         ))}
                     </select>
-                    &nbsp;
+                    )}
+                    {!isTTS && (
                     <button
                         className="signonpagebutton"
                         onClick={() => handleEditPrompt()}
@@ -638,6 +656,7 @@ const GenAIApp = () => {
                     >
                         <FaEdit />
                     </button>
+                    )}
                     <button
                         onClick={handleGenerate}
                         className="signonpagebutton"
