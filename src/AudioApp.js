@@ -1,10 +1,11 @@
 import './App.css';
 import App from './App';
+import TTSQueueApp from './TTSQueueApp';
 import './AudioApp.css';
 import React, { useEffect, useState, useRef } from 'react';
 import H5AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
-import { FaSignOutAlt,FaBackward, FaArrowLeft } from 'react-icons/fa';
+import { FaSignOutAlt,FaBackward, FaArrowLeft,FaAlignJustify } from 'react-icons/fa';
 import {collection, where, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import {auth, db } from './Firebase';
 import {
@@ -28,6 +29,7 @@ function AudioApp() {
   const playerRef = useRef(null);
   const [user, setUser] = useState(null);
   const [showMainApp, setShowMainApp] = useState(false);
+  const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
 
   // Listen for authentication state changes
   useEffect(() => {
@@ -115,6 +117,12 @@ function AudioApp() {
       <App user={user} />
     );
   }
+  if (showTTSQueueApp) {
+    return (
+      <TTSQueueApp user={user} />
+    );
+  }
+
   return (
     <div>
       {!user ? (
@@ -166,7 +174,10 @@ function AudioApp() {
         <button className={showMainApp ? 'button_selected' : 'button'} onClick={() => setShowMainApp(!showMainApp)}>
                 <FaArrowLeft />
         </button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+                <FaAlignJustify />
+        </button>
         <button className="signoutbutton" onClick={handleSignOut}><FaSignOutAlt /></button>
         <header className="AudioApp-header">
         <div style={{ width: '99%' }}>

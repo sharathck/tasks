@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaReply, FaConfluence } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaAlignJustify, FaReply, FaConfluence } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import AudioApp from './AudioApp';
+import TTSQueueApp from './TTSQueueApp';
 import {  doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import {  signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import {auth, db } from './Firebase';
+
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
@@ -58,6 +60,7 @@ function App() {
   const [answerData, setAnswerData] = useState('');
   const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
   const [showAudioApp, setShowAudioApp] = useState(false);
+  const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -614,6 +617,13 @@ function App() {
       <AudioApp user={user} />
     );
   }
+
+  if (showTTSQueueApp) {
+    return (
+      <TTSQueueApp user={user} />
+    );
+  }
+
   return (
     <div>
       {user && (
@@ -641,6 +651,9 @@ function App() {
               </button>
               <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                 <FaPlay />
+              </button>
+              <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+                <FaAlignJustify />
               </button>
               <button className="signoutbutton" onClick={handleSignOut}>
                 <FaSignOutAlt />

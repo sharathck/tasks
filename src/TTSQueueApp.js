@@ -1,0 +1,549 @@
+import React, { useState, useEffect } from 'react';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaCheckDouble, FaClock, FaArrowLeft } from 'react-icons/fa';
+import './TTSQueueApp.css';
+import { doc, deleteDoc, getDocs, startAfter, collection, query, where, orderBy, and, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
+import App from './App';
+import { Readability } from '@mozilla/readability';
+import { saveAs } from 'file-saver';
+import * as docx from 'docx';
+import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
+import { auth, db } from './Firebase';
+import AudioApp from './AudioApp';
+
+const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
+const serviceRegion = 'eastus';
+const voiceName = 'en-US-AvaNeural';
+
+let articles = '';
+let uid = '';
+
+function TTSQueueApp() {
+    const [user, setUser] = useState(null);
+    const [tasks, setTasks] = useState([]);
+    const [completedTasks, setCompletedTasks] = useState([]);
+    const [newTask, setNewTask] = useState('');
+    const [editTask, setEditTask] = useState(null);
+    const [editTaskText, setEditTaskText] = useState('');
+    const [showCompleted, setShowCompleted] = useState(false);
+    const [readerMode, setReaderMode] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [lastVisible, setLastVisible] = useState(null);
+    const [lastArticle, setLastArticle] = useState(null);
+    const [answerData, setAnswerData] = useState('');
+    const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
+    const [showMainApp, setShowMainApp] = useState(false);
+    const [showAudioApp, setShowAudioApp] = useState(false);
+
+    const isiPhone = /iPhone/i.test(navigator.userAgent);
+    console.log(isiPhone);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setUser(user);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            const todoCollection = collection(db, 'todo')
+            uid = user.uid;
+            const urlParams = new URLSearchParams(window.location.search);
+            const limitParam = urlParams.get('limit');
+            const limitValue = limitParam ? parseInt(limitParam) : 2;
+            //print limit value
+            console.log('limit value: ', limitValue);
+            const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const tasksData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                articles += tasksData.map((task) => task.task).join(' ');
+                setLastArticle(snapshot.docs[snapshot.docs.length - 1]); // Set last visible document
+                setTasks(tasksData);
+            });
+
+            return () => unsubscribe();
+        }
+    }, [user]);
+
+
+    useEffect(() => {
+        if (showCompleted) {
+            const tasksCollection = collection(db, 'todo');
+            const urlParams = new URLSearchParams(window.location.search);
+            const limitParam = urlParams.get('limit');
+            const limitValue = limitParam ? parseInt(limitParam) : 6;
+            const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const tasksData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                articles += tasksData.map((task) => task.task).join(' ');
+                setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+                setCompletedTasks(tasksData);
+            });
+            return () => unsubscribe();
+        }
+    }, [showCompleted]);
+
+    const handleSignIn = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider);
+    };
+
+    const handleSignOut = () => {
+        auth.signOut();
+    };
+
+
+    const splitMessage = (msg, chunkSize = 4000) => {
+        const chunks = [];
+        for (let i = 0; i < msg.length; i += chunkSize) {
+            chunks.push(msg.substring(i, i + chunkSize));
+        }
+        return chunks;
+    };
+
+    const synthesizeSpeech = async () => {
+        if (isiPhone) {
+            callTTSAPI(articles, 'https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/');
+            return;
+        }
+        const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+        speechConfig.speechSynthesisVoiceName = voiceName;
+
+        const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+        const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+        const chunks = splitMessage(articles);
+        for (const chunk of chunks) {
+            try {
+                const result = await speechSynthesizer.speakTextAsync(chunk);
+                if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                    console.log(`Speech synthesized to speaker for text: [${chunk}]`);
+                } else if (result.reason === speechsdk.ResultReason.Canceled) {
+                    const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
+                    console.error(`Speech synthesis canceled: ${cancellationDetails.reason}`);
+                    if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
+                        console.error(`Error details: ${cancellationDetails.errorDetails}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`Error synthesizing speech: ${error}`);
+            }
+        }
+    };
+
+    const handleAddTask = async (e) => {
+        e.preventDefault();
+        if (newTask.trim() !== '') {
+            let textresponse = '';
+            if (newTask.substring(0, 4) == 'http') {
+                const urlWithoutProtocol = newTask.replace(/^https?:\/\//, '');
+                const response = await fetch('https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-9?url=' + newTask);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                // Initialize Readability with the document
+                const reader = new Readability(doc);
+                const article = reader.parse();
+                try {
+                    textresponse = article.title + ' . ' + article.textContent;
+                }
+                catch (error) {
+                    textresponse = error + '   Could not parse url : ' + newTask;
+                }
+            }
+            else {
+                textresponse = newTask;
+            }
+
+            await addDoc(collection(db, 'todo'), {
+                task: textresponse,
+                status: false,
+                userId: user.uid,
+                createdDate: new Date(),
+                uemail: user.email
+            });
+            setNewTask('');
+        }
+    };
+
+    const handleUpdateTask = async (taskId, newTaskText) => {
+        if (newTaskText.trim() !== '') {
+            const taskDocRef = doc(db, 'todo', taskId);
+            await updateDoc(taskDocRef, {
+                task: newTaskText,
+            });
+        }
+    };
+
+
+    const handleToggleStatus = async (taskId, status) => {
+        const taskDocRef = doc(db, 'todo', taskId);
+        await updateDoc(taskDocRef, {
+            status: !status,
+        });
+    };
+
+    const generateDocx = async () => {
+        const doc = new docx.Document({
+            sections: [{
+                properties: {},
+                children: [
+                    new docx.Paragraph({
+                        children: [
+                            new docx.TextRun(articles),
+                        ],
+                    }),
+                ],
+            }]
+        });
+
+        docx.Packer.toBlob(doc).then(blob => {
+            console.log(blob);
+            const now = new Date();
+            const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+            const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+            const dateTime = `${date}__${time}`;
+            saveAs(blob, dateTime + "_" + ".docx");
+            console.log("Document created successfully");
+        });
+    };
+
+
+    const generateText = async () => {
+        const blob = new Blob([articles], { type: "text/plain;charset=utf-8" });
+        const now = new Date();
+        const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+        const time = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+        const dateTime = `${date}__${time}`;
+        saveAs(blob, dateTime + ".txt");
+    }
+
+    const handleReaderMode = () => {
+        setReaderMode(true);
+    };
+
+    const handleBack = () => {
+        setReaderMode(false);
+    };
+
+    const handlePasswordReset = async () => {
+        if (!email) {
+            alert('Please enter your email address.');
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert('Password reset email sent, please check your inbox.');
+        } catch (error) {
+            console.error('Error sending password reset email', error);
+        }
+    };
+
+
+    const handleSignInWithEmail = async (e) => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            if (!user.emailVerified) {
+                await auth.signOut();
+                alert('Please verify your email before signing in.');
+            }
+        } catch (error) {
+            if (error.code === 'auth/wrong-password') {
+                alert('Wrong password, please try again.');
+            } else {
+                alert('Error signing in, please try again.' + error.message);
+                console.error('Error signing in:', error);
+            }
+        }
+    };
+
+    const handleSignUpWithEmail = async () => {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await sendEmailVerification(auth.currentUser);
+            const user = userCredential.user;
+            alert('Verification email sent! Please check your inbox. Ater verification, please sign in.');
+            if (!user.emailVerified) {
+                await auth.signOut();
+            }
+        } catch (error) {
+            alert('Error signing up, please try again.' + error.message);
+            console.error('Error signing up:', error);
+        }
+    };
+
+    const fetchMoreData = async () => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const limitParam = urlParams.get('limit');
+            const limitValue = limitParam ? parseInt(limitParam) : 21;
+            const tasksCollection = collection(db, 'todo');
+
+            if (lastVisible) {
+                const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
+                const tasksSnapshot = await getDocs(q);
+                const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setCompletedTasks(prevData => [...prevData, ...tasksList]);
+                setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+            }
+            else {
+                alert('No more data to fetch');
+            }
+        } catch (error) {
+            console.error("Error fetching more data: ", error);
+        }
+    };
+
+    const handleDeleteTask = async (taskId, taskText) => {
+        const confirmation = window.confirm(`Are you sure you want to delete this task: ${taskText.substring(0, 30)}...?`);
+        if (confirmation) {
+            await deleteDoc(doc(db, 'todo', taskId));
+        }
+    };
+
+    // Function to call the TTS API
+    const callTTSAPI = async (message, appUrl) => {
+        let now = new Date();
+        console.log('before callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+        setIsGeneratingTTS(true); // Set generating state
+        message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
+        message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
+        // replace -,*,#,_,`,~,=,^,>,< with empty string
+        message = message.replace(/[-*#_`~=^><]/g, '');
+
+        console.log('Calling TTS API with message:', message);
+        console.log('Calling TTS API with appUrl:', appUrl);
+
+        try {
+            const response = await fetch(appUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message, uid: uid })
+            });
+
+            if (!response.ok) {
+                throw new Error([`Network response was not ok: ${response.statusText}`]);
+            }
+        } catch (error) {
+            console.error('Error calling TTS API:', error);
+            alert([`Error: ${error.message}`]);
+        } finally {
+            // Fetch the Firebase document data
+            const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
+            let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
+            const genaiSnapshot = await getDocs(q);
+            const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Get the answer from the first document
+            if (genaiList.length > 0) {
+                let answer = genaiList[0].answer;
+                //extract from the position where http starts and until end
+                answer = answer.substring(answer.indexOf('http'));
+                // replace ) with empty string
+                answer = answer.replace(')', '');
+                setAnswerData(answer);
+            }
+            setIsGeneratingTTS(false); // Reset generating state
+            now = new Date();
+            console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+
+        }
+    };
+
+    const fetchMoreArticles = async () => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const limitParam = urlParams.get('limit');
+            const limitValue = limitParam ? parseInt(limitParam) : 6;
+            const tasksCollection = collection(db, 'todo');
+            if (lastArticle) {
+                const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), startAfter(lastArticle), limit(limitValue));
+                const tasksSnapshot = await getDocs(q);
+                const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setTasks(prevData => [...prevData, ...tasksList]);
+                setLastArticle(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+            }
+            else {
+                alert('No more data to fetch');
+            }
+        } catch (error) {
+            console.error("Error fetching more data: ", error);
+        }
+    };
+    if (showMainApp) {
+        return (
+            <App user={user} />
+        );
+    }
+
+    if (showAudioApp) {
+        return (
+            <AudioApp user={user} />
+        );
+    }
+
+    return (
+        <div>
+            {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
+                {readerMode ? (
+                    <div>
+                        <button className="tts-button" onClick={handleBack}><FaArrowLeft /></button>
+                        <p>{articles}</p>
+                    </div>
+                ) : (
+                    <div>
+                        <button className={showMainApp ? 'tts-button_selected' : 'tts-button'} onClick={() => setShowMainApp(!showMainApp)}>
+                            <FaArrowLeft />
+                        </button>
+                        &nbsp;
+                        <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+                            <FaPlay />
+                        </button>
+                        &nbsp;
+                        <button className={showCompleted ? 'tts-button_selected' : 'tts-button'} onClick={() => setShowCompleted(!showCompleted)}>
+                            <FaCheckDouble />
+                        </button>
+                        <button className='tts-button' onClick={generateDocx}><FaFileWord /></button>
+                        <button className='tts-button' onClick={generateText}><FaFileAlt /></button>
+                        <button className={isGeneratingTTS ? 'tts-button_selected' : 'tts-button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
+                        <button className='tts-button' onClick={handleReaderMode}><FaReadme /></button>
+                        <button className="signoutbutton" onClick={handleSignOut}>
+                            <FaSignOutAlt />
+                        </button>
+                        <br />
+                        <br />
+                        <span style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Queue Articles for Text to Speech</span>
+                        {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
+                        {answerData && (
+                            <div>
+                                <br />
+                                <a href={answerData} target="_blank" rel="noopener noreferrer">Play/Download</a>
+                            </div>
+                        )}
+                        {!showCompleted && (
+                            <div>
+
+                                <form onSubmit={handleAddTask}>
+                                    <input
+                                        className="addTask"
+                                        type="text"
+                                        placeholder=""
+                                        value={newTask}
+                                        onChange={(e) => setNewTask(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Shift') { handleAddTask(e); } }}
+                                        autoFocus
+                                    />
+                                    <button className="tts-addbutton" type="submit">
+                                        <FaPlus />
+                                    </button>
+                                </form>
+                                <ul>
+                                    {tasks
+                                        .filter((task) => !task.status)
+                                        .map((task) => (
+                                            <li key={task.id}>
+                                                {editTask === task.id ? (
+                                                    <form onSubmit={handleUpdateTask}>
+                                                        <input
+                                                            type="text"
+                                                            value={editTaskText}
+                                                            onChange={(e) => setEditTaskText(e.target.value)}
+                                                        />
+                                                        <button type="submit">
+                                                            <FaCheck />
+                                                        </button>
+                                                    </form>
+                                                ) : (
+                                                    <>
+                                                        <button className='tts-markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status)}>
+                                                            <FaCheck />
+                                                        </button>
+                                                        <span>{task.task}</span>
+                                                    </>
+                                                )}
+                                            </li>
+                                        ))}
+                                </ul>
+                                <button className="tts-button" onClick={fetchMoreArticles}>Show More</button>
+                            </div>
+                        )}
+                        {showCompleted && (
+                            <div>
+                                <h2>Completed Tasks</h2>
+                                <ul>
+                                    {completedTasks
+                                        .filter((task) => task.status)
+                                        .map((task) => (
+                                            <li key={task.id} className="completed">
+                                                <button onClick={() => handleToggleStatus(task.id, task.status)}>
+                                                    <FaCheck />
+                                                </button>
+                                                {task.task.substring(0, 88)}
+                                                <button onClick={() => handleDeleteTask(task.id, task.task)} className='tts-button_delete_selected'>
+                                                    <FaTrash />
+                                                </button>
+                                            </li>
+                                        ))}
+                                </ul>
+                                <button className="button" onClick={fetchMoreData}>Show More</button>
+                                <div style={{ marginBottom: '110px' }}></div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>}
+            {!user && <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
+                <br />
+                <br />
+                <p>Sign In</p>
+                <input
+                    className='textinput'
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <br />
+                <br />
+                <input
+                    type="password"
+                    className='textinput'
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <br />
+                <br />
+                <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
+                <br />
+                <br />
+                <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
+                <br />
+                <br />
+                <button className='signonpagebutton' onClick={() => handleSignIn()}>Sign In with Google</button>
+                <br />
+            </div>}
+        </div>
+    )
+}
+
+
+export default TTSQueueApp;
