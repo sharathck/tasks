@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaAlignJustify, FaReply, FaConfluence } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import AudioApp from './AudioApp';
 import TTSQueueApp from './TTSQueueApp';
+import GenAIApp from './GenAIApp';
 import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from './Firebase';
+import VoiceSelect from './VoiceSelect';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -61,6 +63,7 @@ function App() {
   const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
   const [showAudioApp, setShowAudioApp] = useState(false);
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
+  const [showGenAIApp, setShowGenAIApp] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -165,7 +168,7 @@ function App() {
     message = message.replace(/[-*#_`~=^><]/g, '');
 
     console.log('Calling TTS API with message:', message);
-    console.log('Calling TTS API with appUrl:', appUrl);
+    console.log('Calling TTS API with appUrl:', appUrl, 'voiceName:', voiceName);
 
     try {
       const response = await fetch(appUrl, {
@@ -434,7 +437,7 @@ function App() {
        for (const chunk of chunks) {
          callTTSAPI(chunk);
        }*/
-      callTTSAPI(articles, 'https://fastapi-tts-v21-892085575649.us-central1.run.app');
+      callTTSAPI(articles, process.env.REACT_APP_API_URL);
     }
     else {
       callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
@@ -560,6 +563,11 @@ function App() {
     setSharedTasks(!sharedTasks);
   }
 
+  if (showGenAIApp) {
+    return (
+      <GenAIApp user={user} />
+    );
+  }
   if (showAudioApp) {
     return (
       <AudioApp user={user} />
@@ -582,9 +590,6 @@ function App() {
           </div>
         ) : (
           <div>
-            <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
-              <FaCheckDouble />
-            </button>
             <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
             <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
@@ -601,6 +606,9 @@ function App() {
             </button>
             <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
               <FaAlignJustify />
+            </button>
+            <button className={showGenAIApp ? 'button_selected' : 'button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+              <FaBrain />
             </button>
             <button className="signoutbutton" onClick={handleSignOut}>
               <FaSignOutAlt />
@@ -671,15 +679,24 @@ function App() {
                 {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                 <br />
                 <br />
+                <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+                  <FaCheckDouble />
+                </button>
+                <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+                  <FaClock />
+                </button>
+                <button className='button' onClick={generateDocx}><FaFileWord /></button>
+                <button className='button' onClick={generateText}><FaFileAlt /></button>
+                <br />
                 <br />
                 {/* Add the voice name input box */}
-                <input
-                  type="text"
-                  placeholder="Enter Voice Name"
-                  value={voiceName}
-                  onChange={(e) => setVoiceName(e.target.value)}
-                  style={{ marginBottom: '10px', fontSize: '18px' }}
-                />
+                <VoiceSelect
+                  selectedVoice={voiceName} // Current selected voice
+                  onVoiceChange={setVoiceName} // Handler to update selected voice
+                /> &nbsp;
+                <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
+                <br />
+                <br />
                 {adminUser && (
                   <div>
                     <button className="button" onClick={showSharedTasks}>
@@ -801,11 +818,6 @@ function App() {
                 </form>
               </div>
             )}
-            <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
-              <FaClock />
-            </button>
-            <button className='button' onClick={generateDocx}><FaFileWord /></button>
-            <button className='button' onClick={generateText}><FaFileAlt /></button>
           </div>
 
         )}

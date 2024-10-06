@@ -10,11 +10,10 @@ import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import { auth, db } from './Firebase';
 import AudioApp from './AudioApp';
+import VoiceSelect from './VoiceSelect';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
-const voiceName = 'en-US-AvaNeural';
-
 let articles = '';
 let uid = '';
 
@@ -37,6 +36,7 @@ function TTSQueueApp() {
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [showMainApp, setShowMainApp] = useState(false);
     const [showAudioApp, setShowAudioApp] = useState(false);
+    const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
 
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
@@ -109,7 +109,7 @@ function TTSQueueApp() {
 
     const synthesizeSpeech = async () => {
         if (isiPhone) {
-            callTTSAPI(articles, 'https://tts.happyrock-2dd71657.centralus.azurecontainerapps.io/');
+            callTTSAPI(articles, process.env.REACT_APP_API_URL);
             return;
         }
         const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
@@ -264,6 +264,7 @@ function TTSQueueApp() {
     // Function to call the TTS API
     const callTTSAPI = async (message, appUrl) => {
         let now = new Date();
+        console.log('Calling TTS API with appUrl:', appUrl, 'voiceName:', voiceName);
         console.log('before callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
         setIsGeneratingTTS(true); // Set generating state
         message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
@@ -373,7 +374,11 @@ function TTSQueueApp() {
                         </button>
                         <br />
                         <br />
-                        <span style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Queue Articles for Text to Speech</span>
+                        <span style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold', fontSize: '18px' }}>TTS Queue  </span> &nbsp;
+                        <VoiceSelect
+                        selectedVoice={voiceName} // Current selected voice
+                        onVoiceChange={setVoiceName} // Handler to update selected voice
+                        />
                         {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
                         {answerData && (
                             <div>
