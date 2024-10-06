@@ -94,11 +94,6 @@ function TTSQueueApp() {
         }
     }, [showCompleted]);
 
-    const handleSignIn = () => {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider);
-    };
-
     const handleSignOut = () => {
         auth.signOut();
     };
@@ -237,54 +232,6 @@ function TTSQueueApp() {
         setReaderMode(false);
     };
 
-    const handlePasswordReset = async () => {
-        if (!email) {
-            alert('Please enter your email address.');
-            return;
-        }
-
-        try {
-            await sendPasswordResetEmail(auth, email);
-            alert('Password reset email sent, please check your inbox.');
-        } catch (error) {
-            console.error('Error sending password reset email', error);
-        }
-    };
-
-
-    const handleSignInWithEmail = async (e) => {
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            if (!user.emailVerified) {
-                await auth.signOut();
-                alert('Please verify your email before signing in.');
-            }
-        } catch (error) {
-            if (error.code === 'auth/wrong-password') {
-                alert('Wrong password, please try again.');
-            } else {
-                alert('Error signing in, please try again.' + error.message);
-                console.error('Error signing in:', error);
-            }
-        }
-    };
-
-    const handleSignUpWithEmail = async () => {
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await sendEmailVerification(auth.currentUser);
-            const user = userCredential.user;
-            alert('Verification email sent! Please check your inbox. Ater verification, please sign in.');
-            if (!user.emailVerified) {
-                await auth.signOut();
-            }
-        } catch (error) {
-            alert('Error signing up, please try again.' + error.message);
-            console.error('Error signing up:', error);
-        }
-    };
-
     const fetchMoreData = async () => {
         try {
             const urlParams = new URLSearchParams(window.location.search);
@@ -398,7 +345,7 @@ function TTSQueueApp() {
 
     return (
         <div>
-            {user && <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
+            <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
                 {readerMode ? (
                     <div>
                         <button className="tts-button" onClick={handleBack}><FaArrowLeft /></button>
@@ -505,45 +452,9 @@ function TTSQueueApp() {
                         )}
                     </div>
                 )}
-            </div>}
-            {!user && <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
-                <br />
-                <br />
-                <p>Sign In</p>
-                <input
-                    className='textinput'
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <br />
-                <br />
-                <input
-                    type="password"
-                    className='textinput'
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <br />
-                <br />
-                <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
-                <br />
-                <br />
-                <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
-                <br />
-                <br />
-                <button className='signonpagebutton' onClick={() => handleSignIn()}>Sign In with Google</button>
-                <br />
-            </div>}
+            </div>
         </div>
     )
 }
-
 
 export default TTSQueueApp;

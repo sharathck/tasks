@@ -6,9 +6,9 @@ import * as docx from 'docx';
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import AudioApp from './AudioApp';
 import TTSQueueApp from './TTSQueueApp';
-import {  doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
-import {  signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
-import {auth, db } from './Firebase';
+import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
+import { auth, db } from './Firebase';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -206,11 +206,6 @@ function App() {
 
   const handleHideRecurrentTasks = async () => {
     setHideRecurrentTasks(!hideRecurrentTasks);
-  };
-
-  const handleSignIn = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider);
   };
 
   const handleSignOut = () => {
@@ -473,55 +468,8 @@ function App() {
     }
   };
 
-  const handleSignInWithEmail = async (e) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      if (!user.emailVerified) {
-        await auth.signOut();
-        alert('Please verify your email before signing in.');
-      }
-    } catch (error) {
-      if (error.code === 'auth/wrong-password') {
-        alert('Wrong password, please try again.');
-      } else {
-        alert('Error signing in, please try again.' + error.message);
-        console.error('Error signing in:', error);
-      }
-    }
-  };
-
-  const handleSignUpWithEmail = async () => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(auth.currentUser);
-      const user = userCredential.user;
-      alert('Verification email sent! Please check your inbox. Ater verification, please sign in.');
-      if (!user.emailVerified) {
-        await auth.signOut();
-      }
-    } catch (error) {
-      alert('Error signing up, please try again.' + error.message);
-      console.error('Error signing up:', error);
-    }
-  };
-
   const handleBack = () => {
     setReaderMode(false);
-  };
-
-  const handlePasswordReset = async () => {
-    if (!email) {
-      alert('Please enter your email address.');
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert('Password reset email sent, please check your inbox.');
-    } catch (error) {
-      console.error('Error sending password reset email', error);
-    }
   };
 
   const fetchMoreData = async () => {
@@ -612,7 +560,7 @@ function App() {
     setSharedTasks(!sharedTasks);
   }
 
-  if (showAudioApp){
+  if (showAudioApp) {
     return (
       <AudioApp user={user} />
     );
@@ -626,282 +574,242 @@ function App() {
 
   return (
     <div>
-      {user && (
-        <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
-          {readerMode ? (
-            <div>
-              <button className='button' onClick={handleBack}><FaArrowLeft /></button>
-              <p>{articles}</p>
-            </div>
-          ) : (
-            <div>
-              <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
-                <FaCheckDouble />
-              </button>
-              <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
-              <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-              {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-              <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
-              {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
-              <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
-                <FaSearch />
-              </button>
-              <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
-                <FaConfluence />
-              </button>
-              <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
-                <FaPlay />
-              </button>
-              <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
-                <FaAlignJustify />
-              </button>
-              <button className="signoutbutton" onClick={handleSignOut}>
-                <FaSignOutAlt />
-              </button>
-              {showSearchBox && (
-                <div> <input
-                  type="text"
-                  className="searchTask"
-                  placeholder="Search tasks"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  ref={searchInputRef}
-                />
-                  <button className='button' onClick={handleClearSearch} >
-                    <FaTimes />
-                  </button>
-                </div>
+      <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
+        {readerMode ? (
+          <div>
+            <button className='button' onClick={handleBack}><FaArrowLeft /></button>
+            <p>{articles}</p>
+          </div>
+        ) : (
+          <div>
+            <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+              <FaCheckDouble />
+            </button>
+            <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+            <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+            {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+            <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
+            {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
+            <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
+              <FaSearch />
+            </button>
+            <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
+              <FaConfluence />
+            </button>
+            <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+              <FaPlay />
+            </button>
+            <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+              <FaAlignJustify />
+            </button>
+            <button className="signoutbutton" onClick={handleSignOut}>
+              <FaSignOutAlt />
+            </button>
+            {showSearchBox && (
+              <div> <input
+                type="text"
+                className="searchTask"
+                placeholder="Search tasks"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                ref={searchInputRef}
+              />
+                <button className='button' onClick={handleClearSearch} >
+                  <FaTimes />
+                </button>
+              </div>
 
-              )}
-              {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
-              {answerData && (
-                <div>
-                  <br />
-                  <a href={answerData} target="_blank" rel="noopener noreferrer">Play/Download</a>
-                </div>
-              )}
-              {!showCompleted && !showFuture && (
-                <div>
-                  <form onSubmit={handleAddTask}>
-                    <input
-                      className="addTask"
-                      type="text"
-                      placeholder=""
-                      value={newTask}
-                      onChange={(e) => setNewTask(e.target.value)}
-                    />
-                    <button className="addbutton" type="submit">
-                      <FaPlus />
-                    </button>
-                  </form>
-                  <ul>
-                    {tasks
-                      .filter((task) => !task.status && (hideRecurrentTasks ? task.recurrence === 'ad-hoc' : true) && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
-                      .map((task) => (
-                        <li key={task.id} data-task-id={task.id} data-status={task.status}>
-                          <>
-                            <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
-                              <FaCheck />
-                            </button>
-                            <span>
-                              {task.task}
-                              {task.recurrence && task.recurrence !== 'ad-hoc' && (
-                                <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                              )}
-                              {showDueDates && (
-                                <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
-                              )}
-                            </span>
-                            {showEditButtons && (
-                              <button className='button' onClick={() => handleEditTask(task)}>
-                                <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
-                              </button>
-                            )}
-                          </>
-                        </li>
-                      ))}
-                  </ul>
-                  {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
-                  <br />
-                  <br />
-                  <br />
-                  {/* Add the voice name input box */}
+            )}
+            {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
+            {answerData && (
+              <div>
+                <br />
+                <a href={answerData} target="_blank" rel="noopener noreferrer">Play/Download</a>
+              </div>
+            )}
+            {!showCompleted && !showFuture && (
+              <div>
+                <form onSubmit={handleAddTask}>
                   <input
+                    className="addTask"
                     type="text"
-                    placeholder="Enter Voice Name"
-                    value={voiceName}
-                    onChange={(e) => setVoiceName(e.target.value)}
-                    style={{ marginBottom: '10px', fontSize: '18px' }}
+                    placeholder=""
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
                   />
-                  {adminUser && (
-                    <div>
-                      <button className="button" onClick={showSharedTasks}>
-                        {!sharedTasks ? 'Show Navya Tasks' : 'Hide Navya Tasks'}
-                      </button>
-                      <br />
-                      <br />
-                    </div>
-                  )}
-                  {adminUser && (
-                    <div>
-                      <button className="button" onClick={showAarushTasks}>
-                        {!sharedTasks ? 'Show Aarush Tasks' : 'Hide Aarush Tasks'}
-                      </button>
-                      <br />
-                      <br />
-                    </div>
-                  )}
-                </div>
-              )}
-              {showCompleted && (
-                <div>
-                  <h2>Completed Tasks</h2>
-                  <ul>
-                    {completedTasks
-                      .filter((task) => task.status && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
-                      .map((task) => (
-                        <li key={task.id} className="completed">
-                          <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                  <button className="addbutton" type="submit">
+                    <FaPlus />
+                  </button>
+                </form>
+                <ul>
+                  {tasks
+                    .filter((task) => !task.status && (hideRecurrentTasks ? task.recurrence === 'ad-hoc' : true) && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
+                    .map((task) => (
+                      <li key={task.id} data-task-id={task.id} data-status={task.status}>
+                        <>
+                          <button className='markcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
                             <FaCheck />
                           </button>
-                          {task.task} &nbsp;&nbsp;
-                          {task.recurrence && task.recurrence !== 'ad-hoc' && (
-                            <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                          )}
-                          &nbsp;
-                          {showDueDates && (
-                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
-                          )}
-                          {showDeleteButtons && (
-                            <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
-                              <FaTrash />
-                            </button>
-                          )}
-                        </li>
-                      ))}
-                  </ul>
-                  {showMoreCompletedButton && <button className="button" onClick={fetchMoreData}>Show More</button>}
-                  <div style={{ marginBottom: '110px' }}></div>
-                </div>
-              )}
-              {showFuture && (
-                <div>
-                  <h2>Future Tasks</h2>
-                  <ul>
-                    {futureTasks
-                      .filter((task) => (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
-                      .map((task) => (
-                        <li key={task.id}>
-                          {task.task}
-                          &nbsp;
-                          {showDueDates && (
-                            <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
-                          )}
-                          &nbsp;
-                          {task.recurrence && task.recurrence !== 'ad-hoc' && (
-                            <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
-                          )}
-                          &nbsp;
+                          <span>
+                            {task.task}
+                            {task.recurrence && task.recurrence !== 'ad-hoc' && (
+                              <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                            )}
+                            {showDueDates && (
+                              <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                            )}
+                          </span>
                           {showEditButtons && (
-                            <button className='editbutton' onClick={() => handleEditTask(task)}>
+                            <button className='button' onClick={() => handleEditTask(task)}>
                               <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
                             </button>
                           )}
-                          &nbsp;
-                          {showDeleteButtons && (
-                            <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
-                              <FaTrash />
-                            </button>
-                          )}
-                        </li>
-                      ))}
-                  </ul>
-                  {showMoreFutureButton && <button className="button" onClick={fetchMoreFutureData}>Show More</button>}
-                  <div style={{ marginBottom: '110px' }}></div>
-                </div>
-              )}
-              {editTask && (
-                <div >
-                  <form className='editForm' onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
-                    <input style={{ width: '80%' }}
-                      type="text"
-                      value={editTaskText}
-                      onChange={(e) => setEditTaskText(e.target.value)}
-                    />
+                        </>
+                      </li>
+                    ))}
+                </ul>
+                {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
+                <br />
+                <br />
+                <br />
+                {/* Add the voice name input box */}
+                <input
+                  type="text"
+                  placeholder="Enter Voice Name"
+                  value={voiceName}
+                  onChange={(e) => setVoiceName(e.target.value)}
+                  style={{ marginBottom: '10px', fontSize: '18px' }}
+                />
+                {adminUser && (
+                  <div>
+                    <button className="button" onClick={showSharedTasks}>
+                      {!sharedTasks ? 'Show Navya Tasks' : 'Hide Navya Tasks'}
+                    </button>
                     <br />
                     <br />
-                    <select
-                      value={editRecurrence}
-                      onChange={(e) => setEditRecurrence(e.target.value)}
-                    >
-                      <option value="daily">Daily</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
-                      <option value="ad-hoc">Ad-hoc</option>
-                    </select>
-                    &nbsp;&nbsp;
-                    <input
-                      type="datetime-local"
-                      value={editDueDate}
-                      onChange={(e) => setEditDueDate(e.target.value)}
-                    />
+                  </div>
+                )}
+                {adminUser && (
+                  <div>
+                    <button className="button" onClick={showAarushTasks}>
+                      {!sharedTasks ? 'Show Aarush Tasks' : 'Hide Aarush Tasks'}
+                    </button>
                     <br />
                     <br />
-                    <button className="button" type="submit">Save</button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <button className="button" onClick={() => setEditTask(null)}>Cancel</button>
-                  </form>
-                </div>
-              )}
-              <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
-                <FaClock />
-              </button>
-              <button className='button' onClick={generateDocx}><FaFileWord /></button>
-              <button className='button' onClick={generateText}><FaFileAlt /></button>
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {showCompleted && (
+              <div>
+                <h2>Completed Tasks</h2>
+                <ul>
+                  {completedTasks
+                    .filter((task) => task.status && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
+                    .map((task) => (
+                      <li key={task.id} className="completed">
+                        <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                          <FaCheck />
+                        </button>
+                        {task.task} &nbsp;&nbsp;
+                        {task.recurrence && task.recurrence !== 'ad-hoc' && (
+                          <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                        )}
+                        &nbsp;
+                        {showDueDates && (
+                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                        )}
+                        {showDeleteButtons && (
+                          <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
+                            <FaTrash />
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                </ul>
+                {showMoreCompletedButton && <button className="button" onClick={fetchMoreData}>Show More</button>}
+                <div style={{ marginBottom: '110px' }}></div>
+              </div>
+            )}
+            {showFuture && (
+              <div>
+                <h2>Future Tasks</h2>
+                <ul>
+                  {futureTasks
+                    .filter((task) => (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
+                    .map((task) => (
+                      <li key={task.id}>
+                        {task.task}
+                        &nbsp;
+                        {showDueDates && (
+                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                        )}
+                        &nbsp;
+                        {task.recurrence && task.recurrence !== 'ad-hoc' && (
+                          <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
+                        )}
+                        &nbsp;
+                        {showEditButtons && (
+                          <button className='editbutton' onClick={() => handleEditTask(task)}>
+                            <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                          </button>
+                        )}
+                        &nbsp;
+                        {showDeleteButtons && (
+                          <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
+                            <FaTrash />
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                </ul>
+                {showMoreFutureButton && <button className="button" onClick={fetchMoreFutureData}>Show More</button>}
+                <div style={{ marginBottom: '110px' }}></div>
+              </div>
+            )}
+            {editTask && (
+              <div >
+                <form className='editForm' onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }}>
+                  <input style={{ width: '80%' }}
+                    type="text"
+                    value={editTaskText}
+                    onChange={(e) => setEditTaskText(e.target.value)}
+                  />
+                  <br />
+                  <br />
+                  <select
+                    value={editRecurrence}
+                    onChange={(e) => setEditRecurrence(e.target.value)}
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="ad-hoc">Ad-hoc</option>
+                  </select>
+                  &nbsp;&nbsp;
+                  <input
+                    type="datetime-local"
+                    value={editDueDate}
+                    onChange={(e) => setEditDueDate(e.target.value)}
+                  />
+                  <br />
+                  <br />
+                  <button className="button" type="submit">Save</button>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <button className="button" onClick={() => setEditTask(null)}>Cancel</button>
+                </form>
+              </div>
+            )}
+            <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+              <FaClock />
+            </button>
+            <button className='button' onClick={generateDocx}><FaFileWord /></button>
+            <button className='button' onClick={generateText}><FaFileAlt /></button>
+          </div>
 
-          )}
-        </div>
-      )}
-      {!user && (
-        <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
-          <br />
-          <br />
-          <p>Sign In</p>
-          <input
-            className='textinput'
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <br />
-          <br />
-          <input
-            type="password"
-            className='textinput'
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <br />
-          <br />
-          <button className='signonpagebutton' onClick={() => handleSignInWithEmail()}>Sign In</button>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button className='signuppagebutton' onClick={() => handleSignUpWithEmail()}>Sign Up</button>
-          <br />
-          <br />
-          <button onClick={() => handlePasswordReset()}>Forgot Password?</button>
-          <br />
-          <br />
-          <button className='signgooglepagebutton' onClick={handleSignIn}>Sign In with Google</button>
-          <br />
-          <br />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
