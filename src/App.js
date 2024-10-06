@@ -590,6 +590,12 @@ function App() {
           </div>
         ) : (
           <div>
+            <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+              <FaCheckDouble />
+            </button>
+            <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+              <FaClock />
+            </button>
             <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
             <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
@@ -597,9 +603,6 @@ function App() {
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
             <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
               <FaSearch />
-            </button>
-            <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
-              <FaConfluence />
             </button>
             <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
               <FaPlay />
@@ -610,7 +613,7 @@ function App() {
             <button className={showGenAIApp ? 'button_selected' : 'button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
             </button>
-            <button className="signoutbutton" onClick={handleSignOut}>
+            <button className="button" onClick={handleSignOut}>
               <FaSignOutAlt />
             </button>
             {showSearchBox && (
@@ -679,12 +682,10 @@ function App() {
                 {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                 <br />
                 <br />
-                <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
-                  <FaCheckDouble />
+                <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
+                  <FaConfluence />
                 </button>
-                <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
-                  <FaClock />
-                </button>
+
                 <button className='button' onClick={generateDocx}><FaFileWord /></button>
                 <button className='button' onClick={generateText}><FaFileAlt /></button>
                 <br />
