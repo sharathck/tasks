@@ -544,7 +544,7 @@ const GenAIApp = () => {
                         value={promptInput}
                         onChange={(e) => setPromptInput(e.target.value)}
                         placeholder="Enter your prompt here..."
-                        style={{ width: '99%', padding: '2px', height: '200px', fontSize: '16px' }}
+                        style={{ width: '99%', padding: '2px', height: '280px', fontSize: '16px' }}
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
