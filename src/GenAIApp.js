@@ -57,6 +57,7 @@ const GenAIApp = () => {
     const [selectedPrompt, setSelectedPrompt] = useState(null);
     const [selectedPromptFullText, setSelectedPromptFullText] = useState(null);
     const [showMainApp, setShowMainApp] = useState(false);
+    const [GenAIParameter, setGenAIParameter] = useState(false);
 
 
     // Helper function to save prompt
@@ -108,6 +109,11 @@ const GenAIApp = () => {
         const urlParams = new URLSearchParams(queryString);
         return urlParams.get(name);
     };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const genaiParam = urlParams.get('genai');
+    if (genaiParam) {
+    setGenAIParameter(true);}
 
     const questionLimit = getUrlParameter('question_limit');
     const telugu = getUrlParameter('telugu');
@@ -683,7 +689,7 @@ const GenAIApp = () => {
                         )}
                     </button>
                     &nbsp; &nbsp;
-                    {process.env.REACT_APP_MAIN_APP === 'App' ? (
+                    {!GenAIParameter ? (
                         <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
                             <FaArrowLeft />
                         </button>
