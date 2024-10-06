@@ -110,11 +110,6 @@ const GenAIApp = () => {
         return urlParams.get(name);
     };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const genaiParam = urlParams.get('genai');
-    if (genaiParam) {
-    setGenAIParameter(true);}
-
     const questionLimit = getUrlParameter('question_limit');
     const telugu = getUrlParameter('telugu');
     const hindi = getUrlParameter('hindi');
@@ -132,6 +127,11 @@ const GenAIApp = () => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const genaiParam = urlParams.get('genai');
+                if (genaiParam) {
+                    setGenAIParameter(true);
+                }            
                 setUid(currentUser.uid);
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
@@ -571,7 +571,8 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="anthropic"
-                            onChange={(e) => {setIsAnthropic(e.target.checked);
+                            onChange={(e) => {
+                                setIsAnthropic(e.target.checked);
                                 if (e.target.checked) setIsTTS(false);
                                 if (e.target.checked) setIsImage_Dall_e_3(false);
                             }}
@@ -583,7 +584,8 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="gemini"
-                            onChange={(e) => {setIsGemini(e.target.checked);
+                            onChange={(e) => {
+                                setIsGemini(e.target.checked);
                                 if (e.target.checked) setIsTTS(false);
                                 if (e.target.checked) setIsImage_Dall_e_3(false);
                             }}
@@ -595,7 +597,8 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="o1-mini"
-                            onChange={(e) => {setIsGpto1Mini(e.target.checked);
+                            onChange={(e) => {
+                                setIsGpto1Mini(e.target.checked);
                                 if (e.target.checked) setIsTTS(false);
                                 if (e.target.checked) setIsImage_Dall_e_3(false);
                             }}
@@ -607,7 +610,8 @@ const GenAIApp = () => {
                         <input
                             type="checkbox"
                             value="o1"
-                            onChange={(e) => {setIso1(e.target.checked);
+                            onChange={(e) => {
+                                setIso1(e.target.checked);
                                 if (e.target.checked) setIsTTS(false);
                                 if (e.target.checked) setIsImage_Dall_e_3(false);
                             }}
@@ -635,33 +639,33 @@ const GenAIApp = () => {
                     </label>
                     {isTTS && (
                         <VoiceSelect
-                        selectedVoice={voiceName} // Current selected voice
-                        onVoiceChange={setVoiceName} // Handler to update selected voice
+                            selectedVoice={voiceName} // Current selected voice
+                            onVoiceChange={setVoiceName} // Handler to update selected voice
                         />
                     )}
                     {!isTTS && (
-                    <select id="promptS</label>elect"
-                        onChange={(e) => {
-                            handlePromptChange(e.target.value);
-                            setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
-                            setSelectedPromptFullText(e.target.value);
-                        }}
-                        style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
-                    >
-                        <option value="NA">Select Prompt</option>
-                        {genaiPrompts.map((prompt) => (
-                            <option key={prompt.id} value={prompt.fullText}>{prompt.tag}</option>
-                        ))}
-                    </select>
+                        <select id="promptS</label>elect"
+                            onChange={(e) => {
+                                handlePromptChange(e.target.value);
+                                setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
+                                setSelectedPromptFullText(e.target.value);
+                            }}
+                            style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
+                        >
+                            <option value="NA">Select Prompt</option>
+                            {genaiPrompts.map((prompt) => (
+                                <option key={prompt.id} value={prompt.fullText}>{prompt.tag}</option>
+                            ))}
+                        </select>
                     )}
                     {!isTTS && (
-                    <button
-                        className="signonpagebutton"
-                        onClick={() => handleEditPrompt()}
-                        style={{ padding: '10px', background: 'lightblue', fontSize: '16px' }}
-                    >
-                        <FaEdit />
-                    </button>
+                        <button
+                            className="signonpagebutton"
+                            onClick={() => handleEditPrompt()}
+                            style={{ padding: '10px', background: 'lightblue', fontSize: '16px' }}
+                        >
+                            <FaEdit />
+                        </button>
                     )}
                     <button
                         onClick={handleGenerate}
