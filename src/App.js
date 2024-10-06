@@ -726,7 +726,7 @@ function App() {
                     .filter((task) => task.status && (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
                     .map((task) => (
                       <li key={task.id} className="completed">
-                        <button onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                        <button className='donemarkcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
                           <FaCheck />
                         </button>
                         {task.task} &nbsp;&nbsp;
