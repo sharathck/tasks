@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import H5AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
-import { collection, where, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { auth, db } from './Firebase';
 import {
   signInWithEmailAndPassword,
@@ -49,13 +49,19 @@ function AudioApp() {
   const fetchData = async (userID) => {
     try {
       const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
-      let q = query(genaiCollection, where('model', '==', 'azure-tts'), orderBy('createdDateTime', 'desc'), limit(100));
+      let q = query(genaiCollection, where('model', '==', 'azure-tts'), orderBy('createdDateTime', 'desc'), limit(200));
       const genaiSnapshot = await getDocs(q);
       const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       // Replace '[play/download](' and ')' from answer field
       genaiList.forEach(item => {
+        // check if status field exists
+        if (!item.hasOwnProperty('status')) {
         item.answer = item.answer.replace('[play/download](', '').replace(/\)$/, '');
+        }
+        else {
+          item.answer = '';
+        }
       });
 
       setGenaiData(genaiList);
@@ -138,6 +144,20 @@ function AudioApp() {
                   <a href={item.answer} download onClick={(e) => { e.preventDefault(); setAudioSource(item.answer, index); }}>
                     {item.answer.replace('https://storage.googleapis.com/audio-genai/', '').replace(new RegExp(`_${user.uid}_[^_]*_`), '_').replace('.mp3', '').replace(uid, '').replace('https://storage.googleapis.com/reviewtext-ad5c6.appspot.com/user_audio/', '').replace('/', '')} {/* Fall back to a generic name if none is provided */}
                   </a>
+                  <input
+                    type="checkbox"
+                    checked={item.status === true}
+                    onChange={async (e) => {
+                      const newStatus = e.target.checked;
+                      const docRef = doc(db, 'genai', user.uid, 'MyGenAI', item.id);
+                      await updateDoc(docRef, { status: newStatus });
+                      setGenaiData((prevData) =>
+                        prevData.map((dataItem) =>
+                          dataItem.id === item.id ? { ...dataItem, status: newStatus } : dataItem
+                        )
+                      );
+                    }}
+                  />
                 </li>
               ))}
             </ul>
