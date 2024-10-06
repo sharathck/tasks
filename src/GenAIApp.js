@@ -683,9 +683,13 @@ const GenAIApp = () => {
                         )}
                     </button>
                     &nbsp; &nbsp;
-                    <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                        <FaArrowLeft />
-                    </button>
+                    {process.env.REACT_APP_MAIN_APP === 'App' ? (
+                        <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                            <FaArrowLeft />
+                        </button>
+                    ) : (
+                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    )}
                 </div>
                 <label>
                     Limit:
