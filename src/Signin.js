@@ -1,4 +1,7 @@
 import App from './App';
+import GenAIApp from './GenAIApp';
+import TTSQueueApp from './TTSQueueApp';
+import AudioApp from './AudioApp';
 import './Signin.css';
 import React, { useEffect, useState, useRef } from 'react';
 import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
@@ -74,6 +77,19 @@ function SigninApp() {
     };
 
     if (user) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const genai = urlParams.get('genai');
+        if (genai) {
+            return <GenAIApp user={user} />;
+        }
+        const ttsqueue = urlParams.get('ttsqueue');
+        if (ttsqueue) {
+            return <TTSQueueApp user={user} />;
+        }
+        const audio = urlParams.get('audio');
+        if (audio) {
+            return <AudioApp user={user} />;
+        }
         return (
             <App user={user} />
         );
