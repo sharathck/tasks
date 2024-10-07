@@ -272,7 +272,7 @@ function TTSQueueApp() {
         message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
         message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
         // replace -,*,#,_,`,~,=,^,>,< with empty string
-        message = message.replace(/[-*#_`~=^><]/g, '');
+        message = message.replace(/[-*#_`~=^><]/g, ''); // Ensure global replacement
 
         console.log('Calling TTS API with message:', message);
         console.log('Calling TTS API with appUrl:', appUrl);
@@ -361,10 +361,14 @@ function TTSQueueApp() {
                         </button>
                         &nbsp;
                         <input
-                            value={limitActiveValue}
-                            onChange={(e) => { if (parseInt(e.target.value) > 0) { setLimitActiveValue(parseInt(e.target.value)); } }}
-                            style={{ width: '50px', textAlign: 'center' }}
+                            type="number"
+                            onChange={(e) => {
+                                if (parseInt(e.target.value) > 0) { setLimitActiveValue(parseInt(e.target.value)); }
+                                else { setLimitActiveValue(1); }
+                            }}
+                            style={{ width: '40px' }}
                             min="0"
+                            placeholder= {limitActiveValue}
                             max="99"
                         />
                         <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
@@ -378,7 +382,7 @@ function TTSQueueApp() {
                         <button className='tts-button' onClick={generateText}><FaFileAlt /></button>
                         <button className={isGeneratingTTS ? 'tts-button_selected' : 'tts-button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
                         <button className='tts-button' onClick={handleReaderMode}><FaReadme /></button>
-                        <button className="signoutbutton" onClick={handleSignOut}>
+                        <button className="tts-button" onClick={handleSignOut}>
                             <FaSignOutAlt />
                         </button>
                         <br />
