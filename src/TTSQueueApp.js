@@ -26,10 +26,6 @@ function TTSQueueApp() {
     const [editTaskText, setEditTaskText] = useState('');
     const [showCompleted, setShowCompleted] = useState(false);
     const [readerMode, setReaderMode] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isSignUp, setIsSignUp] = useState(false);
-    const [resetEmail, setResetEmail] = useState('');
     const [lastVisible, setLastVisible] = useState(null);
     const [lastArticle, setLastArticle] = useState(null);
     const [answerData, setAnswerData] = useState('');
@@ -38,7 +34,6 @@ function TTSQueueApp() {
     const [showAudioApp, setShowAudioApp] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
     const [limitActiveValue, setLimitActiveValue] = useState(5);
-
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
 
@@ -59,6 +54,7 @@ function TTSQueueApp() {
             if (limitParam) {
                 setLimitActiveValue(limitParam);
             }
+            articles = '';
             //print limit value
             console.log('limit value: ', limitActiveValue);
             const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitActiveValue));
@@ -361,12 +357,11 @@ function TTSQueueApp() {
                         </button>
                         &nbsp;
                         <input
-                            type="number"
                             onChange={(e) => {
                                 if (parseInt(e.target.value) > 0) { setLimitActiveValue(parseInt(e.target.value)); }
                                 else { setLimitActiveValue(1); }
                             }}
-                            style={{ width: '40px' }}
+                            style={{ width: '30px' , height: '25px', fontSize: '18px' }}
                             min="0"
                             placeholder= {limitActiveValue}
                             max="99"
