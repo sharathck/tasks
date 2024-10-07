@@ -4,7 +4,7 @@ import './AudioApp.css';
 import React, { useEffect, useState, useRef } from 'react';
 import H5AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
-import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
+import { FaSignOutAlt, FaBackward, FaCheckDouble, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
 import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import { auth, db } from './Firebase';
 import {
@@ -31,14 +31,18 @@ function AudioApp() {
   const [showMainApp, setShowMainApp] = useState(false);
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
   const [showArticlesOnly, setShowArticlesOnly] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
 
-  // Listen for authentication state changes
-  useEffect(() => {
+   // Listen for authentication state changes
+   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         setUid(currentUser.uid);
         console.log('User is signed in:', currentUser.uid);
+        if (showCompleted) {
+          fetchCompletedData(user.uid);
+        } else {
         if (showArticlesOnly){
           await fetchArticlesOnlyData(currentUser.uid);
         }
@@ -47,9 +51,27 @@ function AudioApp() {
         await fetchData(currentUser.uid);
         }
       }
+      }
     });
     return () => unsubscribe();
-  }, [showArticlesOnly]);
+  }, [showCompleted, showArticlesOnly]);
+
+  const fetchCompletedData = async (userID) => {
+    try {
+      const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
+      let q = query(
+        genaiCollection,
+        where('status', '==', true),
+        orderBy('createdDateTime', 'desc'),
+        limit(200)
+      );
+      const genaiSnapshot = await getDocs(q);
+      const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setGenaiData(genaiList);
+    } catch (error) {
+      console.error("Error fetching completed data: ", error);
+    }
+  };
 
   // Function to fetch data from Firestore
   const fetchArticlesOnlyData = async (userID) => {
@@ -101,13 +123,9 @@ function AudioApp() {
       genaiList.forEach(item => {
         // check if status field exists
         if (!item.hasOwnProperty('status')) {
-        item.answer = item.answer.replace('[play/download](', '').replace(/\)$/, '');
-        }
-        else {
-          item.answer = '';
+          return false; // This will filter out the item
         }
       });
-
       setGenaiData(genaiList);
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -164,6 +182,9 @@ function AudioApp() {
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
           <FaAlignJustify />
+        </button>
+        <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+        <FaCheckDouble />
         </button>
         <button className="signoutbutton" onClick={handleSignOut}><FaSignOutAlt /></button>
         <header className="AudioApp-header">
