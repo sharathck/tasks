@@ -131,7 +131,10 @@ const GenAIApp = () => {
                 const genaiParam = urlParams.get('genai');
                 if (genaiParam) {
                     setGenAIParameter(true);
-                }            
+                } 
+                if (process.env.REACT_APP_MAIN_APP === 'GenAI') {
+                    setGenAIParameter(true);
+                }           
                 setUid(currentUser.uid);
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
