@@ -37,6 +37,7 @@ function TTSQueueApp() {
     const [showMainApp, setShowMainApp] = useState(false);
     const [showAudioApp, setShowAudioApp] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
+    const [limitActiveValue, setLimitActiveValue] = useState(5);
 
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
@@ -55,10 +56,12 @@ function TTSQueueApp() {
             uid = user.uid;
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
-            const limitValue = limitParam ? parseInt(limitParam) : 5;
+            if (limitParam) {
+                setLimitActiveValue(limitParam);
+            }
             //print limit value
-            console.log('limit value: ', limitValue);
-            const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
+            console.log('limit value: ', limitActiveValue);
+            const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitActiveValue));
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 const tasksData = snapshot.docs.map((doc) => ({
                     id: doc.id,
@@ -71,7 +74,7 @@ function TTSQueueApp() {
 
             return () => unsubscribe();
         }
-    }, [user]);
+    }, [user, limitActiveValue]);
 
 
     useEffect(() => {
@@ -357,6 +360,13 @@ function TTSQueueApp() {
                             <FaArrowLeft />
                         </button>
                         &nbsp;
+                        <input
+                            value={limitActiveValue}
+                            onChange={(e) => { if (parseInt(e.target.value) > 0) { setLimitActiveValue(parseInt(e.target.value)); } }}
+                            style={{ width: '50px', textAlign: 'center' }}
+                            min="0"
+                            max="99"
+                        />
                         <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                             <FaPlay />
                         </button>
@@ -375,8 +385,8 @@ function TTSQueueApp() {
                         <br />
                         <span style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold', fontSize: '18px' }}>TTS Queue  </span> &nbsp;
                         <VoiceSelect
-                        selectedVoice={voiceName} // Current selected voice
-                        onVoiceChange={setVoiceName} // Handler to update selected voice
+                            selectedVoice={voiceName} // Current selected voice
+                            onVoiceChange={setVoiceName} // Handler to update selected voice
                         />
                         {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
                         {answerData && (
