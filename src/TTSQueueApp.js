@@ -86,7 +86,6 @@ function TTSQueueApp() {
                     id: doc.id,
                     ...doc.data(),
                 }));
-                articles += tasksData.map((task) => task.task).join(' ');
                 setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
                 setCompletedTasks(tasksData);
             });
