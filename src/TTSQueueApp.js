@@ -55,7 +55,7 @@ function TTSQueueApp() {
             uid = user.uid;
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
-            const limitValue = limitParam ? parseInt(limitParam) : 11;
+            const limitValue = limitParam ? parseInt(limitParam) : 5;
             //print limit value
             console.log('limit value: ', limitValue);
             const q = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitValue));
