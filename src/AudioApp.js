@@ -30,6 +30,7 @@ function AudioApp() {
   const [user, setUser] = useState(null);
   const [showMainApp, setShowMainApp] = useState(false);
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
+  const [showArticlesOnly, setShowArticlesOnly] = useState(false);
 
   // Listen for authentication state changes
   useEffect(() => {
@@ -38,21 +39,64 @@ function AudioApp() {
       if (currentUser) {
         setUid(currentUser.uid);
         console.log('User is signed in:', currentUser.uid);
+        if (showArticlesOnly){
+          await fetchArticlesOnlyData(currentUser.uid);
+        }
+        else {
         // Fetch data for the authenticated user
         await fetchData(currentUser.uid);
+        }
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [showArticlesOnly]);
+
+  // Function to fetch data from Firestore
+  const fetchArticlesOnlyData = async (userID) => {
+    try {
+      const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
+      let q = query(
+        genaiCollection,
+        where('model', '==', 'azure-tts'),
+        orderBy('createdDateTime', 'desc'),
+        limit(200)
+      );
+      const genaiSnapshot = await getDocs(q);
+      const genaiList = genaiSnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(doc => doc.answer?.endsWith('de.mp3)')); 
+      // Replace '[play/download](' and ')' from answer field
+      genaiList.forEach(item => {
+        // check if status field exists
+        if (!item.hasOwnProperty('status')) {
+        item.answer = item.answer.replace('[play/download](', '').replace(/\)$/, '');
+        }
+        else {
+          item.answer = '';
+        }
+      });
+
+      setGenaiData(genaiList);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+
 
   // Function to fetch data from Firestore
   const fetchData = async (userID) => {
     try {
       const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
-      let q = query(genaiCollection, where('model', '==', 'azure-tts'), orderBy('createdDateTime', 'desc'), limit(200));
+      let q = query(
+        genaiCollection,
+        where('model', '==', 'azure-tts'),
+        orderBy('createdDateTime', 'desc'),
+        limit(200)
+      );
       const genaiSnapshot = await getDocs(q);
-      const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+      const genaiList = genaiSnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() })); 
       // Replace '[play/download](' and ')' from answer field
       genaiList.forEach(item => {
         // check if status field exists
@@ -113,7 +157,11 @@ function AudioApp() {
         <button className={showMainApp ? 'button_selected' : 'button'} onClick={() => setShowMainApp(!showMainApp)}>
           <FaArrowLeft />
         </button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
+        <button className={showArticlesOnly ? 'button_selected' : 'button'} onClick={() => setShowArticlesOnly(!showArticlesOnly)}>
+          Articles Only
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
           <FaAlignJustify />
         </button>

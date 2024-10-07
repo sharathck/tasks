@@ -435,7 +435,6 @@ function TTSQueueApp() {
                         )}
                         {showCompleted && (
                             <div>
-                                <h2>Completed Tasks</h2>
                                 <ul>
                                     {completedTasks
                                         .filter((task) => task.status)
