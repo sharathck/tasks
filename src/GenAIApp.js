@@ -799,7 +799,7 @@ const GenAIApp = () => {
                                             {item.showRawQuestion ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
                                     </h4>
-                                    <div style={{ fontSize: '16px' }}>
+                                    <div style={{ fontSize: '20px' }}>
                                         {item.showRawQuestion ? item.question : renderQuestion(item.question)}
                                     </div>
                                 </div>
