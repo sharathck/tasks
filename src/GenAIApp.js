@@ -546,8 +546,8 @@ const GenAIApp = () => {
     }
 
     return (
-        <div>
-            <div>
+        <div className="container">
+            <div className="input-section">
                 <div>
                     <textarea
                         value={promptInput}
@@ -556,7 +556,7 @@ const GenAIApp = () => {
                         style={{ width: '99%', padding: '2px', height: '280px', fontSize: '16px' }}
                     />
                 </div>
-                <div style={{ marginBottom: '20px' }}>
+                <div className="checkbox-section" style={{ marginBottom: '20px' }}>
                     <label>
                         <input
                             type="checkbox"
@@ -647,7 +647,7 @@ const GenAIApp = () => {
                         />
                     )}
                     {!isTTS && (
-                        <select id="promptS</label>elect"
+                        <select id="promptSelect"
                             onChange={(e) => {
                                 handlePromptChange(e.target.value);
                                 setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
@@ -773,12 +773,12 @@ const GenAIApp = () => {
           )}*/}
 
                 {/* **Existing Data Display** */}
-                <div>
+                <div className="data-section">
                     {isLoading && <p> Loading Data...</p>}
                     {!isLoading && <div>
                         {genaiData.map((item) => (
                             <div key={item.createdDateTime}>
-                                <div style={{ border: "1px dotted black", padding: "2px", backgroundColor: "#e4ede8" }}>
+                                <div className="data-item" style={{ border: "1px dotted black", padding: "2px", backgroundColor: "#e4ede8" }}>
                                     <h4 style={{ color: "brown" }}>
                                         <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
                                         @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
@@ -803,7 +803,7 @@ const GenAIApp = () => {
                                         {item.showRawQuestion ? item.question : renderQuestion(item.question)}
                                     </div>
                                 </div>
-                                <div style={{ border: "1px solid black" }}>
+                                <div className="data-item" style={{ border: "1px solid black" }}>
                                     <div style={{ color: "green", fontWeight: "bold" }}>---- Response ----
                                         {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
                                             <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}><FaHeadphones /></button>
@@ -821,7 +821,7 @@ const GenAIApp = () => {
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
                                     </div>
-                                    <div style={{ fontSize: '16px' }}>
+                                    <div style={{ fontSize: '24px' }}>
                                         {item.showRawAnswer ? item.answer : <ReactMarkdown>{item.answer}</ReactMarkdown>}
                                     </div>
                                 </div>
