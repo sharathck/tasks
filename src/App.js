@@ -187,7 +187,7 @@ function App() {
       alert([`Error: ${error.message}`]);
     } finally {
       // Fetch the Firebase document data
-      const genaiCollection = collection(db, 'genai', user.uid, 'MyGenAI');
+      /*const genaiCollection = collection(db, 'genai', user.uid, 'MyGenAI');
       let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
       const genaiSnapshot = await getDocs(q);
       const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -199,10 +199,11 @@ function App() {
         // replace ) with empty string
         answer = answer.replace(')', '');
         setAnswerData(answer);
-      }
+      }*/
       setIsGeneratingTTS(false); // Reset generating state
-      now = new Date();
-      console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+      setShowAudioApp(true);
+      //now = new Date();
+      //console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
 
     }
   };
