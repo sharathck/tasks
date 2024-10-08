@@ -67,6 +67,9 @@ function AudioApp() {
       );
       const genaiSnapshot = await getDocs(q);
       const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      genaiList.forEach(item => {
+          item.answer = item.answer.replace('[play/download](', '').replace(/\)$/, '');
+      });
       setGenaiData(genaiList);
     } catch (error) {
       console.error("Error fetching completed data: ", error);
@@ -122,11 +125,16 @@ function AudioApp() {
       // Replace '[play/download](' and ')' from answer field
       genaiList.forEach(item => {
         // check if status field exists
-        if (!item.hasOwnProperty('status')) {
-          return false; // This will filter out the item
-        }
+        if (!item.hasOwnProperty('status') || item.status === false) {
+          item.answer = item.answer.replace('[play/download](', '').replace(/\)$/, '');
+          }
+          else {
+            item.answer = '';
+          }
       });
-      setGenaiData(genaiList);
+      // remove items with empty answer field
+      const filteredGenaiList = genaiList.filter(item => item.answer !== '');
+      setGenaiData(filteredGenaiList);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
@@ -179,10 +187,11 @@ function AudioApp() {
         <button className={showArticlesOnly ? 'button_selected' : 'button'} onClick={() => setShowArticlesOnly(!showArticlesOnly)}>
           Articles Only
         </button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
           <FaAlignJustify />
         </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
         <FaCheckDouble />
         </button>
@@ -205,14 +214,15 @@ function AudioApp() {
               onEnded={() => {
                 const nextFileIndex = (selectedFileIndex + 1) % genaiData.length;
                 setAudioSource(genaiData[nextFileIndex].answer, nextFileIndex);
-              }}
-            />
-            <ul style={{ listStyleType: 'none' }}>
-              {genaiData.map((item, index) => (
-                <li key={index} className={selectedFileIndex === index ? 'selected-file' : ''}>
+                }}
+              />
+              <ul style={{ listStyleType: 'none', padding: 0 }}>
+                {genaiData.map((item, index) => (
+                <li key={index} className={selectedFileIndex === index ? 'selected-file' : ''} style={{ margin: '10px 0', padding: '2px', height: '40px', borderRadius: '2px', backgroundColor: selectedFileIndex === index ? '#f0f0f0' : '#fff' }}>
                   <a href={item.answer} download onClick={(e) => { e.preventDefault(); setAudioSource(item.answer, index); }}>
                     {item.answer.replace('https://storage.googleapis.com/audio-genai/', '').replace(new RegExp(`_${user.uid}_[^_]*_`), '_').replace('.mp3', '').replace(uid, '').replace('https://storage.googleapis.com/reviewtext-ad5c6.appspot.com/user_audio/', '').replace('/', '')} {/* Fall back to a generic name if none is provided */}
                   </a>
+                  &nbsp;&nbsp;
                   <input
                     type="checkbox"
                     checked={item.status === true}
