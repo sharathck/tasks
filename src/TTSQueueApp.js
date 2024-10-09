@@ -296,7 +296,7 @@ function TTSQueueApp() {
             alert([`Error: ${error.message}`]);
         } finally {
             // Fetch the Firebase document data
-            if (isTriggeredFromMainApp) {
+            if (!isTriggeredFromMainApp) {
                 const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
                 let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
                 const genaiSnapshot = await getDocs(q);
