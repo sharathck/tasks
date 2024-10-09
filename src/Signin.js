@@ -91,7 +91,7 @@ function SigninApp() {
             return <AudioApp user={user} />;
         }
         let MainComponent;
-        switch (process.env.REACT_MAIN_APP) {
+        switch (process.env.REACT_APP_MAIN_APP) {
             case 'GenAIApp':
                 MainComponent = <GenAIApp user={user} />;
                 break;
