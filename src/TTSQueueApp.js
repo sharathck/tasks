@@ -296,23 +296,26 @@ function TTSQueueApp() {
             alert([`Error: ${error.message}`]);
         } finally {
             // Fetch the Firebase document data
-          /*  const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
-            let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
-            const genaiSnapshot = await getDocs(q);
-            const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Get the answer from the first document
-            if (genaiList.length > 0) {
-                let answer = genaiList[0].answer;
-                //extract from the position where http starts and until end
-                answer = answer.substring(answer.indexOf('http'));
-                // replace ) with empty string
-                answer = answer.replace(')', '');
-                setAnswerData(answer);
-            }*/
-
-            setShowAudioApp(true);
+            if (isTriggeredFromMainApp) {
+                const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
+                let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
+                const genaiSnapshot = await getDocs(q);
+                const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Get the answer from the first document
+                if (genaiList.length > 0) {
+                    let answer = genaiList[0].answer;
+                    //extract from the position where http starts and until end
+                    answer = answer.substring(answer.indexOf('http'));
+                    // replace ) with empty string
+                    answer = answer.replace(')', '');
+                    setAnswerData(answer);
+                }
+            }
+            else {
+                setShowAudioApp(true);
+            }
             setIsGeneratingTTS(false); // Reset generating state
-           // now = new Date();
+            // now = new Date();
             // console.log('after callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
 
         }
