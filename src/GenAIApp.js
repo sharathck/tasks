@@ -12,6 +12,8 @@ import App from './App';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 
+const fireBaseGenAICollection = process.env.REACT_APP_FIREBASE_GENAI_COLLECTION;
+const fireBaseGenAIUserCollection = process.env.REACT_APP_FIREBASE_GENAI_USER_COLLECTION;
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
@@ -72,7 +74,7 @@ const GenAIApp = () => {
                 console.error("No user is signed in");
                 return;
             }
-            const genaiCollection = collection(db, 'genai', user.uid, 'prompts');
+            const genaiCollection = collection(db, fireBaseGenAICollection, user.uid, 'prompts');
             if (selectedPrompt == 'NA' || selectedPrompt == null) {
                 console.log('Adding new prompt');
                 await addDoc(genaiCollection, {
@@ -85,7 +87,7 @@ const GenAIApp = () => {
                 const q = query(genaiCollection, where('tag', '==', selectedPrompt), limit(1));
                 const genaiSnapshot = await getDocs(q);
                 const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const docRef = doc(db, 'genai', user.uid, 'prompts', genaiList[0].id);
+                const docRef = doc(db, fireBaseGenAICollection, user.uid, 'prompts', genaiList[0].id);
                 await updateDoc(docRef, {
                     tag: editPromptTag,
                     fullText: editPromptFullText
@@ -128,11 +130,11 @@ const GenAIApp = () => {
             setUser(currentUser);
             if (currentUser) {
                 const urlParams = new URLSearchParams(window.location.search);
-                const genaiParam = urlParams.get('genai');
+                const genaiParam = urlParams.get(fireBaseGenAICollection);
                 if (genaiParam) {
                     setGenAIParameter(true);
                 } 
-                if (process.env.REACT_APP_MAIN_APP === 'GenAI') {
+                if (process.env.REACT_APP_MAIN_APP === fireBaseGenAICollection) {
                     setGenAIParameter(true);
                 }           
                 setUid(currentUser.uid);
@@ -151,7 +153,7 @@ const GenAIApp = () => {
     // Fetch prompts from Firestore
     const fetchPrompts = async (userID) => {
         try {
-            const genaiCollection = collection(db, 'genai', userID, 'prompts');
+            const genaiCollection = collection(db, fireBaseGenAICollection, userID, 'prompts');
             const q = query(genaiCollection, limit(100), orderBy('tag', 'asc'));
             const genaiSnapshot = await getDocs(q);
             const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -164,7 +166,7 @@ const GenAIApp = () => {
     // Function to fetch data from Firestore
     const fetchData = async (userID) => {
         try {
-            const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
+            const genaiCollection = collection(db, fireBaseGenAICollection, userID, fireBaseGenAIUserCollection);
             let q;
             q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(dataLimit));
             if (hindi) {
@@ -275,7 +277,7 @@ const GenAIApp = () => {
             }
             else {
                 console.log('User is signed in:', user.uid);
-                const genaiCollection = collection(db, 'genai', user.uid, 'MyGenAI');
+                const genaiCollection = collection(db, fireBaseGenAICollection, user.uid, fireBaseGenAIUserCollection);
                 let nextQuery;
                 nextQuery = query(genaiCollection, orderBy('createdDateTime', 'desc'), startAfter(lastVisible), limit(dataLimit));
                 if (hindi) {
@@ -296,7 +298,7 @@ const GenAIApp = () => {
     };
 
     const handlePromptChange = async (promptValue) => {
-        /* const genaiCollection = collection(db, 'genai', uid, 'prompts');
+        /* const genaiCollection = collection(db, fireBaseGenAICollection, uid, 'prompts');
          const q = query(genaiCollection, where('tag', '==', promptValue), limit(1));
          const genaiSnapshot = await getDocs(q);
          const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));*/
@@ -692,7 +694,7 @@ const GenAIApp = () => {
                             isGeneratingImage_Dall_e_3 || isGeneratingTTS ? (
                             <FaSpinner className="spinning" />
                         ) : (
-                            'GenAI'
+                            fireBaseGenAICollection
                         )}
                     </button>
                     &nbsp; &nbsp;

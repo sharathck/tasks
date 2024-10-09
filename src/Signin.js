@@ -90,9 +90,21 @@ function SigninApp() {
         if (audio) {
             return <AudioApp user={user} />;
         }
-        return (
-            <App user={user} />
-        );
+        let MainComponent;
+        switch (process.env.REACT_MAIN_APP) {
+            case 'GenAIApp':
+                MainComponent = <GenAIApp user={user} />;
+                break;
+            case 'TTSQueueApp':
+                MainComponent = <TTSQueueApp user={user} />;
+                break;
+            case 'AudioApp':
+                MainComponent = <AudioApp user={user} />;
+                break;
+            default:
+                MainComponent = <App user={user} />;
+        }
+        return MainComponent;
     }
 
     return (

@@ -12,6 +12,8 @@ import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPass
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 
+const fireBaseTasksCollection = process.env.REACT_APP_FIREBASE_TASKS_COLLECTION;
+console.log('Firebase tasks collection:', fireBaseTasksCollection);
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
@@ -79,7 +81,7 @@ function App() {
       if (adminUserIds.includes(user.uid)) {
         setAdminUser(true);
       }
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const showCurrentLimitValue = limitParam ? parseInt(limitParam) : tasksLimit;
@@ -112,7 +114,7 @@ function App() {
     if (showCompleted) {
       setShowFuture(false);
       setCanBeDeleted(true);
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData = snapshot.docs.map((doc) => ({
@@ -136,7 +138,7 @@ function App() {
     if (showFuture) {
       setShowCompleted(false);
       setCanBeDeleted(true);
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', new Date()), orderBy('dueDate', 'asc'), limit(limitValue));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const futureTasksData = snapshot.docs.map((doc) => ({
@@ -303,7 +305,7 @@ function App() {
         dueDate.setDate(dueDate.getDate() + dayDiff);
       }
 
-      await addDoc(collection(db, 'tasks'), {
+      await addDoc(collection(db, fireBaseTasksCollection), {
         task: taskDesc,
         recurrence: recurrence,
         status: false,
@@ -318,7 +320,7 @@ function App() {
   };
 
   const handleToggleStatus = async (taskId, status, recurrence, dueDate) => {
-    const taskDocRef = doc(db, 'tasks', taskId);
+    const taskDocRef = doc(db, fireBaseTasksCollection, taskId);
     const currentDate = new Date();
     let nextDueDate = new Date(dueDate);
     if (recurrence !== 'ad-hoc') {
@@ -371,7 +373,7 @@ function App() {
   const handleDeleteTask = async (taskId, taskText) => {
     const confirmation = window.confirm(`Are you sure you want to delete this task: ${taskText.substring(0, 30)}...?`);
     if (confirmation) {
-      await deleteDoc(doc(db, 'tasks', taskId));
+      await deleteDoc(doc(db, fireBaseTasksCollection, taskId));
     }
   };
 
@@ -417,7 +419,7 @@ function App() {
   };
 
   const handleSaveTask = async () => {
-    const taskDocRef = doc(db, 'tasks', editTask.id);
+    const taskDocRef = doc(db, fireBaseTasksCollection, editTask.id);
     await updateDoc(taskDocRef, {
       task: editTaskText,
       recurrence: editRecurrence,
@@ -449,7 +451,7 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const currentDate = new Date();
       if (lastVisible) {
         const q = query(tasksCollection, where('userId', '==', user.uid), where('dueDate', '>', currentDate), orderBy('dueDate', 'asc'), startAfter(lastVisible), limit(limitValue));
@@ -480,7 +482,7 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       if (lastVisible) {
         const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
         const tasksSnapshot = await getDocs(q);
@@ -506,7 +508,7 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const limitParam = urlParams.get('limit');
       const limitValue = limitParam ? parseInt(limitParam) : fetchMoreTasksLimit;
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const currentDate = new Date();
       if (lastVisible) {
         const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), startAfter(lastVisible), limit(limitValue));
@@ -533,7 +535,7 @@ function App() {
 
   const showSharedTasks = async () => {
     if (!sharedTasks) {
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const currentDate = new Date();
       console.log('Admin user');
       const sharedQuery = query(tasksCollection, where('userId', 'in', ['qDzUX26K0dgtSMlN9PtCj6Q9L5J3']), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
@@ -549,7 +551,7 @@ function App() {
 
   const showAarushTasks = async () => {
     if (!sharedTasks) {
-      const tasksCollection = collection(db, 'tasks');
+      const tasksCollection = collection(db, fireBaseTasksCollection);
       const currentDate = new Date();
       console.log('Admin user');
       const sharedQuery = query(tasksCollection, where('userId', '==', 'yvsWRZwjTQecvGap3pGXWNGHoTp2'), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));

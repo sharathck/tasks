@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaCheckDouble, FaClock, FaArrowLeft } from 'react-icons/fa';
 import './TTSQueueApp.css';
 import { doc, deleteDoc, getDocs, startAfter, collection, query, where, orderBy, and, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import App from './App';
 import { Readability } from '@mozilla/readability';
 import { saveAs } from 'file-saver';
@@ -12,10 +11,17 @@ import { auth, db } from './Firebase';
 import AudioApp from './AudioApp';
 import VoiceSelect from './VoiceSelect';
 
+const fireBaseTTSCollection = process.env.REACT_APP_FIREBASE_TTS_COLLECTION;
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 let articles = '';
 let uid = '';
+let isTriggeredFromMainApp = false;
+let limitMax = 2;
+if (process.env.REACT_APP_MAIN_APP == 'App') {
+    isTriggeredFromMainApp = true;
+    limitMax = 5;
+}
 
 function TTSQueueApp() {
     const [user, setUser] = useState(null);
@@ -33,7 +39,7 @@ function TTSQueueApp() {
     const [showMainApp, setShowMainApp] = useState(false);
     const [showAudioApp, setShowAudioApp] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
-    const [limitActiveValue, setLimitActiveValue] = useState(5);
+    const [limitActiveValue, setLimitActiveValue] = useState(limitMax);
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
 
@@ -47,7 +53,7 @@ function TTSQueueApp() {
 
     useEffect(() => {
         if (user) {
-            const todoCollection = collection(db, 'todo')
+            const todoCollection = collection(db, fireBaseTTSCollection)
             uid = user.uid;
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
@@ -75,7 +81,7 @@ function TTSQueueApp() {
 
     useEffect(() => {
         if (showCompleted) {
-            const tasksCollection = collection(db, 'todo');
+            const tasksCollection = collection(db, fireBaseTTSCollection);
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
             const limitValue = limitParam ? parseInt(limitParam) : 6;
@@ -159,7 +165,7 @@ function TTSQueueApp() {
                 textresponse = newTask;
             }
 
-            await addDoc(collection(db, 'todo'), {
+            await addDoc(collection(db, fireBaseTTSCollection), {
                 task: textresponse,
                 status: false,
                 userId: user.uid,
@@ -172,7 +178,7 @@ function TTSQueueApp() {
 
     const handleUpdateTask = async (taskId, newTaskText) => {
         if (newTaskText.trim() !== '') {
-            const taskDocRef = doc(db, 'todo', taskId);
+            const taskDocRef = doc(db, fireBaseTTSCollection, taskId);
             await updateDoc(taskDocRef, {
                 task: newTaskText,
             });
@@ -181,7 +187,7 @@ function TTSQueueApp() {
 
 
     const handleToggleStatus = async (taskId, status) => {
-        const taskDocRef = doc(db, 'todo', taskId);
+        const taskDocRef = doc(db, fireBaseTTSCollection, taskId);
         await updateDoc(taskDocRef, {
             status: !status,
         });
@@ -235,7 +241,7 @@ function TTSQueueApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
             const limitValue = limitParam ? parseInt(limitParam) : 21;
-            const tasksCollection = collection(db, 'todo');
+            const tasksCollection = collection(db, fireBaseTTSCollection);
 
             if (lastVisible) {
                 const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
@@ -255,7 +261,7 @@ function TTSQueueApp() {
     const handleDeleteTask = async (taskId, taskText) => {
         const confirmation = window.confirm(`Are you sure you want to delete this task: ${taskText.substring(0, 30)}...?`);
         if (confirmation) {
-            await deleteDoc(doc(db, 'todo', taskId));
+            await deleteDoc(doc(db, fireBaseTTSCollection, taskId));
         }
     };
 
@@ -315,7 +321,7 @@ function TTSQueueApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
             const limitValue = limitParam ? parseInt(limitParam) : 6;
-            const tasksCollection = collection(db, 'todo');
+            const tasksCollection = collection(db, fireBaseTTSCollection);
             if (lastArticle) {
                 const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), startAfter(lastArticle), limit(limitValue));
                 const tasksSnapshot = await getDocs(q);
@@ -352,23 +358,25 @@ function TTSQueueApp() {
                     </div>
                 ) : (
                     <div>
-                        <button className={showMainApp ? 'tts-button_selected' : 'tts-button'} onClick={() => setShowMainApp(!showMainApp)}>
+                        {isTriggeredFromMainApp && <button className={showMainApp ? 'tts-button_selected' : 'tts-button'} onClick={() => setShowMainApp(!showMainApp)}>
                             <FaArrowLeft />
                         </button>
+                        }
                         &nbsp;
                         <input
                             onChange={(e) => {
                                 if (parseInt(e.target.value) > 0) { setLimitActiveValue(parseInt(e.target.value)); }
                                 else { setLimitActiveValue(1); }
                             }}
-                            style={{ width: '30px' , height: '25px', fontSize: '18px' }}
+                            style={{ width: '30px', height: '25px', fontSize: '18px' }}
                             min="0"
-                            placeholder= {limitActiveValue}
+                            placeholder={limitActiveValue}
                             max="99"
                         />
-                        <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+                        {isTriggeredFromMainApp && <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                             <FaPlay />
                         </button>
+                        }
                         &nbsp;
                         <button className={showCompleted ? 'tts-button_selected' : 'tts-button'} onClick={() => setShowCompleted(!showCompleted)}>
                             <FaCheckDouble />
