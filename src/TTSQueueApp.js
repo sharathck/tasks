@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaCheckDouble, FaClock, FaArrowLeft } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaPlay, FaReadme, FaCheckDouble, FaClock, FaArrowLeft, FaVolumeUp } from 'react-icons/fa';
 import './TTSQueueApp.css';
 import { doc, deleteDoc, getDocs, startAfter, collection, query, where, orderBy, and, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
 import App from './App';
@@ -40,8 +40,11 @@ function TTSQueueApp() {
     const [showAudioApp, setShowAudioApp] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
     const [limitActiveValue, setLimitActiveValue] = useState(limitMax);
+    const [showLiveTTS, setShowLiveTTS] = useState(false);
+
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
+    const todoCollection = collection(db, fireBaseTTSCollection)
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -53,7 +56,6 @@ function TTSQueueApp() {
 
     useEffect(() => {
         if (user) {
-            const todoCollection = collection(db, fireBaseTTSCollection)
             uid = user.uid;
             const urlParams = new URLSearchParams(window.location.search);
             const limitParam = urlParams.get('limit');
@@ -111,11 +113,25 @@ function TTSQueueApp() {
         return chunks;
     };
 
-    const synthesizeSpeech = async () => {
-        if (isiPhone) {
-            callTTSAPI(articles, process.env.REACT_APP_API_URL);
-            return;
+    const generateTTS = () => {
+        //   setReaderMode(true);
+        //log the exact date and time
+        if (articles.length > 2) {
+          /* const chunks = [];
+           for (let i = 0; i < promptInput.length; i += 3999) {
+             chunks.push(promptInput.substring(i, i + 3999));
+           }
+           for (const chunk of chunks) {
+             callTTSAPI(chunk);
+           }*/
+          callTTSAPI(articles, process.env.REACT_APP_API_URL);
         }
+        else {
+          callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
+        }
+      };
+
+    const synthesizeSpeech = async () => {
         const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
         speechConfig.speechSynthesisVoiceName = voiceName;
 
@@ -296,6 +312,13 @@ function TTSQueueApp() {
             alert([`Error: ${error.message}`]);
         } finally {
             // Fetch the Firebase document data
+            const query = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitActiveValue));
+            const tasksSnapshot = await getDocs(query);
+            for (const doc of tasksSnapshot.docs) {
+                console.log('doc:', doc.data());
+                await updateDoc(doc.ref, { status: true });
+            }
+
             if (!isTriggeredFromMainApp) {
                 const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
                 let q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(1));
@@ -378,7 +401,7 @@ function TTSQueueApp() {
                             placeholder={limitActiveValue}
                             max="99"
                         />
-                        {isTriggeredFromMainApp && <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+                        {isTriggeredFromMainApp && <button className={showAudioApp ? 'button_selected' : 'tts-button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                             <FaPlay />
                         </button>
                         }
@@ -388,7 +411,8 @@ function TTSQueueApp() {
                         </button>
                         <button className='tts-button' onClick={generateDocx}><FaFileWord /></button>
                         <button className='tts-button' onClick={generateText}><FaFileAlt /></button>
-                        <button className={isGeneratingTTS ? 'tts-button_selected' : 'tts-button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
+                        <button className={isGeneratingTTS ? 'button_selected' : 'tts-button'} onClick={generateTTS}><FaHeadphones /></button>
+                        {!isiPhone && <button className={showLiveTTS ? 'button_selected' : 'tts-button'} onClick={synthesizeSpeech}><FaVolumeUp /></button>}
                         <button className='tts-button' onClick={handleReaderMode}><FaReadme /></button>
                         <button className="tts-button" onClick={handleSignOut}>
                             <FaSignOutAlt />

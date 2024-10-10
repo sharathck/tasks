@@ -426,7 +426,7 @@ function App() {
     setEditTask(null);
   };
 
-  const handleReaderMode = () => {
+  const generateTTS = () => {
     //   setReaderMode(true);
     //log the exact date and time
     if (articles.length > 2) {
@@ -599,9 +599,9 @@ function App() {
             <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
             <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-            <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaHeadphones /></button>
+            <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={generateTTS}><FaHeadphones /></button>
             {!isiPhone && <button className={showLiveTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaVolumeUp /></button>}
-            {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
+            {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={generateTTS}><FaReadme /></button>)}
             <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
               <FaSearch />
             </button>
