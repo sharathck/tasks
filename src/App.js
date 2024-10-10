@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -66,6 +66,7 @@ function App() {
   const [showAudioApp, setShowAudioApp] = useState(false);
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
   const [showGenAIApp, setShowGenAIApp] = useState(false);
+  const [showLiveTTS, setShowLiveTTS] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -241,10 +242,6 @@ function App() {
   };
 
   const synthesizeSpeech = async () => {
-    if (isiPhone) {
-      handleReaderMode();
-      return;
-    }
     const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
     speechConfig.speechSynthesisVoiceName = voiceName;
 
@@ -602,7 +599,8 @@ function App() {
             <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
             <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-            <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
+            <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaHeadphones /></button>
+            {!isiPhone && <button className={showLiveTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaVolumeUp /></button>}
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={handleReaderMode}><FaReadme /></button>)}
             <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
               <FaSearch />
