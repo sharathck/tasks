@@ -139,3 +139,13 @@ html, body {
   padding: 6px 12px;
   cursor: pointer;
 }
+.flashing {
+  animation: flash 1s infinite;
+  font-weight: bold;
+}
+
+@keyframes flash {
+  0% { color: rgb(180, 226, 203); }
+  50% { color: rgb(66, 175, 68); }
+  100% { color: rgb(26, 120, 56); }
+}

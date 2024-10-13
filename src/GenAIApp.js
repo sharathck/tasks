@@ -587,7 +587,7 @@ const GenAIApp = () => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                    <label>
+                    <label className={isGenerating ? 'flashing' : ''}>
                         <input
                             type="checkbox"
                             value="openai"
@@ -600,7 +600,7 @@ const GenAIApp = () => {
                         />
                         ChatGPT
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label  className={isGeneratingAnthropic ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="anthropic"
@@ -613,7 +613,7 @@ const GenAIApp = () => {
                         />
                         Claude
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingGemini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="gemini"
@@ -626,7 +626,7 @@ const GenAIApp = () => {
                         />
                         Gemini
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingo1Mini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="o1-mini"
@@ -639,7 +639,7 @@ const GenAIApp = () => {
                         />
                         o1-mini
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingLlama ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="llama"
@@ -648,7 +648,7 @@ const GenAIApp = () => {
                         />
                         Llama
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingMistral ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="mistral"
@@ -657,7 +657,7 @@ const GenAIApp = () => {
                         />
                         Mistral
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingPerplexity ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="perplexity"
@@ -666,7 +666,7 @@ const GenAIApp = () => {
                         />
                         Perplexity
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingo1 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="o1"
@@ -679,7 +679,7 @@ const GenAIApp = () => {
                         />
                         o1
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="dall-e-3"
@@ -688,7 +688,7 @@ const GenAIApp = () => {
                         />
                         IMAGE
                     </label>
-                    <label style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingTTS ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="tts"
