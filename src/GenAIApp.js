@@ -12,8 +12,6 @@ import App from './App';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 
-const fireBaseGenAICollection = process.env.REACT_APP_FIREBASE_GENAI_COLLECTION;
-const fireBaseGenAIUserCollection = process.env.REACT_APP_FIREBASE_GENAI_USER_COLLECTION;
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
@@ -45,11 +43,17 @@ const GenAIApp = () => {
     const [isAnthropic, setIsAnthropic] = useState(false);
     const [isGemini, setIsGemini] = useState(true);
     const [isGpto1Mini, setIsGpto1Mini] = useState(false);
+    const [isLlama, setIsLlama] = useState(false);
+    const [isMistral, setIsMistral] = useState(false);
+    const [isPerplexity, setIsPerplexity] = useState(false);
     const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
     const [isGeneratingo1, setIsGeneratingo1] = useState(false); // New state for generating o1
+    const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
+    const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
+    const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
@@ -74,7 +78,7 @@ const GenAIApp = () => {
                 console.error("No user is signed in");
                 return;
             }
-            const genaiCollection = collection(db, fireBaseGenAICollection, user.uid, 'prompts');
+            const genaiCollection = collection(db, 'genai', user.uid, 'prompts');
             if (selectedPrompt == 'NA' || selectedPrompt == null) {
                 console.log('Adding new prompt');
                 await addDoc(genaiCollection, {
@@ -87,7 +91,7 @@ const GenAIApp = () => {
                 const q = query(genaiCollection, where('tag', '==', selectedPrompt), limit(1));
                 const genaiSnapshot = await getDocs(q);
                 const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const docRef = doc(db, fireBaseGenAICollection, user.uid, 'prompts', genaiList[0].id);
+                const docRef = doc(db, 'genai', user.uid, 'prompts', genaiList[0].id);
                 await updateDoc(docRef, {
                     tag: editPromptTag,
                     fullText: editPromptFullText
@@ -130,13 +134,13 @@ const GenAIApp = () => {
             setUser(currentUser);
             if (currentUser) {
                 const urlParams = new URLSearchParams(window.location.search);
-                const genaiParam = urlParams.get(fireBaseGenAICollection);
+                const genaiParam = urlParams.get('genai');
                 if (genaiParam) {
                     setGenAIParameter(true);
-                } 
-                if (process.env.REACT_APP_MAIN_APP === fireBaseGenAICollection) {
+                }
+                if (process.env.REACT_APP_MAIN_APP === 'GenAI') {
                     setGenAIParameter(true);
-                }           
+                }
                 setUid(currentUser.uid);
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
@@ -153,7 +157,7 @@ const GenAIApp = () => {
     // Fetch prompts from Firestore
     const fetchPrompts = async (userID) => {
         try {
-            const genaiCollection = collection(db, fireBaseGenAICollection, userID, 'prompts');
+            const genaiCollection = collection(db, 'genai', userID, 'prompts');
             const q = query(genaiCollection, limit(100), orderBy('tag', 'asc'));
             const genaiSnapshot = await getDocs(q);
             const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -166,7 +170,7 @@ const GenAIApp = () => {
     // Function to fetch data from Firestore
     const fetchData = async (userID) => {
         try {
-            const genaiCollection = collection(db, fireBaseGenAICollection, userID, fireBaseGenAIUserCollection);
+            const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
             let q;
             q = query(genaiCollection, orderBy('createdDateTime', 'desc'), limit(dataLimit));
             if (hindi) {
@@ -277,7 +281,7 @@ const GenAIApp = () => {
             }
             else {
                 console.log('User is signed in:', user.uid);
-                const genaiCollection = collection(db, fireBaseGenAICollection, user.uid, fireBaseGenAIUserCollection);
+                const genaiCollection = collection(db, 'genai', user.uid, 'MyGenAI');
                 let nextQuery;
                 nextQuery = query(genaiCollection, orderBy('createdDateTime', 'desc'), startAfter(lastVisible), limit(dataLimit));
                 if (hindi) {
@@ -298,7 +302,7 @@ const GenAIApp = () => {
     };
 
     const handlePromptChange = async (promptValue) => {
-        /* const genaiCollection = collection(db, fireBaseGenAICollection, uid, 'prompts');
+        /* const genaiCollection = collection(db, 'genai', uid, 'prompts');
          const q = query(genaiCollection, where('tag', '==', promptValue), limit(1));
          const genaiSnapshot = await getDocs(q);
          const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));*/
@@ -353,6 +357,21 @@ const GenAIApp = () => {
         if (iso1) {
             setIsGeneratingo1(true); // Set generating state to true
             callAPI('o1');
+        }
+
+        if (isLlama) {
+            setIsGeneratingLlama(true); // Set generating state to true
+            callAPI('llama');
+        }
+
+        if (isMistral) {
+            setIsGeneratingMistral(true); // Set generating state to true
+            callAPI('mistral');
+        }
+
+        if (isPerplexity) {
+            setIsGeneratingPerplexity(true); // Set generating state to true
+            callAPI('perplexity');
         }
 
         // **Handle DALL·E 3 Selection**
@@ -426,6 +445,15 @@ const GenAIApp = () => {
             }
             if (selectedModel === 'dall-e-3') {
                 setIsGeneratingImage_Dall_e_3(false);
+            }
+            if (selectedModel === 'mistral') {
+                setIsGeneratingMistral(false);
+            }
+            if (selectedModel === 'llama') {
+                setIsGeneratingLlama(false);
+            }
+            if (selectedModel === 'perplexity') {
+                setIsGeneratingPerplexity(false);
             }
         }
     };
@@ -548,8 +576,8 @@ const GenAIApp = () => {
     }
 
     return (
-        <div className="container">
-            <div className="input-section">
+        <div>
+            <div>
                 <div>
                     <textarea
                         value={promptInput}
@@ -558,7 +586,7 @@ const GenAIApp = () => {
                         style={{ width: '99%', padding: '2px', height: '280px', fontSize: '16px' }}
                     />
                 </div>
-                <div className="checkbox-section" style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '20px' }}>
                     <label>
                         <input
                             type="checkbox"
@@ -614,6 +642,33 @@ const GenAIApp = () => {
                     <label style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
+                            value="llama"
+                            onChange={(e) => setIsLlama(e.target.checked)}
+                            checked={isLlama}
+                        />
+                        Llama
+                    </label>
+                    <label style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
+                            value="mistral"
+                            onChange={(e) => setIsMistral(e.target.checked)}
+                            checked={isMistral}
+                        />
+                        Mistral
+                    </label>
+                    <label style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
+                            value="perplexity"
+                            onChange={(e) => setIsPerplexity(e.target.checked)}
+                            checked={isPerplexity}
+                        />
+                        Perplexity
+                    </label>
+                    <label style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
                             value="o1"
                             onChange={(e) => {
                                 setIso1(e.target.checked);
@@ -649,7 +704,7 @@ const GenAIApp = () => {
                         />
                     )}
                     {!isTTS && (
-                        <select id="promptSelect"
+                        <select id="promptS</label>elect"
                             onChange={(e) => {
                                 handlePromptChange(e.target.value);
                                 setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
@@ -683,7 +738,10 @@ const GenAIApp = () => {
                             isGeneratingo1Mini ||
                             isGeneratingo1 ||
                             isGeneratingImage_Dall_e_3 ||
-                            isGeneratingTTS
+                            isGeneratingTTS ||
+                            isGeneratingMistral ||
+                            isGeneratingLlama ||
+                            isGeneratingPerplexity
                         }
                     >
                         {isGenerating ||
@@ -691,10 +749,13 @@ const GenAIApp = () => {
                             isGeneratingAnthropic ||
                             isGeneratingo1Mini ||
                             isGeneratingo1 ||
-                            isGeneratingImage_Dall_e_3 || isGeneratingTTS ? (
+                            isGeneratingImage_Dall_e_3 || isGeneratingTTS ||
+                            isGeneratingMistral ||
+                            isGeneratingLlama ||
+                            isGeneratingPerplexity ? (
                             <FaSpinner className="spinning" />
                         ) : (
-                            fireBaseGenAICollection
+                            'GenAI'
                         )}
                     </button>
                     &nbsp; &nbsp;
@@ -775,12 +836,12 @@ const GenAIApp = () => {
           )}*/}
 
                 {/* **Existing Data Display** */}
-                <div className="data-section">
+                <div>
                     {isLoading && <p> Loading Data...</p>}
                     {!isLoading && <div>
                         {genaiData.map((item) => (
                             <div key={item.createdDateTime}>
-                                <div className="data-item" style={{ border: "1px dotted black", padding: "2px", backgroundColor: "#e4ede8" }}>
+                                <div style={{ border: "1px dotted black", padding: "2px", backgroundColor: "#e4ede8" }}>
                                     <h4 style={{ color: "brown" }}>
                                         <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
                                         @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
@@ -801,11 +862,11 @@ const GenAIApp = () => {
                                             {item.showRawQuestion ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
                                     </h4>
-                                    <div style={{ fontSize: '20px' }}>
+                                    <div style={{ fontSize: '16px' }}>
                                         {item.showRawQuestion ? item.question : renderQuestion(item.question)}
                                     </div>
                                 </div>
-                                <div className="data-item" style={{ border: "1px solid black" }}>
+                                <div style={{ border: "1px solid black" }}>
                                     <div style={{ color: "green", fontWeight: "bold" }}>---- Response ----
                                         {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
                                             <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}><FaHeadphones /></button>
@@ -823,7 +884,7 @@ const GenAIApp = () => {
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
                                     </div>
-                                    <div style={{ fontSize: '24px' }}>
+                                    <div style={{ fontSize: '16px' }}>
                                         {item.showRawAnswer ? item.answer : <ReactMarkdown>{item.answer}</ReactMarkdown>}
                                     </div>
                                 </div>
