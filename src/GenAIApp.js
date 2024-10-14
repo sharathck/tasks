@@ -11,6 +11,7 @@ import {
 import App from './App';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
+import { TbEmpathize } from "react-icons/tb";
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -45,7 +46,7 @@ const GenAIApp = () => {
     const [isGpto1Mini, setIsGpto1Mini] = useState(false);
     const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
-    const [isPerplexity, setIsPerplexity] = useState(false);
+    const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
     const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
@@ -53,7 +54,7 @@ const GenAIApp = () => {
     const [isGeneratingo1, setIsGeneratingo1] = useState(false); // New state for generating o1
     const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
     const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
-    const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
+    const [isGeneratingGpt4Turbo, setIsGeneratingGpt4Turbo] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
@@ -64,6 +65,9 @@ const GenAIApp = () => {
     const [selectedPromptFullText, setSelectedPromptFullText] = useState(null);
     const [showMainApp, setShowMainApp] = useState(false);
     const [GenAIParameter, setGenAIParameter] = useState(false);
+    const [temperature, setTemperature] = useState(0.7);
+    const [top_p, setTop_p] = useState(0.8);
+    const [showGpt4Turbo, setShowGpt4Turbo] = useState(true);
 
 
     // Helper function to save prompt
@@ -219,7 +223,7 @@ const GenAIApp = () => {
         if (isiPhone) {
             window.scrollTo(0, 0);
             alert('Please go to top of the page to check status and listen to the audio');
-            callTTSAPI(articles, process.env.REACT_APP_API_URL);
+            callTTSAPI(articles, process.env.REACT_APP_TTS_API_URL);
             return;
         }
         const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
@@ -328,7 +332,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo) {
             alert('Please select at least one model.');
             return;
         }
@@ -369,9 +373,9 @@ const GenAIApp = () => {
             callAPI('mistral');
         }
 
-        if (isPerplexity) {
-            setIsGeneratingPerplexity(true); // Set generating state to true
-            callAPI('perplexity');
+        if (isGpt4Turbo) {
+            setIsGeneratingGpt4Turbo(true); // Set generating state to true
+            callAPI('gpt-4-turbo');
         }
 
         // **Handle DALL·E 3 Selection**
@@ -393,7 +397,7 @@ const GenAIApp = () => {
                  for (const chunk of chunks) {
                    callTTSAPI(chunk);
                  }*/
-                callTTSAPI(promptInput, process.env.REACT_APP_API_URL);
+                callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
             }
             else {
                 callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
@@ -402,15 +406,15 @@ const GenAIApp = () => {
     };
 
     const callAPI = async (selectedModel) => {
-        console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_API_URL);
+        console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL);
 
         try {
-            const response = await fetch('https://genaiapp-892085575649.us-central1.run.app/', {
+            const response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid })
+                body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid , temperature: temperature, top_p: top_p })
             });
 
             if (!response.ok) {
@@ -452,8 +456,8 @@ const GenAIApp = () => {
             if (selectedModel === 'llama') {
                 setIsGeneratingLlama(false);
             }
-            if (selectedModel === 'perplexity') {
-                setIsGeneratingPerplexity(false);
+            if (selectedModel === 'gpt-4-turbo') {
+                setIsGeneratingGpt4Turbo(false);
             }
         }
     };
@@ -549,8 +553,8 @@ const GenAIApp = () => {
         console.log("Fetching data for search query:", searchQuery);
         console.log("search model:", searchModel);
         console.log("limit:", dataLimit);
-        console.log("URL:", "https://genaiapp-892085575649.us-central1.run.app/bigquery-search");
-        fetch("https://genaiapp-892085575649.us-central1.run.app/bigquery-search", {
+        console.log("URL:", process.env.REACT_APP_GENAI_API_BIGQUERY_URL);
+        fetch(process.env.REACT_APP_GENAI_API_BIGQUERY_URL, {
             method: "POST",
             body: JSON.stringify({
                 uid: uid,
@@ -657,15 +661,15 @@ const GenAIApp = () => {
                         />
                         Mistral
                     </label>
-                    <label className={isGeneratingPerplexity ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                    {showGpt4Turbo && <label className={isGeneratingGpt4Turbo ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
-                            value="perplexity"
-                            onChange={(e) => setIsPerplexity(e.target.checked)}
-                            checked={isPerplexity}
+                            value="Gpt4Turbo"
+                            onChange={(e) => setIsGpt4Turbo(e.target.checked)}
+                            checked={isGpt4Turbo}
                         />
-                        Perplexity
-                    </label>
+                        Gpt4Turbo
+                    </label>}
                     <label className={isGeneratingo1 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
@@ -678,6 +682,30 @@ const GenAIApp = () => {
                             checked={iso1}
                         />
                         o1
+                    </label>
+                    <label style={{ marginLeft: '8px' }}>
+                        Temp:
+                        <input
+                            type="number"
+                            value={temperature}
+                            onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            style={{ width: '50px', marginLeft: '5px' }}
+                        />
+                    </label>
+                    <label style={{ marginLeft: '8px' }}>
+                        Top_p:
+                        <input
+                            type="number"
+                            value={top_p}
+                            onChange={(e) => setTop_p(parseFloat(e.target.value))}
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            style={{ width: '50px', marginLeft: '5px' }}
+                        />
                     </label>
                     <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
@@ -741,7 +769,7 @@ const GenAIApp = () => {
                             isGeneratingTTS ||
                             isGeneratingMistral ||
                             isGeneratingLlama ||
-                            isGeneratingPerplexity
+                            isGeneratingGpt4Turbo
                         }
                     >
                         {isGenerating ||
@@ -752,7 +780,7 @@ const GenAIApp = () => {
                             isGeneratingImage_Dall_e_3 || isGeneratingTTS ||
                             isGeneratingMistral ||
                             isGeneratingLlama ||
-                            isGeneratingPerplexity ? (
+                            isGeneratingGpt4Turbo ? (
                             <FaSpinner className="spinning" />
                         ) : (
                             'GenAI'
