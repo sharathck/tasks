@@ -293,9 +293,9 @@ function TTSQueueApp() {
         message = message.replace(/[-*#_`~=^><]/g, ''); // Ensure global replacement
 
         console.log('Calling TTS API with message:', message);
-        console.log('Calling TTS API with appUrl:', appUrl);
 
         try {
+            console.log('Inside try Calling TTS API with appUrl:', appUrl);
             const response = await fetch(appUrl, {
                 method: 'POST',
                 headers: {
@@ -309,11 +309,11 @@ function TTSQueueApp() {
             }
         } catch (error) {
             console.error('Error calling TTS API:', error);
-            alert([`Error: ${error.message}`]);
+            setIsGeneratingTTS(false);
         } finally {
             // Fetch the Firebase document data
-            const query = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitActiveValue));
-            const tasksSnapshot = await getDocs(query);
+            const markItems = query(todoCollection, where('userId', '==', user.uid), where('status', '==', false), orderBy('createdDate', 'desc'), limit(limitActiveValue));
+            const tasksSnapshot = await getDocs(markItems);
             for (const doc of tasksSnapshot.docs) {
                 console.log('doc:', doc.data());
                 await updateDoc(doc.ref, { status: true });
