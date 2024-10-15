@@ -437,7 +437,7 @@ function App() {
        for (const chunk of chunks) {
          callTTSAPI(chunk);
        }*/
-      callTTSAPI(articles, process.env.REACT_APP_API_URL);
+      callTTSAPI(articles, process.env.REACT_APP_TTS_API_URL);
     }
     else {
       callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
