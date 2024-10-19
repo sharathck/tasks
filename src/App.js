@@ -673,7 +673,7 @@ function App() {
                           </span>
                           {showEditButtons && (
                             <button className='button' onClick={() => handleEditTask(task)}>
-                              <FaEdit style={{ color: 'Green', backgroundColor: 'whitesmoke' }} />
+                              <FaEdit style={{ color: 'blue', backgroundColor: 'whitesmoke' }} />
                             </button>
                           )}
                         </>
