@@ -428,13 +428,13 @@ const GenAIApp = () => {
         }
 
         if (isPerplexityFast) {
-            await setIsGeneratingPerplexityFast(true); // Set generating state to true
-            await callAPI(modelPerplexityFast);
+            setIsGeneratingPerplexityFast(true); // Set generating state to true
+            callAPI(modelPerplexityFast);
         }
 
         if (isPerplexity) {
-            await setIsGeneratingPerplexity(true); // Set generating state to true
-            await callAPI(modelPerplexity);
+            setIsGeneratingPerplexity(true); // Set generating state to true
+            callAPI(modelPerplexity);
         }
 
         // **Handle DALL·E 3 Selection**
@@ -466,11 +466,6 @@ const GenAIApp = () => {
 
         const callAPI = async (selectedModel) => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL);
-        let inputText = promptInput;
-
-        if (selectedModel === modelPerplexityFast || selectedModel === modelPerplexity) {
-            inputText = inputText +  " focusing on the latest information";
-        }
 
         try {
             const response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
@@ -478,7 +473,7 @@ const GenAIApp = () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ prompt: inputText, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+            body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
             });
 
             if (!response.ok) {
