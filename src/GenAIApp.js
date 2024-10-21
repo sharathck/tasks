@@ -40,13 +40,17 @@ const GenAIApp = () => {
     const [isGeneratingAnthropic, setIsGeneratingAnthropic] = useState(false);
     const [isGeneratingo1Mini, setIsGeneratingo1Mini] = useState(false);
     const [isGeneratingImage_Dall_e_3, setIsGeneratingImage_Dall_e_3] = useState(false);
-    const [isOpenAI, setIsOpenAI] = useState(false);
+    const [isGpt4oMini, setIsGpt4oMini] = useState(false);
+    const [isGeneratingGpt4oMini, setIsGeneratingGpt4oMini] = useState(false);
+    const [isOpenAI, setIsOpenAI] = useState(true);
     const [isAnthropic, setIsAnthropic] = useState(false);
-    const [isGemini, setIsGemini] = useState(true);
+    const [isGemini, setIsGemini] = useState(false);
     const [isGpto1Mini, setIsGpto1Mini] = useState(false);
     const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
     const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
+    const [isGeminiFast, setIsGeminiFast] = useState(false);
+    const [isGeneratingGeminiFast, setIsGeneratingGeminiFast] = useState(false);
     const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
@@ -68,7 +72,17 @@ const GenAIApp = () => {
     const [temperature, setTemperature] = useState(0.7);
     const [top_p, setTop_p] = useState(0.8);
     const [showGpt4Turbo, setShowGpt4Turbo] = useState(true);
-
+    const [modelAnthropic, setModelAnthropic] = useState('claude');
+    const [modelGemini, setModelGemini] = useState('gemini');
+    const [modelOpenAI, setModelOpenAI] = useState('gpt-4o');
+    const [modelGpto1Mini, setModelGpto1Mini] = useState('o1-mini');
+    const [modelo1, setModelo1] = useState('o1');
+    const [modelLlama, setModelLlama] = useState('llama');
+    const [modelMistral, setModelMistral] = useState('mistral');
+    const [modelGpt4oMini, setModelGpt4oMini] = useState('gpt-4o-mini');
+    const [modelGeminiFast, setModelGeminiFast] = useState('gemini-flash-fast');
+    const [modelGpt4Turbo, setModelGpt4Turbo] = useState('gpt-4-turbo');
+    const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
 
     // Helper function to save prompt
     const handleSavePrompt = async () => {
@@ -149,7 +163,8 @@ const GenAIApp = () => {
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
                 await fetchData(currentUser.uid);
-                await fetchPrompts(currentUser.uid);
+                fetchPrompts(currentUser.uid);
+                fetchGenAIParameters();
             }
             else {
                 console.log('No user is signed in');
@@ -157,6 +172,24 @@ const GenAIApp = () => {
         });
         return () => unsubscribe();
     }, []);
+
+    const fetchGenAIParameters = async () => {
+        try {
+            console.log('Fetching genai parameters...');
+            const voiceNamesCollection = collection(db, 'public');
+            const q = query(voiceNamesCollection, where('setup', '==', 'genai'));
+            const voiceNamesSnapshot = await getDocs(q);
+            voiceNamesSnapshot.forEach(doc => {
+                const data = doc.data();
+                console.log('Data:', data.temperature, data.top_p);
+                setTemperature(data.temperature);
+                setTop_p(data.top_p);
+            });
+        } catch (error) {
+            console.error("Error fetching voice names: ", error);
+            return [];
+        }
+    };
 
     // Fetch prompts from Firestore
     const fetchPrompts = async (userID) => {
@@ -332,7 +365,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast) {
             alert('Please select at least one model.');
             return;
         }
@@ -340,48 +373,57 @@ const GenAIApp = () => {
         // Generate API calls for each selected model
         if (isAnthropic) {
             setIsGeneratingAnthropic(true); // Set generating state to true
-            callAPI('anthropic');
+            callAPI(modelAnthropic);
         }
 
         if (isGemini) {
             setIsGeneratingGemini(true); // Set generating state to true
-            callAPI('gemini');
+            callAPI(modelGemini);
         }
-
         if (isOpenAI) {
             setIsGenerating(true); // Set generating state to true
-            callAPI('openai');
+            callAPI(modelOpenAI);
         }
 
         if (isGpto1Mini) {
             setIsGeneratingo1Mini(true); // Set generating state to true
-            callAPI('o1-mini');
+            callAPI(modelGpto1Mini);
         }
 
         if (iso1) {
             setIsGeneratingo1(true); // Set generating state to true
-            callAPI('o1');
+            callAPI(modelo1);
         }
 
         if (isLlama) {
             setIsGeneratingLlama(true); // Set generating state to true
-            callAPI('llama');
+            callAPI(modelLlama);
         }
 
         if (isMistral) {
             setIsGeneratingMistral(true); // Set generating state to true
-            callAPI('mistral');
+            callAPI(modelMistral);
+        }
+
+        if (isGpt4oMini) {
+            setIsGeneratingGpt4oMini(true); // Set generating state to true
+            callAPI(modelGpt4oMini);
+        }
+
+        if (isGeminiFast) {
+            setIsGeneratingGeminiFast(true); // Set generating state to true
+            callAPI(modelGeminiFast);
         }
 
         if (isGpt4Turbo) {
             setIsGeneratingGpt4Turbo(true); // Set generating state to true
-            callAPI('gpt-4-turbo');
+            callAPI(modelGpt4Turbo);
         }
 
         // **Handle DALL·E 3 Selection**
         if (isImage_Dall_e_3) {
             setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
-            callAPI('dall-e-3');
+            callAPI(modelImageDallE3);
         }
 
         // **Handle TTS Selection**
@@ -390,36 +432,36 @@ const GenAIApp = () => {
             //
 
             if (promptInput.length > 2) {
-                /* const chunks = [];
-                 for (let i = 0; i < promptInput.length; i += 3999) {
-                   chunks.push(promptInput.substring(i, i + 3999));
-                 }
-                 for (const chunk of chunks) {
-                   callTTSAPI(chunk);
-                 }*/
-                callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
+            /* const chunks = [];
+             for (let i = 0; i < promptInput.length; i += 3999) {
+               chunks.push(promptInput.substring(i, i + 3999));
+             }
+             for (const chunk of chunks) {
+               callTTSAPI(chunk);
+             }*/
+            callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
             }
             else {
-                callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
+            callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
             }
         }
-    };
+        };
 
-    const callAPI = async (selectedModel) => {
+        const callAPI = async (selectedModel) => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL);
 
         try {
             const response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid , temperature: temperature, top_p: top_p })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to generate content.');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to generate content.');
             }
             const data = await response.json();
             console.log('Response:', data);
@@ -432,35 +474,41 @@ const GenAIApp = () => {
             searchModel = 'All';
             console.log('Fetching data after generating content');
             fetchData(uid);
-            if (selectedModel === 'openai') {
-                setIsGenerating(false);
+            if (selectedModel === modelOpenAI) {
+            setIsGenerating(false);
             }
-            if (selectedModel === 'anthropic') {
-                setIsGeneratingAnthropic(false);
+            if (selectedModel === modelAnthropic) {
+            setIsGeneratingAnthropic(false);
             }
-            if (selectedModel === 'gemini') {
-                setIsGeneratingGemini(false);
+            if (selectedModel === modelGemini) {
+            setIsGeneratingGemini(false);
             }
-            if (selectedModel === 'o1-mini') {
-                setIsGeneratingo1Mini(false);
+            if (selectedModel === modelGpto1Mini) {
+            setIsGeneratingo1Mini(false);
             }
-            if (selectedModel === 'o1') {
-                setIsGeneratingo1(false);
+            if (selectedModel === modelo1) {
+            setIsGeneratingo1(false);
             }
-            if (selectedModel === 'dall-e-3') {
-                setIsGeneratingImage_Dall_e_3(false);
+            if (selectedModel === modelImageDallE3) {
+            setIsGeneratingImage_Dall_e_3(false);
             }
-            if (selectedModel === 'mistral') {
-                setIsGeneratingMistral(false);
+            if (selectedModel === modelMistral) {
+            setIsGeneratingMistral(false);
             }
-            if (selectedModel === 'llama') {
-                setIsGeneratingLlama(false);
+            if (selectedModel === modelLlama) {
+            setIsGeneratingLlama(false);
             }
-            if (selectedModel === 'gpt-4-turbo') {
-                setIsGeneratingGpt4Turbo(false);
+            if (selectedModel === modelGpt4Turbo) {
+            setIsGeneratingGpt4Turbo(false);
+            }
+            if (selectedModel === modelGpt4oMini) {
+            setIsGeneratingGpt4oMini(false);
+            }
+            if (selectedModel === modelGeminiFast) {
+            setIsGeneratingGeminiFast(false);
             }
         }
-    };
+        };
 
     // Function to call the TTS API
     const callTTSAPI = async (message, apiUrl) => {
@@ -501,6 +549,11 @@ const GenAIApp = () => {
                 setIsGpto1Mini(false);
                 setIso1(false);
                 setIsTTS(false);
+                setIsLlama(false);
+                setIsMistral(false);
+                setIsGpt4Turbo(false);
+                setIsGpt4oMini(false);
+                setIsGeminiFast(false);
             }
 
             // Set the promptSelect dropdown to "image"
@@ -564,12 +617,12 @@ const GenAIApp = () => {
             })
         })
             .then((res) => res.json())
-            .then((text) => {
-                setGenaiData(JSON.parse(text));
+            .then((data) => {
+                setGenaiData(data);
                 setIsLoading(false);
             })
             .catch((error) => {
-                console.error("Invalid JSON format:", error);
+                console.error("Error fetching data:", error);
                 setIsLoading(false);
             });
     }
@@ -604,7 +657,7 @@ const GenAIApp = () => {
                         />
                         ChatGPT
                     </label>
-                    <label  className={isGeneratingAnthropic ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                    <label className={isGeneratingAnthropic ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="anthropic"
@@ -670,6 +723,24 @@ const GenAIApp = () => {
                         />
                         Gpt4Turbo
                     </label>}
+                    <label className={isGeneratingGpt4oMini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
+                            value="gpt4mini"
+                            onChange={(e) => setIsGpt4oMini(e.target.checked)}
+                            checked={isGpt4oMini}
+                        />
+                        Gpt4oMini
+                    </label>
+                    <label className={isGeneratingGeminiFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
+                            value="gemini-fast"
+                            onChange={(e) => setIsGeminiFast(e.target.checked)}
+                            checked={isGeminiFast}
+                        />
+                        Gemini-Fast
+                    </label>
                     <label className={isGeneratingo1 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
@@ -777,10 +848,12 @@ const GenAIApp = () => {
                             isGeneratingAnthropic ||
                             isGeneratingo1Mini ||
                             isGeneratingo1 ||
-                            isGeneratingImage_Dall_e_3 || isGeneratingTTS ||
+                            isGeneratingImage_Dall_e_3 ||
+                            isGeneratingTTS ||
                             isGeneratingMistral ||
                             isGeneratingLlama ||
-                            isGeneratingGpt4Turbo ? (
+                            isGeneratingGpt4Turbo ||
+                            isGeneratingGpt4oMini ? (
                             <FaSpinner className="spinning" />
                         ) : (
                             'GenAI'
@@ -827,6 +900,11 @@ const GenAIApp = () => {
                     <option value="o1-preview">o1</option>
                     <option value="azure-tts">TTS</option>
                     <option value="dall-e-3">IMAGE</option>
+                    <option value="Mistral-large-2407">Mistral</option>
+                    <option value="meta-llama-3.1-405b-instruct">Llama</option>
+                    <option value="gpt-4-turbo">Gpt4Turbo</option>
+                    <option value="gpt-4o-mini">Gpt4oMini</option>
+                    <option value="gemini-flash-fast">GeminiFast</option>
                 </select>
                 {showEditPopup && (
                     <div style={{ border: '4px' }}>
