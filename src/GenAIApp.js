@@ -905,9 +905,9 @@ const GenAIApp = () => {
                             isGeneratingMistral ||
                             isGeneratingLlama ||
                             isGeneratingGpt4Turbo ||
-                            isGeminiFast ||
-                            isPerplexityFast ||
-                            isPerplexity ||
+                            isGeneratingGeminiFast ||
+                            isGeneratingPerplexity ||
+                            isGeneratingPerplexityFast ||
                             isGeneratingGpt4oMini ? (
                             <FaSpinner className="spinning" />
                         ) : (
