@@ -436,7 +436,7 @@ function TTSQueueApp() {
 
                                 <form onSubmit={handleAddTask}>
                                     <input
-                                        className="addTask"
+                                        className="tts-addTask"
                                         type="text"
                                         placeholder=""
                                         value={newTask}
