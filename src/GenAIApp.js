@@ -13,6 +13,7 @@ import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 import { TbEmpathize } from "react-icons/tb";
 import { MdSettingsInputComponent } from "react-icons/md";
+import { FaK } from "react-icons/fa6";
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -23,6 +24,7 @@ let searchQuery = '';
 let searchModel = 'All';
 let dataLimit = 11;
 let promptSuggestion = 'NA';
+let autoPromptInput = '';
 
 const GenAIApp = () => {
     // **State Variables**
@@ -44,10 +46,10 @@ const GenAIApp = () => {
     const [isGpt4oMini, setIsGpt4oMini] = useState(false);
     const [isGeneratingGpt4oMini, setIsGeneratingGpt4oMini] = useState(false);
     const [isOpenAI, setIsOpenAI] = useState(true);
-    const [isAnthropic, setIsAnthropic] = useState(false);
+    const [isAnthropic, setIsAnthropic] = useState(true);
     const [isGemini, setIsGemini] = useState(false);
     const [isGpto1Mini, setIsGpto1Mini] = useState(false);
-    const [isLlama, setIsLlama] = useState(false);
+    const [isLlama, setIsLlama] = useState(true);
     const [isMistral, setIsMistral] = useState(false);
     const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
     const [isGeminiFast, setIsGeminiFast] = useState(false);
@@ -76,7 +78,21 @@ const GenAIApp = () => {
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [temperature, setTemperature] = useState(0.7);
     const [top_p, setTop_p] = useState(0.8);
+    const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showGpt4Turbo, setShowGpt4Turbo] = useState(true);
+    const [showMistral, setShowMistral] = useState(true);
+    const [showLlama, setShowLlama] = useState(true);
+    const [showGpt4oMini, setShowGpt4oMini] = useState(true);
+    const [showGeminiFast, setShowGeminiFast] = useState(true);
+    const [showPerplexityFast, setShowPerplexityFast] = useState(true);
+    const [showPerplexity, setShowPerplexity] = useState(true);
+    const [showGemini, setShowGemini] = useState(true);
+    const [showAnthropic, setShowAnthropic] = useState(true);
+    const [showOpenAI, setShowOpenAI] = useState(true);
+    const [showo1, setShowo1] = useState(true);
+    const [showImageDallE3, setShowImageDallE3] = useState(true);
+    const [showTTS, setShowTTS] = useState(true);
+    const [showo1Mini, setShowo1Mini] = useState(true);
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
     const [modelOpenAI, setModelOpenAI] = useState('gpt-4o');
@@ -90,7 +106,30 @@ const GenAIApp = () => {
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
+    const [autoPrompt, setAutoPrompt] = useState(false);
 
+    const embedPrompt = async (docId) => {
+        try {
+            console.log('Embedding prompt:', docId);
+            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}embed-prompt`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ doc_id: docId, uid: uid })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to embed prompt.');
+            }
+            const data = await response.json();
+            console.log('Embed Prompt Response:', data);
+        } catch (error) {
+            console.error('Error embedding prompt:', error);
+            alert(`Error: ${error.message}`);
+        }
+    };
     // Helper function to save prompt
     const handleSavePrompt = async () => {
         if (!editPromptTag.trim() || !editPromptFullText.trim()) {
@@ -99,6 +138,7 @@ const GenAIApp = () => {
         }
         try {
             const user = auth.currentUser;
+            let docId = '';
             if (!user) {
                 console.error("No user is signed in");
                 return;
@@ -106,10 +146,11 @@ const GenAIApp = () => {
             const genaiCollection = collection(db, 'genai', user.uid, 'prompts');
             if (selectedPrompt == 'NA' || selectedPrompt == null) {
                 console.log('Adding new prompt');
-                await addDoc(genaiCollection, {
+                const newDocRef = await addDoc(genaiCollection, {
                     tag: editPromptTag,
                     fullText: editPromptFullText
-                })
+                });
+                docId = newDocRef.id;
             }
             else {
                 console.log('Updating prompt');
@@ -121,8 +162,9 @@ const GenAIApp = () => {
                     tag: editPromptTag,
                     fullText: editPromptFullText
                 });
+                docId = docRef.id;
             }
-
+            embedPrompt(docId);
             setEditPromptTag('');
             setEditPromptFullText('');
             setShowEditPopup(false);
@@ -191,6 +233,23 @@ const GenAIApp = () => {
                 console.log('Data:', data.temperature, data.top_p);
                 setTemperature(data.temperature);
                 setTop_p(data.top_p);
+                setAutoPromptLimit(data.autoPromptLimit);
+                dataLimit = data.dataLimit;
+                setIsAnthropic(data.isAnthropic);
+                setIsGemini(data.isGemini);
+                setIsOpenAI(data.isOpenAI);
+                setIsGpto1Mini(data.isGpto1Mini);
+                setIso1(data.iso1);
+                setIsImage_Dall_e_3(data.isImage_Dall_e_3);
+                setIsTTS(data.isTTS);
+                setIsLlama(data.isLlama);
+                setIsMistral(data.isMistral);
+                setIsGpt4Turbo(data.isGpt4Turbo);
+                setIsGpt4oMini(data.isGpt4oMini);
+                setIsGeminiFast(data.isGeminiFast);
+                setIsPerplexityFast(data.isPerplexityFast);
+                setIsPerplexity(data.isPerplexity);
+                setShowGpt4Turbo(data.showGpt4Turbo);
             });
         } catch (error) {
             console.error("Error fetching voice names: ", error);
@@ -366,6 +425,36 @@ const GenAIApp = () => {
         });
     };
 
+    const searchPrompts = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}prompt-search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ q: promptInput, uid: user.uid, limit: autoPromptLimit })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to search prompts.');
+            }
+
+            const data = await response.json();
+            const docIds = data.document_ids;
+
+            const genaiCollection = collection(db, 'genai', uid, 'prompts');
+            const docsQuery = query(genaiCollection, where('__name__', 'in', docIds));
+            const docsSnapshot = await getDocs(docsQuery);
+            const fullTexts = docsSnapshot.docs.map(doc => doc.data().fullText);
+            autoPromptInput = promptInput;
+            autoPromptInput = autoPromptInput + "    " + fullTexts.join("\n");
+        } catch (error) {
+            console.error('Error searching prompts:', error);
+            alert(`Error: ${error.message}`);
+        }
+    };
+
     // **New Event Handlers for Generate and Refresh**
 
     // Handler for Generate Button Click
@@ -454,36 +543,49 @@ const GenAIApp = () => {
             //
 
             if (promptInput.length > 2) {
-            /* const chunks = [];
-             for (let i = 0; i < promptInput.length; i += 3999) {
-               chunks.push(promptInput.substring(i, i + 3999));
-             }
-             for (const chunk of chunks) {
-               callTTSAPI(chunk);
-             }*/
-            callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
+                /* const chunks = [];
+                 for (let i = 0; i < promptInput.length; i += 3999) {
+                   chunks.push(promptInput.substring(i, i + 3999));
+                 }
+                 for (const chunk of chunks) {
+                   callTTSAPI(chunk);
+                 }*/
+                callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
             }
             else {
-            callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
+                callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
             }
         }
-        };
+    };
 
-        const callAPI = async (selectedModel) => {
+    const callAPI = async (selectedModel) => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL);
 
         try {
-            const response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-            });
-
+            let response;
+            if (autoPrompt) {
+                await searchPrompts();
+                console.log('Prompt:', autoPromptInput);
+                response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: autoPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                });
+            }
+            else {
+                response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                });
+            }
             if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to generate content.');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate content.');
             }
             const data = await response.json();
             console.log('Response:', data);
@@ -497,47 +599,47 @@ const GenAIApp = () => {
             console.log('Fetching data after generating content');
             fetchData(uid);
             if (selectedModel === modelOpenAI) {
-            setIsGenerating(false);
+                setIsGenerating(false);
             }
             if (selectedModel === modelAnthropic) {
-            setIsGeneratingAnthropic(false);
+                setIsGeneratingAnthropic(false);
             }
             if (selectedModel === modelGemini) {
-            setIsGeneratingGemini(false);
+                setIsGeneratingGemini(false);
             }
             if (selectedModel === modelGpto1Mini) {
-            setIsGeneratingo1Mini(false);
+                setIsGeneratingo1Mini(false);
             }
             if (selectedModel === modelo1) {
-            setIsGeneratingo1(false);
+                setIsGeneratingo1(false);
             }
             if (selectedModel === modelImageDallE3) {
-            setIsGeneratingImage_Dall_e_3(false);
+                setIsGeneratingImage_Dall_e_3(false);
             }
             if (selectedModel === modelMistral) {
-            setIsGeneratingMistral(false);
+                setIsGeneratingMistral(false);
             }
             if (selectedModel === modelLlama) {
-            setIsGeneratingLlama(false);
+                setIsGeneratingLlama(false);
             }
             if (selectedModel === modelGpt4Turbo) {
-            setIsGeneratingGpt4Turbo(false);
+                setIsGeneratingGpt4Turbo(false);
             }
             if (selectedModel === modelGpt4oMini) {
-            setIsGeneratingGpt4oMini(false);
+                setIsGeneratingGpt4oMini(false);
             }
             if (selectedModel === modelGeminiFast) {
-            setIsGeneratingGeminiFast(false);
+                setIsGeneratingGeminiFast(false);
             }
             if (selectedModel === modelPerplexityFast) {
-            setIsGeneratingPerplexityFast(false);
+                setIsGeneratingPerplexityFast(false);
             }
             if (selectedModel === modelPerplexity) {
-            setIsGeneratingPerplexity(false);
+                setIsGeneratingPerplexity(false);
             }
 
         }
-        };
+    };
 
     // Function to call the TTS API
     const callTTSAPI = async (message, apiUrl) => {
@@ -825,7 +927,7 @@ const GenAIApp = () => {
                         Perplexity-Fast
                     </label>
                     <label className={isGeneratingPerplexity ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                            
+
                         <input
                             type="checkbox"
                             value="perplexity"
@@ -898,6 +1000,14 @@ const GenAIApp = () => {
                             ))}
                         </select>
                     )}
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={autoPrompt}
+                            onChange={(e) => setAutoPrompt(e.target.checked)}
+                        />
+                        AutoPrompt
+                    </label>
                     {!isTTS && (
                         <button
                             className="signonpagebutton"
@@ -973,7 +1083,7 @@ const GenAIApp = () => {
                     type="text"
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
                     placeholder="Keyword Search"
-                    style={{ width: '30%', padding: '10px', marginLeft: '5px' , border: '2px', fontSize: '16px' }}
+                    style={{ width: '30%', padding: '10px', marginLeft: '5px', border: '2px', fontSize: '16px' }}
                 />
 
                 <select
