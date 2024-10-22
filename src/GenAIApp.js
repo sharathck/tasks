@@ -243,6 +243,11 @@ const GenAIApp = () => {
         bigQueryResults();
     };
 
+    const handleVectorSearchChange = (event) => {
+        searchQuery = event.target.value;
+        vectorSearchResults();
+    };
+
     const [showFullQuestion, setShowFullQuestion] = useState(false);
 
     const handleShowMore = () => {
@@ -627,6 +632,35 @@ const GenAIApp = () => {
         searchModel = modelValue;
         bigQueryResults();
     }
+
+    const vectorSearchResults = async () => {
+        setIsLoading(true);
+        console.log("Fetching data for Vector search query:", searchQuery);
+        console.log("URL:", process.env.REACT_APP_GENAI_API_VECTOR_URL);
+        fetch(process.env.REACT_APP_GENAI_API_VECTOR_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                uid: uid,
+                q: searchQuery,
+                limit: dataLimit,
+            })
+        })
+            .then((res) => res.json())
+            .then(async (data) => {
+                const docIds = data.document_ids;
+                const genaiCollection = collection(db, 'genai', uid, 'MyGenAI');
+                const docsQuery = query(genaiCollection, where('__name__', 'in', docIds));
+                const docsSnapshot = await getDocs(docsQuery);
+                const genaiList = docsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setGenaiData(genaiList);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+                setIsLoading(false);
+            });
+    }
+
     const bigQueryResults = () => {
         setIsLoading(true);
         console.log("Fetching data for search query:", searchQuery);
@@ -932,10 +966,18 @@ const GenAIApp = () => {
                 <input
                     type="text"
                     onBlur={(event) => handleSearchChange(event)}
-                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
-                    placeholder="Enter Search Text and Click Enter"
-                    style={{ width: '70%', padding: '10px', fontSize: '16px' }}
+                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
+                    placeholder="Semantic or Vector Search"
+                    style={{ width: '30%', padding: '10px', border: '2px', fontSize: '16px' }}
                 />
+                <input
+                    type="text"
+                    onBlur={(event) => handleSearchChange(event)}
+                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
+                    placeholder="Keyword Search"
+                    style={{ width: '30%', padding: '10px', marginLeft: '5px' , border: '2px', fontSize: '16px' }}
+                />
+
                 <select
                     value={searchModel}
                     onChange={(e) => handleModelChange(e.target.value)}
