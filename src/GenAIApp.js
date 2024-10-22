@@ -250,6 +250,9 @@ const GenAIApp = () => {
                 setIsPerplexityFast(data.isPerplexityFast);
                 setIsPerplexity(data.isPerplexity);
                 setShowGpt4Turbo(data.showGpt4Turbo);
+                setShowPerplexityFast(data.showPerplexityFast);
+                setShowGpt4oMini(data.showGpt4oMini);
+                setShowGeminiFast(data.showGeminiFast);
             });
         } catch (error) {
             console.error("Error fetching voice names: ", error);
@@ -885,16 +888,7 @@ const GenAIApp = () => {
                         />
                         Gpt4Turbo
                     </label>}
-                    <label className={isGeneratingGpt4oMini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="gpt4mini"
-                            onChange={(e) => setIsGpt4oMini(e.target.checked)}
-                            checked={isGpt4oMini}
-                        />
-                        Gpt4oMini
-                    </label>
-                    <label className={isGeneratingGeminiFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                    {showGeminiFast && <label className={isGeneratingGeminiFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="gemini-fast"
@@ -902,7 +896,16 @@ const GenAIApp = () => {
                             checked={isGeminiFast}
                         />
                         Gemini-Fast
-                    </label>
+                    </label>}
+                    {showGpt4oMini && <label className={isGeneratingGpt4oMini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
+                            value="gpt4mini"
+                            onChange={(e) => setIsGpt4oMini(e.target.checked)}
+                            checked={isGpt4oMini}
+                        />
+                        Gpt4oMini
+                    </label>}
                     <label className={isGeneratingo1 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
@@ -916,7 +919,7 @@ const GenAIApp = () => {
                         />
                         o1
                     </label>
-                    <label className={isGeneratingPerplexityFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                    {showPerplexityFast && <label className={isGeneratingPerplexityFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
 
                             type="checkbox"
@@ -925,7 +928,7 @@ const GenAIApp = () => {
                             checked={isPerplexityFast}
                         />
                         Perplexity-Fast
-                    </label>
+                    </label>}
                     <label className={isGeneratingPerplexity ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
 
                         <input
@@ -934,7 +937,7 @@ const GenAIApp = () => {
                             onChange={(e) => setIsPerplexity(e.target.checked)}
                             checked={isPerplexity}
                         />
-                        Perplexity
+                        Plxty
                     </label>
 
                     <label style={{ marginLeft: '8px' }}>
@@ -961,7 +964,7 @@ const GenAIApp = () => {
                             style={{ width: '50px', marginLeft: '5px' }}
                         />
                     </label>
-                    <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                    {showImageDallE3 && <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
                             value="dall-e-3"
@@ -969,7 +972,7 @@ const GenAIApp = () => {
                             checked={isImage_Dall_e_3}
                         />
                         IMAGE
-                    </label>
+                    </label>}
                     <label className={isGeneratingTTS ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
                         <input
                             type="checkbox"
@@ -1006,7 +1009,7 @@ const GenAIApp = () => {
                             checked={autoPrompt}
                             onChange={(e) => setAutoPrompt(e.target.checked)}
                         />
-                        AutoPrompt
+                        AutoAI
                     </label>
                     {!isTTS && (
                         <button
