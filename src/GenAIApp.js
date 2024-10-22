@@ -965,14 +965,12 @@ const GenAIApp = () => {
                 </label>
                 <input
                     type="text"
-                    onBlur={(event) => handleSearchChange(event)}
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
                     placeholder="Semantic or Vector Search"
                     style={{ width: '30%', padding: '10px', border: '2px', fontSize: '16px' }}
                 />
                 <input
                     type="text"
-                    onBlur={(event) => handleSearchChange(event)}
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
                     placeholder="Keyword Search"
                     style={{ width: '30%', padding: '10px', marginLeft: '5px' , border: '2px', fontSize: '16px' }}
