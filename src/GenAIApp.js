@@ -55,6 +55,7 @@ const GenAIApp = () => {
     const [isGeminiFast, setIsGeminiFast] = useState(false);
     const [isPerplexityFast, setIsPerplexityFast] = useState(false);
     const [isPerplexity, setIsPerplexity] = useState(false);
+    const [isCodestral, setIsCodestral] = useState(false);
     const [isGeneratingGeminiFast, setIsGeneratingGeminiFast] = useState(false);
     const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
@@ -66,6 +67,7 @@ const GenAIApp = () => {
     const [isGeneratingGpt4Turbo, setIsGeneratingGpt4Turbo] = useState(false);
     const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
+    const [isGeneratingCodeStral, setIsGeneratingCodeStral] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
@@ -86,6 +88,7 @@ const GenAIApp = () => {
     const [showGeminiFast, setShowGeminiFast] = useState(true);
     const [showPerplexityFast, setShowPerplexityFast] = useState(true);
     const [showPerplexity, setShowPerplexity] = useState(true);
+    const [showCodeStral, setShowCodeStral] = useState(true);
     const [showGemini, setShowGemini] = useState(true);
     const [showAnthropic, setShowAnthropic] = useState(true);
     const [showOpenAI, setShowOpenAI] = useState(true);
@@ -106,6 +109,7 @@ const GenAIApp = () => {
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
+    const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
     const [autoPrompt, setAutoPrompt] = useState(false);
 
     const embedPrompt = async (docId) => {
@@ -249,10 +253,12 @@ const GenAIApp = () => {
                 setIsGeminiFast(data.isGeminiFast);
                 setIsPerplexityFast(data.isPerplexityFast);
                 setIsPerplexity(data.isPerplexity);
+                setIsCodestral(data.isCodestral);
                 setShowGpt4Turbo(data.showGpt4Turbo);
                 setShowPerplexityFast(data.showPerplexityFast);
                 setShowGpt4oMini(data.showGpt4oMini);
                 setShowGeminiFast(data.showGeminiFast);
+                setShowCodeStral(data.showCodeStral);
             });
         } catch (error) {
             console.error("Error fetching voice names: ", error);
@@ -430,12 +436,12 @@ const GenAIApp = () => {
 
     const searchPrompts = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}prompt-search`, {
+            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}search`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ q: promptInput, uid: user.uid, limit: autoPromptLimit })
+                body: JSON.stringify({ q: promptInput, uid: user.uid, collection: 'prompts', limit: autoPromptLimit })
             });
 
             if (!response.ok) {
@@ -452,6 +458,7 @@ const GenAIApp = () => {
             const fullTexts = docsSnapshot.docs.map(doc => doc.data().fullText);
             autoPromptInput = promptInput;
             autoPromptInput = autoPromptInput + "    " + fullTexts.join("\n");
+            setPromptInput(autoPromptInput);
         } catch (error) {
             console.error('Error searching prompts:', error);
             alert(`Error: ${error.message}`);
@@ -469,7 +476,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral) {
             alert('Please select at least one model.');
             return;
         }
@@ -532,6 +539,11 @@ const GenAIApp = () => {
         if (isPerplexity) {
             setIsGeneratingPerplexity(true); // Set generating state to true
             callAPI(modelPerplexity);
+        }
+
+        if (isCodestral) {
+            setIsGeneratingCodeStral(true); // Set generating state to true
+            callAPI(modelCodestralApi);
         }
 
         // **Handle DALL·E 3 Selection**
@@ -640,6 +652,9 @@ const GenAIApp = () => {
             if (selectedModel === modelPerplexity) {
                 setIsGeneratingPerplexity(false);
             }
+            if (selectedModel === modelCodestralApi) {
+                setIsGeneratingCodeStral(false);
+            }
 
         }
     };
@@ -690,6 +705,7 @@ const GenAIApp = () => {
                 setIsGeminiFast(false);
                 setIsPerplexityFast(false);
                 setIsPerplexity(false);
+                setIsCodestral(false);
             }
 
             // Set the promptSelect dropdown to "image"
@@ -939,7 +955,15 @@ const GenAIApp = () => {
                         />
                         Plxty
                     </label>
-
+                    {showCodeStral && <label className={isGeneratingCodeStral ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
+                        <input
+                            type="checkbox"
+                            value="codestral"
+                            onChange={(e) => setIsCodestral(e.target.checked)}
+                            checked={isCodestral}
+                        />
+                        CodeStral
+                    </label>}
                     <label style={{ marginLeft: '8px' }}>
                         Temp:
                         <input
@@ -1050,6 +1074,7 @@ const GenAIApp = () => {
                             isGeneratingGeminiFast ||
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
+                            isGeneratingCodeStral ||
                             isGeneratingGpt4oMini ? (
                             <FaSpinner className="spinning" />
                         ) : (
