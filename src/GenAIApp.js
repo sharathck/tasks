@@ -818,152 +818,63 @@ const GenAIApp = () => {
             <div>
                 <div>
                     <textarea
+                        className="promptInput"
                         value={promptInput}
                         onChange={(e) => setPromptInput(e.target.value)}
                         placeholder="Enter your prompt here..."
-                        style={{ width: '99%', padding: '2px', height: '140px', fontSize: '16px' }}
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                    <label className={isGenerating ? 'flashing' : ''}>
-                        <input
-                            type="checkbox"
-                            value="openai"
-                            onChange={(e) => {
-                                setIsOpenAI(e.target.checked);
-                                if (e.target.checked) setIsTTS(false);
-                                if (e.target.checked) setIsImage_Dall_e_3(false);
-                            }}
-                            checked={isOpenAI}
-                        />
-                        ChatGPT
-                    </label>
-                    <label className={isGeneratingAnthropic ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="anthropic"
-                            onChange={(e) => {
-                                setIsAnthropic(e.target.checked);
-                                if (e.target.checked) setIsTTS(false);
-                                if (e.target.checked) setIsImage_Dall_e_3(false);
-                            }}
-                            checked={isAnthropic}
-                        />
-                        Claude
-                    </label>
-                    <label className={isGeneratingGemini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="gemini"
-                            onChange={(e) => {
-                                setIsGemini(e.target.checked);
-                                if (e.target.checked) setIsTTS(false);
-                                if (e.target.checked) setIsImage_Dall_e_3(false);
-                            }}
-                            checked={isGemini}
-                        />
-                        Gemini
-                    </label>
-                    <label className={isGeneratingo1Mini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="o1-mini"
-                            onChange={(e) => {
-                                setIsGpto1Mini(e.target.checked);
-                                if (e.target.checked) setIsTTS(false);
-                                if (e.target.checked) setIsImage_Dall_e_3(false);
-                            }}
-                            checked={isGpto1Mini}
-                        />
-                        o1-mini
-                    </label>
-                    <label className={isGeneratingLlama ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="llama"
-                            onChange={(e) => setIsLlama(e.target.checked)}
-                            checked={isLlama}
-                        />
-                        Llama
-                    </label>
-                    <label className={isGeneratingMistral ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="mistral"
-                            onChange={(e) => setIsMistral(e.target.checked)}
-                            checked={isMistral}
-                        />
-                        Mistral
-                    </label>
-                    {showGpt4Turbo && <label className={isGeneratingGpt4Turbo ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="Gpt4Turbo"
-                            onChange={(e) => setIsGpt4Turbo(e.target.checked)}
-                            checked={isGpt4Turbo}
-                        />
-                        Gpt4Turbo
-                    </label>}
-                    {showGeminiFast && <label className={isGeneratingGeminiFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="gemini-fast"
-                            onChange={(e) => setIsGeminiFast(e.target.checked)}
-                            checked={isGeminiFast}
-                        />
-                        Gemini-Fast
-                    </label>}
-                    {showGpt4oMini && <label className={isGeneratingGpt4oMini ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="gpt4mini"
-                            onChange={(e) => setIsGpt4oMini(e.target.checked)}
-                            checked={isGpt4oMini}
-                        />
-                        Gpt4oMini
-                    </label>}
-                    <label className={isGeneratingo1 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="o1"
-                            onChange={(e) => {
-                                setIso1(e.target.checked);
-                                if (e.target.checked) setIsTTS(false);
-                                if (e.target.checked) setIsImage_Dall_e_3(false);
-                            }}
-                            checked={iso1}
-                        />
-                        o1
-                    </label>
-                    {showPerplexityFast && <label className={isGeneratingPerplexityFast ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-
-                            type="checkbox"
-                            value="perplexity-fast"
-                            onChange={(e) => setIsPerplexityFast(e.target.checked)}
-                            checked={isPerplexityFast}
-                        />
-                        Perplexity-Fast
-                    </label>}
-                    <label className={isGeneratingPerplexity ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-
-                        <input
-                            type="checkbox"
-                            value="perplexity"
-                            onChange={(e) => setIsPerplexity(e.target.checked)}
-                            checked={isPerplexity}
-                        />
-                        Plxty
-                    </label>
-                    {showCodeStral && <label className={isGeneratingCodeStral ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="codestral"
-                            onChange={(e) => setIsCodestral(e.target.checked)}
-                            checked={isCodestral}
-                        />
-                        CodeStral
-                    </label>}
+                    <button className={isOpenAI ? 'button_selected' : 'button'} onClick={() => setIsOpenAI(!isOpenAI)}>
+                        <label className={isGenerating ? 'flashing' : ''}>ChatGPT</label>
+                    </button>
+                    <button className={isAnthropic ? 'button_selected' : 'button'} onClick={() => setIsAnthropic(!isAnthropic)}>
+                        <label className={isGeneratingAnthropic ? 'flashing' : ''}>Claude</label>
+                    </button>
+                    <button className={isGemini ? 'button_selected' : 'button'} onClick={() => setIsGemini(!isGemini)}>
+                        <label className={isGeneratingGemini ? 'flashing' : ''}>Gemini</label>
+                    </button>
+                    <button className={isGpto1Mini ? 'button_selected' : 'button'} onClick={() => setIsGpto1Mini(!isGpto1Mini)}>
+                        <label className={isGeneratingo1Mini ? 'flashing' : ''}>o1-mini</label>
+                    </button>
+                    <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
+                        <label className={isGeneratingLlama ? 'flashing' : ''}>Llama</label>
+                    </button>
+                    <button className={isMistral ? 'button_selected' : 'button'} onClick={() => setIsMistral(!isMistral)}>
+                        <label className={isGeneratingMistral ? 'flashing' : ''}>Mistral</label>
+                    </button>
+                    {showGpt4Turbo && (
+                        <button className={isGpt4Turbo ? 'button_selected' : 'button'} onClick={() => setIsGpt4Turbo(!isGpt4Turbo)}>
+                            <label className={isGeneratingGpt4Turbo ? 'flashing' : ''}>Gpt4Turbo</label>
+                        </button>
+                    )}
+                    {showGeminiFast && (
+                        <button className={isGeminiFast ? 'button_selected' : 'button'} onClick={() => setIsGeminiFast(!isGeminiFast)}>
+                            <label className={isGeneratingGeminiFast ? 'flashing' : ''}>Gemini-Fast</label>
+                        </button>
+                    )}
+                    {showGpt4oMini && (
+                        <button className={isGpt4oMini ? 'button_selected' : 'button'} onClick={() => setIsGpt4oMini(!isGpt4oMini)}>
+                            <label className={isGeneratingGpt4oMini ? 'flashing' : ''}>Gpt4oMini</label>
+                        </button>
+                    )}
+                    <button className={iso1 ? 'button_selected' : 'button'} onClick={() => setIso1(!iso1)}>
+                        <label className={isGeneratingo1 ? 'flashing' : ''}>o1</label>
+                    </button>
+                    {showPerplexityFast && (
+                        <button className={isPerplexityFast ? 'button_selected' : 'button'} onClick={() => setIsPerplexityFast(!isPerplexityFast)}>
+                            <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>Perplexity-Fast</label>
+                        </button>
+                    )}
+                    <button className={isPerplexity ? 'button_selected' : 'button'} onClick={() => setIsPerplexity(!isPerplexity)}>
+                        <label className={isGeneratingPerplexity ? 'flashing' : ''}>Plxty</label>
+                    </button>
+                    {showCodeStral && (
+                        <button className={isCodestral ? 'button_selected' : 'button'} onClick={() => setIsCodestral(!isCodestral)}>
+                            <label className={isGeneratingCodeStral ? 'flashing' : ''}>CodeStral</label>
+                        </button>
+                    )}
+                             
                     <label style={{ marginLeft: '8px' }}>
                         Temp:
                         <input
@@ -988,24 +899,12 @@ const GenAIApp = () => {
                             style={{ width: '50px', marginLeft: '5px' }}
                         />
                     </label>
-                    {showImageDallE3 && <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="dall-e-3"
-                            onChange={(e) => handleDall_e_3Change(e.target.checked)}
-                            checked={isImage_Dall_e_3}
-                        />
-                        IMAGE
-                    </label>}
-                    <label className={isGeneratingTTS ? 'flashing' : ''} style={{ marginLeft: '8px' }}>
-                        <input
-                            type="checkbox"
-                            value="tts"
-                            onChange={(e) => handleTTSChange(e.target.checked)}
-                            checked={isTTS}
-                        />
-                        TTS
-                    </label>
+                    {showImageDallE3 && <button className={isImage_Dall_e_3 ? 'button_selected' : 'button'} onClick={() => handleDall_e_3Change(!isImage_Dall_e_3)}>
+                        <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>IMAGE</label>
+                    </button>}
+                    <button className={isTTS ? 'button_selected' : 'button'} onClick={() => handleTTSChange(!isTTS)}>
+                        <label className={isGeneratingTTS ? 'flashing' : ''}>TTS</label>
+                    </button>
                     {isTTS && (
                         <VoiceSelect
                             selectedVoice={voiceName} // Current selected voice
@@ -1013,7 +912,7 @@ const GenAIApp = () => {
                         />
                     )}
                     {!isTTS && (
-                        <select id="promptS</label>elect"
+                        <select className="promptDropdownInput" id="promptSelect"
                             onChange={(e) => {
                                 handlePromptChange(e.target.value);
                                 setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
@@ -1027,14 +926,6 @@ const GenAIApp = () => {
                             ))}
                         </select>
                     )}
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={autoPrompt}
-                            onChange={(e) => setAutoPrompt(e.target.checked)}
-                        />
-                        AutoAI
-                    </label>
                     {!isTTS && (
                         <button
                             className="signonpagebutton"
@@ -1044,10 +935,13 @@ const GenAIApp = () => {
                             <FaEdit />
                         </button>
                     )}
+                    <button className={autoPrompt ? 'button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
+                        AutoAI
+                    </button>
                     <button
                         onClick={handleGenerate}
                         className="signonpagebutton"
-                        style={{ marginLeft: '20px', padding: '15px 20px', fontSize: '16px' }}
+                        style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
                         disabled={
                             isGenerating ||
                             isGeneratingGemini ||
@@ -1058,7 +952,12 @@ const GenAIApp = () => {
                             isGeneratingTTS ||
                             isGeneratingMistral ||
                             isGeneratingLlama ||
-                            isGeneratingGpt4Turbo
+                            isGeneratingGpt4Turbo ||
+                            isGeneratingGeminiFast ||
+                            isGeneratingPerplexity ||
+                            isGeneratingPerplexityFast ||
+                            isGeneratingGpt4oMini ||
+                            isGeneratingCodeStral
                         }
                     >
                         {isGenerating ||
@@ -1093,28 +992,29 @@ const GenAIApp = () => {
                 <label>
                     Limit:
                     <input
+                    className="limitInput"
                         type="number"
                         onBlur={(event) => handleLimitChange(event)}
                         onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleLimitChange(event)}
                         defaultValue={dataLimit}
-                        style={{ width: "50px", margin: "0 10px" }}
                         min={1}
                     />
                 </label>
                 <input
+                    className="searchInput"
                     type="text"
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
                     placeholder="Semantic or Vector Search"
-                    style={{ width: '30%', padding: '10px', border: '2px', fontSize: '16px' }}
                 />
                 <input
+                    className="searchInput"
                     type="text"
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
                     placeholder="Keyword Search"
-                    style={{ width: '30%', padding: '10px', marginLeft: '5px', border: '2px', fontSize: '16px' }}
                 />
 
                 <select
+                className="modelInput"
                     value={searchModel}
                     onChange={(e) => handleModelChange(e.target.value)}
                     style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
@@ -1172,7 +1072,7 @@ const GenAIApp = () => {
           )}*/}
 
                 {/* **Existing Data Display** */}
-                <div>
+                <div className="outputFormat">
                     {isLoading && <p> Loading Data...</p>}
                     {!isLoading && <div>
                         {genaiData.map((item) => (
