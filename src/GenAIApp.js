@@ -49,7 +49,7 @@ const GenAIApp = () => {
     const [isAnthropic, setIsAnthropic] = useState(true);
     const [isGemini, setIsGemini] = useState(false);
     const [isGpto1Mini, setIsGpto1Mini] = useState(false);
-    const [isLlama, setIsLlama] = useState(true);
+    const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
     const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
     const [isGeminiFast, setIsGeminiFast] = useState(false);
@@ -83,18 +83,18 @@ const GenAIApp = () => {
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showGpt4Turbo, setShowGpt4Turbo] = useState(true);
     const [showMistral, setShowMistral] = useState(true);
-    const [showLlama, setShowLlama] = useState(true);
-    const [showGpt4oMini, setShowGpt4oMini] = useState(true);
+    const [showLlama, setShowLlama] = useState(false);
+    const [showGpt4oMini, setShowGpt4oMini] = useState(false);
     const [showGeminiFast, setShowGeminiFast] = useState(true);
-    const [showPerplexityFast, setShowPerplexityFast] = useState(true);
+    const [showPerplexityFast, setShowPerplexityFast] = useState(false);
     const [showPerplexity, setShowPerplexity] = useState(true);
     const [showCodeStral, setShowCodeStral] = useState(true);
     const [showGemini, setShowGemini] = useState(true);
     const [showAnthropic, setShowAnthropic] = useState(true);
     const [showOpenAI, setShowOpenAI] = useState(true);
-    const [showo1, setShowo1] = useState(true);
-    const [showImageDallE3, setShowImageDallE3] = useState(true);
-    const [showTTS, setShowTTS] = useState(true);
+    const [showo1, setShowo1] = useState(false);
+    const [showImageDallE3, setShowImageDallE3] = useState(false);
+    const [showTTS, setShowTTS] = useState(false);
     const [showo1Mini, setShowo1Mini] = useState(true);
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
@@ -143,6 +143,9 @@ const GenAIApp = () => {
         try {
             const user = auth.currentUser;
             let docId = '';
+            const currentDateTime = new Date();
+            const promptSize = editPromptFullText.length; // Calculate the size of the prompt
+
             if (!user) {
                 console.error("No user is signed in");
                 return;
@@ -152,11 +155,13 @@ const GenAIApp = () => {
                 console.log('Adding new prompt');
                 const newDocRef = await addDoc(genaiCollection, {
                     tag: editPromptTag,
-                    fullText: editPromptFullText
+                    fullText: editPromptFullText,
+                    createdDateTime: currentDateTime,
+                    modifiedDateTime: currentDateTime,
+                    size: promptSize
                 });
                 docId = newDocRef.id;
-            }
-            else {
+            } else {
                 console.log('Updating prompt');
                 const q = query(genaiCollection, where('tag', '==', selectedPrompt), limit(1));
                 const genaiSnapshot = await getDocs(q);
@@ -164,7 +169,9 @@ const GenAIApp = () => {
                 const docRef = doc(db, 'genai', user.uid, 'prompts', genaiList[0].id);
                 await updateDoc(docRef, {
                     tag: editPromptTag,
-                    fullText: editPromptFullText
+                    fullText: editPromptFullText,
+                    modifiedDateTime: currentDateTime,
+                    size: promptSize
                 });
                 docId = docRef.id;
             }
@@ -178,7 +185,6 @@ const GenAIApp = () => {
             console.error("Error saving prompt: ", error);
         }
     };
-
 
     // Helper function to get URL parameters
     const getUrlParameter = (name) => {
@@ -215,16 +221,45 @@ const GenAIApp = () => {
                 setUid(currentUser.uid);
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
-                await fetchData(currentUser.uid);
+                fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
-                fetchGenAIParameters();
+                await fetchGenAIParameters();
+                await fetchAdminSettings(currentUser.email);
             }
             else {
                 console.log('No user is signed in');
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [showEditPopup]);
+
+    const fetchAdminSettings = async (userEmail) => {
+        try {
+            console.log('Fetching ADMIN Settings parameters...' + userEmail);
+            const fetchAdminSettingsCollection = collection(db, 'public');
+            const q = query(fetchAdminSettingsCollection, where('setup', '==', 'genaiAdmin'), limit(1));
+            const fetchAdminSettingsSnapshot = await getDocs(q);
+            fetchAdminSettingsSnapshot.forEach(doc => {
+                const data = doc.data();
+                console.log('Data:', data.emailAddresses, data.showTTS, data.showImageDallE3);
+                if (data.emailAddresses.includes(userEmail)) {
+                    console.log('User is admin');
+                    setShowTTS(data.showTTS);
+                    setShowImageDallE3(data.showImageDallE3);
+                    setShowGeminiFast(data.showGeminiFast);
+                    setShowGpt4Turbo(data.showGpt4Turbo);
+                    setShowPerplexityFast(data.showPerplexityFast);
+                    setShowGpt4oMini(data.showGpt4oMini);
+                    setShowLlama(data.showLlama);
+                    setShowo1(data.showo1);
+                }
+
+            });
+        } catch (error) {
+            console.error("Error fetching genAI Admin Settings: ", error);
+            return [];
+        }
+    };
 
     const fetchGenAIParameters = async () => {
         try {
@@ -259,18 +294,19 @@ const GenAIApp = () => {
                 setShowGpt4oMini(data.showGpt4oMini);
                 setShowGeminiFast(data.showGeminiFast);
                 setShowCodeStral(data.showCodeStral);
+                setShowLlama(data.showLlama);
+                setShowo1(data.showo1);
             });
         } catch (error) {
-            console.error("Error fetching voice names: ", error);
+            console.error("Error fetching genAI parameters: ", error);
             return [];
         }
     };
-
     // Fetch prompts from Firestore
     const fetchPrompts = async (userID) => {
         try {
             const genaiCollection = collection(db, 'genai', userID, 'prompts');
-            const q = query(genaiCollection, limit(100), orderBy('tag', 'asc'));
+            const q = query(genaiCollection, limit(1000), orderBy('modifiedDateTime', 'desc'));
             const genaiSnapshot = await getDocs(q);
             const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setGenaiPrompts(genaiList);
@@ -600,6 +636,7 @@ const GenAIApp = () => {
             }
             if (!response.ok) {
                 const errorData = await response.json();
+                alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
             const data = await response.json();
@@ -837,9 +874,11 @@ const GenAIApp = () => {
                     <button className={isGpto1Mini ? 'button_selected' : 'button'} onClick={() => setIsGpto1Mini(!isGpto1Mini)}>
                         <label className={isGeneratingo1Mini ? 'flashing' : ''}>o1-mini</label>
                     </button>
+                    {showLlama && (
                     <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
                         <label className={isGeneratingLlama ? 'flashing' : ''}>Llama</label>
                     </button>
+                    )}
                     <button className={isMistral ? 'button_selected' : 'button'} onClick={() => setIsMistral(!isMistral)}>
                         <label className={isGeneratingMistral ? 'flashing' : ''}>Mistral</label>
                     </button>
@@ -858,23 +897,27 @@ const GenAIApp = () => {
                             <label className={isGeneratingGpt4oMini ? 'flashing' : ''}>Gpt4oMini</label>
                         </button>
                     )}
+                    {showo1 && (
                     <button className={iso1 ? 'button_selected' : 'button'} onClick={() => setIso1(!iso1)}>
                         <label className={isGeneratingo1 ? 'flashing' : ''}>o1</label>
                     </button>
+                    )}
                     {showPerplexityFast && (
                         <button className={isPerplexityFast ? 'button_selected' : 'button'} onClick={() => setIsPerplexityFast(!isPerplexityFast)}>
                             <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>Perplexity-Fast</label>
                         </button>
                     )}
-                    <button className={isPerplexity ? 'button_selected' : 'button'} onClick={() => setIsPerplexity(!isPerplexity)}>
-                        <label className={isGeneratingPerplexity ? 'flashing' : ''}>Plxty</label>
-                    </button>
+                    {showPerplexity && (
+                        <button className={isPerplexity ? 'button_selected' : 'button'} onClick={() => setIsPerplexity(!isPerplexity)}>
+                            <label className={isGeneratingPerplexity ? 'flashing' : ''}>Plxty</label>
+                        </button>
+                    )}
                     {showCodeStral && (
                         <button className={isCodestral ? 'button_selected' : 'button'} onClick={() => setIsCodestral(!isCodestral)}>
                             <label className={isGeneratingCodeStral ? 'flashing' : ''}>CodeStral</label>
                         </button>
                     )}
-                             
+
                     <label style={{ marginLeft: '8px' }}>
                         Temp:
                         <input
@@ -902,9 +945,9 @@ const GenAIApp = () => {
                     {showImageDallE3 && <button className={isImage_Dall_e_3 ? 'button_selected' : 'button'} onClick={() => handleDall_e_3Change(!isImage_Dall_e_3)}>
                         <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>IMAGE</label>
                     </button>}
-                    <button className={isTTS ? 'button_selected' : 'button'} onClick={() => handleTTSChange(!isTTS)}>
+                    {showTTS && (<button className={isTTS ? 'button_selected' : 'button'} onClick={() => handleTTSChange(!isTTS)}>
                         <label className={isGeneratingTTS ? 'flashing' : ''}>TTS</label>
-                    </button>
+                    </button>)}
                     {isTTS && (
                         <VoiceSelect
                             selectedVoice={voiceName} // Current selected voice
@@ -992,7 +1035,7 @@ const GenAIApp = () => {
                 <label>
                     Limit:
                     <input
-                    className="limitInput"
+                        className="limitInput"
                         type="number"
                         onBlur={(event) => handleLimitChange(event)}
                         onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleLimitChange(event)}
@@ -1014,7 +1057,7 @@ const GenAIApp = () => {
                 />
 
                 <select
-                className="modelInput"
+                    className="modelInput"
                     value={searchModel}
                     onChange={(e) => handleModelChange(e.target.value)}
                     style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
@@ -1022,8 +1065,7 @@ const GenAIApp = () => {
                     <option value="All">All</option>
                     <option value="chatgpt-4o-latest">ChatGPT</option>
                     <option value="gemini-1.5-pro-002">Gemini</option>
-                    <option value="gemini-1.5-pro-exp-0827">gemini-1.5-pro-exp-0827</option>
-                    <option value="claude-3-5-sonnet-20240620">Claude</option>
+                    <option value="claude-3-5-sonnet-latest">Claude</option>
                     <option value="o1-mini">o1-mini</option>
                     <option value="o1-preview">o1</option>
                     <option value="azure-tts">TTS</option>
@@ -1035,6 +1077,7 @@ const GenAIApp = () => {
                     <option value="gemini-flash-fast">GeminiFast</option>
                     <option value="perplexity-fast">PerplexityFast</option>
                     <option value="perplexity">Perplexity</option>
+                    <option value="codestral">CodeStral</option>
                 </select>
                 {showEditPopup && (
                     <div style={{ border: '4px' }}>
@@ -1046,14 +1089,13 @@ const GenAIApp = () => {
                                 type="text"
                                 value={editPromptTag}
                                 onChange={(e) => setEditPromptTag(e.target.value)}
-                                className="popup-input"
+                                className="promptTag"
                             />
                             <br />
                             <textarea
                                 value={editPromptFullText}
-                                style={{ height: '100px', width: '96%' }}
                                 onChange={(e) => setEditPromptFullText(e.target.value)}
-                                className="popup-textarea"
+                                className="promptFullTextInput"
                             />
                             <div>
                                 <button onClick={handleSavePrompt} className="signinbutton">Save</button>
