@@ -1,4 +1,7 @@
 import GenAIApp from './GenAIApp';
+import TTSQueueApp from './TTSQueueApp';
+import App from './App';
+import AudioApp from './AudioApp';
 import './Signin.css';
 import React, { useEffect, useState, useRef } from 'react';
 import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
@@ -26,6 +29,7 @@ function SigninApp() {
     const [user, setUser] = useState(null);
     const [showMainApp, setShowMainApp] = useState(false);
     const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
+    const MainApp = process.env.REACT_APP_MAIN_APP;
 
     // Listen for authentication state changes
     useEffect(() => {
@@ -89,9 +93,27 @@ function SigninApp() {
     };
 
     if (user) {
-        return (
-            <GenAIApp user={user} />
-        );
+        if (MainApp === 'GenAIApp') {
+            return (
+                <GenAIApp user={user} />
+            );
+        }
+        if (MainApp === 'TTSQueueApp') {
+            return (
+                <TTSQueueApp user={user} />
+            );
+        }
+        if (MainApp === 'App') {
+            return (
+                <App user={user} />
+            );
+        }
+        if (MainApp === 'AudioApp') {
+            return (
+                <AudioApp user={user} />
+            );
+        }
+
     }
 
     return (
