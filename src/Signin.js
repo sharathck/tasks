@@ -1,7 +1,4 @@
-import App from './App';
 import GenAIApp from './GenAIApp';
-import TTSQueueApp from './TTSQueueApp';
-import AudioApp from './AudioApp';
 import './Signin.css';
 import React, { useEffect, useState, useRef } from 'react';
 import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
@@ -13,7 +10,8 @@ import {
     onAuthStateChanged,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 
 function SigninApp() {
@@ -68,6 +66,20 @@ function SigninApp() {
         }
     };
 
+    const handleResetPassword = async () => {
+        if (!email) {
+            alert('Please enter your email to reset your password.');
+            return;
+        }
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert('Password reset email sent! Please check your inbox.');
+        } catch (error) {
+            alert('Error sending password reset email. ' + error.message);
+            console.error('Error sending password reset email:', error);
+        }
+    };
+
     const handleSignInWithGoogle = () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider).catch((error) => {
@@ -77,34 +89,9 @@ function SigninApp() {
     };
 
     if (user) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const genai = urlParams.get('genai');
-        if (genai) {
-            return <GenAIApp user={user} />;
-        }
-        const ttsqueue = urlParams.get('ttsqueue');
-        if (ttsqueue) {
-            return <TTSQueueApp user={user} />;
-        }
-        const audio = urlParams.get('audio');
-        if (audio) {
-            return <AudioApp user={user} />;
-        }
-        let MainComponent;
-        switch (process.env.REACT_APP_MAIN_APP) {
-            case 'GenAIApp':
-                MainComponent = <GenAIApp user={user} />;
-                break;
-            case 'TTSQueueApp':
-                MainComponent = <TTSQueueApp user={user} />;
-                break;
-            case 'AudioApp':
-                MainComponent = <AudioApp user={user} />;
-                break;
-            default:
-                MainComponent = <App user={user} />;
-        }
-        return MainComponent;
+        return (
+            <GenAIApp user={user} />
+        );
     }
 
     return (
@@ -141,7 +128,7 @@ function SigninApp() {
                 </button>
                 <br />
                 <br />
-                <button onClick={() => alert('Please enter your email to reset your password.')}>
+                <button onClick={handleResetPassword}>
                     Did you forget Password?
                 </button>
                 <br />
