@@ -83,7 +83,9 @@ const Notes = () => {
                 if (genaiParam) {
                     setGenAIParameter(true);
                 }
-                setGenAIParameter(true);
+                if (process.env.REACT_APP_MAIN_APP === 'GenAI') {
+                    setGenAIParameter(true);
+                }
                 setUid(currentUser.uid);
                 console.log('User is signed in:', currentUser.uid);
                 if (!fileName.trim()) {

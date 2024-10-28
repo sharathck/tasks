@@ -20,21 +20,20 @@
 .dueDate{
 color: orange;
 }
-.button {
-  padding: 2px 2px;
-  margin-left: 10px;
+.app_button {
+  padding: 1px 1px;
+  margin-left: 8px;
   border: 1px solid black;
   background-color: #e8ebef;
   color: rgb(23, 82, 192);
   box-shadow: 2px 2px 8px rgba(34, 33, 33, 0.4);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 25px;
 }
 
-.button_selected {
+.app_button_selected {
   padding: 2px 2px;
-  margin-left: 14px;
-  padding: 5px 5px;
+  margin-left: 7px;
   font-size: 26px;
   border: 1px solid black;
   background-color: rgb(28, 159, 59);
@@ -44,7 +43,7 @@ color: orange;
   font-size: 20px;
 }
 
-.button_delete_selected {
+.app_button_delete_selected {
   padding: 1px 1px;
   margin-left: 10px;
   background-color: rgb(244, 107, 107);
@@ -84,7 +83,7 @@ li {
   margin-left: 5px;
   border: 1px solid black;
 }
-.addbutton {
+.app_button_addbutton {
   background-color:rgb(16, 130, 16);
   color: #fff;
   cursor: pointer;
@@ -94,12 +93,9 @@ li {
   height: 48px; /* Increase the height */
 }
 
-.signoutbutton {
+.app_button_signoutbutton {
   background-color: orange;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  margin-left: 14px;
+  margin-left: 10px;
   padding: 5px 5px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
   font-size: 18px; /* make the button text extremely small */

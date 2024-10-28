@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -12,6 +12,7 @@ import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPass
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 import Notes from './Notes';
+import Articles from './Articles';
 
 const fireBaseTasksCollection = process.env.REACT_APP_FIREBASE_TASKS_COLLECTION;
 console.log('Firebase tasks collection:', fireBaseTasksCollection);
@@ -68,6 +69,7 @@ function App() {
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
   const [showGenAIApp, setShowGenAIApp] = useState(false);
   const [showNotesApp, setShowNotesApp] = useState(false);
+  const [showArticlesApp, setShowArticlesApp] = useState(false);
   const [showLiveTTS, setShowLiveTTS] = useState(false);
 
   useEffect(() => {
@@ -582,6 +584,12 @@ function App() {
     );
   }
 
+  if (showArticlesApp) {
+    return (
+      <Articles user={user} />
+    );
+  }
+
   if (showTTSQueueApp) {
     return (
       <TTSQueueApp user={user} />
@@ -593,40 +601,37 @@ function App() {
       <div>
         {readerMode ? (
           <div>
-            <button className='button' onClick={handleBack}><FaArrowLeft /></button>
+            <button className='app_button' onClick={handleBack}><FaArrowLeft /></button>
             <p>{articles}</p>
           </div>
         ) : (
           <div>
-            <button className={showCompleted ? 'button_selected' : 'button'} onClick={() => setShowCompleted(!showCompleted)}>
+            <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
               <FaCheckDouble />
             </button>
-            <button className={showFuture ? 'button_selected' : 'button'} onClick={() => setShowFuture(!showFuture)}>
+            <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
               <FaClock />
             </button>
-            <button className={showDueDates ? 'button_selected' : 'button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
-            <button className={showEditButtons ? 'button_selected' : 'button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-            {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-            <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={generateTTS}><FaHeadphones /></button>
-            {!isiPhone && <button className={showLiveTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaVolumeUp /></button>}
-            {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={generateTTS}><FaReadme /></button>)}
-            <button className={showSearchBox ? 'button_selected' : 'button'} onClick={handleSearchButtonClick}>
-              <FaSearch />
-            </button>
-            <button className={showAudioApp ? 'button_selected' : 'button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+            <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+            <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+            {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+            <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
+            {!isiPhone && <button className={showLiveTTS ? 'app_button_selected' : 'app_button'} onClick={synthesizeSpeech}><FaVolumeUp /></button>}
+            {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
+            <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
               <FaPlay />
             </button>
-            <button className={showTTSQueueApp ? 'button_selected' : 'button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+            <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
               <FaAlignJustify />
             </button>
-            <button className={showGenAIApp ? 'button_selected' : 'button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+            <button className={showGenAIApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
             </button>
-            <button className={showNotesApp ? 'button_selected' : 'button'} onClick={() => setShowNotesApp(!showNotesApp)}>
+            <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
               <FaNotesMedical />
             </button>
-            <button className="button" onClick={handleSignOut}>
-              <FaSignOutAlt />
+            <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
+              <FaNewspaper />
             </button>
             {showSearchBox && (
               <div> <input
@@ -637,7 +642,7 @@ function App() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 ref={searchInputRef}
               />
-                <button className='button' onClick={handleClearSearch} >
+                <button className='app_button' onClick={handleClearSearch} >
                   <FaTimes />
                 </button>
               </div>
@@ -660,7 +665,7 @@ function App() {
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
                   />
-                  <button className="addbutton" type="submit">
+                  <button className="app_button_addbutton" type="submit">
                     <FaPlus />
                   </button>
                 </form>
@@ -683,7 +688,7 @@ function App() {
                             )}
                           </span>
                           {showEditButtons && (
-                            <button className='button' onClick={() => handleEditTask(task)}>
+                            <button className='app_button' onClick={() => handleEditTask(task)}>
                               <FaEdit style={{ color: 'blue', backgroundColor: 'whitesmoke' }} />
                             </button>
                           )}
@@ -694,12 +699,18 @@ function App() {
                 {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                 <br />
                 <br />
-                <button className={showRecurrentTasks ? 'button_selected' : 'button'} onClick={handleHideRecurrentTasks}>
+                <button className={showRecurrentTasks ? 'app_button_selected' : 'app_button'} onClick={handleHideRecurrentTasks}>
                   <FaConfluence />
                 </button>
 
-                <button className='button' onClick={generateDocx}><FaFileWord /></button>
-                <button className='button' onClick={generateText}><FaFileAlt /></button>
+                <button className='app_button' onClick={generateDocx}><FaFileWord /></button>
+                <button className='app_button' onClick={generateText}><FaFileAlt /></button>
+                <button className={showSearchBox ? 'app_button_selected' : 'app_button'} onClick={handleSearchButtonClick}>
+              <FaSearch />
+            </button>
+            <button className="app_button_signoutbutton" onClick={handleSignOut}>
+               <FaSignOutAlt />
+               </button>
                 <br />
                 <br />
                 {/* Add the voice name input box */}
@@ -707,7 +718,7 @@ function App() {
                   selectedVoice={voiceName} // Current selected voice
                   onVoiceChange={setVoiceName} // Handler to update selected voice
                 /> &nbsp;
-                <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
+                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
                 <br />
                 <br />
                 {adminUser && (
