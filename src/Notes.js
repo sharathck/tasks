@@ -112,7 +112,7 @@ const Notes = () => {
         }, 30000);
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, [promptInput, fileName]);
+    }, [promptInput, fileName, docId]);
 
     // Function to fetch data from Firestore
     const fetchData = async (userID) => {
@@ -258,6 +258,8 @@ const Notes = () => {
                 return;
             }
             const cleanedPromptInput = promptInput.replace(/{\.mark}/g, '');
+            console.log('Prompt Input:', cleanedPromptInput);
+            console.log('Document ID:', docId);
             if (docId.length > 2) {
                 const docRef = doc(db, 'genai', user.uid, 'notes', docId);
                 await updateDoc(docRef, {
