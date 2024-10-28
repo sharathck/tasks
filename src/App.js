@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -11,6 +11,7 @@ import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy,
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
+import Notes from './Notes';
 
 const fireBaseTasksCollection = process.env.REACT_APP_FIREBASE_TASKS_COLLECTION;
 console.log('Firebase tasks collection:', fireBaseTasksCollection);
@@ -66,6 +67,7 @@ function App() {
   const [showAudioApp, setShowAudioApp] = useState(false);
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
   const [showGenAIApp, setShowGenAIApp] = useState(false);
+  const [showNotesApp, setShowNotesApp] = useState(false);
   const [showLiveTTS, setShowLiveTTS] = useState(false);
 
   useEffect(() => {
@@ -574,6 +576,12 @@ function App() {
     );
   }
 
+  if (showNotesApp) {
+    return (
+      <Notes user={user} />
+    );
+  }
+
   if (showTTSQueueApp) {
     return (
       <TTSQueueApp user={user} />
@@ -582,7 +590,7 @@ function App() {
 
   return (
     <div>
-      <div className="app" style={{ marginBottom: '120px', fontSize: '24px' }}>
+      <div>
         {readerMode ? (
           <div>
             <button className='button' onClick={handleBack}><FaArrowLeft /></button>
@@ -613,6 +621,9 @@ function App() {
             </button>
             <button className={showGenAIApp ? 'button_selected' : 'button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
+            </button>
+            <button className={showNotesApp ? 'button_selected' : 'button'} onClick={() => setShowNotesApp(!showNotesApp)}>
+              <FaNotesMedical />
             </button>
             <button className="button" onClick={handleSignOut}>
               <FaSignOutAlt />

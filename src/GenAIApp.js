@@ -15,6 +15,7 @@ import { TbEmpathize } from "react-icons/tb";
 import { MdSettingsInputComponent } from "react-icons/md";
 import { FaK } from "react-icons/fa6";
 
+
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import MDEditor from '@uiw/react-md-editor';
 import ReactMarkdown from "react-markdown";
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones } from 'react-icons/fa';
-import './GenAIApp.css';
+import './Notes.css';
 import { collection, doc, where, addDoc, getDocs, query, orderBy, startAfter, limit, updateDoc } from 'firebase/firestore';
 import {
     onAuthStateChanged,
@@ -15,6 +14,11 @@ import VoiceSelect from './VoiceSelect';
 import { TbEmpathize } from "react-icons/tb";
 import { MdSettingsInputComponent } from "react-icons/md";
 import { FaK } from "react-icons/fa6";
+import MarkdownIt from 'markdown-it';
+import MdEditor from 'react-markdown-editor-lite';
+// import style manually
+import 'react-markdown-editor-lite/lib/index.css';
+
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -43,6 +47,8 @@ const Notes = () => {
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [fileName, setFileName] = useState('');
     const [docId, setDocId] = useState('');
+    const mdParser = new MarkdownIt(/* Markdown-it options */);
+
 
     const embedPrompt = async (enbedDocID) => {
         try {
@@ -77,9 +83,7 @@ const Notes = () => {
                 if (genaiParam) {
                     setGenAIParameter(true);
                 }
-                if (process.env.REACT_APP_MAIN_APP === 'GenAI') {
-                    setGenAIParameter(true);
-                }
+                setGenAIParameter(true);
                 setUid(currentUser.uid);
                 console.log('User is signed in:', currentUser.uid);
                 if (!fileName.trim()) {
@@ -100,7 +104,7 @@ const Notes = () => {
     // Call handleSave method every 5 seconds
     useEffect(() => {
         const interval = setInterval(() => {
-            if (promptInput.trim().length > 0) {
+            if (promptInput.length > 0) {
                 handleSave();
             }
         }, 30000);
@@ -343,6 +347,12 @@ const Notes = () => {
             });
     }
 
+    if (showMainApp) {
+        return (
+            <App user={user} />
+        );
+    }
+
     return (
         <div>
             <div>
@@ -374,12 +384,16 @@ const Notes = () => {
                     ) : (
                         <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     )}
-                    <MDEditor
-                        className="containerMDInput"
-                        value={promptInput}
-                        onChange={(value) => setPromptInput(value)}
-                        placeholder="Enter your prompt here..."
-                    />
+         
+                    <div className="container">
+                        <MdEditor
+                            style={{ height: '600px', fontSize: '2rem' }}
+                            value={promptInput}
+                            renderHTML={promptInput => mdParser.render(promptInput)}
+                            onChange={({ text }) => setPromptInput(text)}
+                            config={{ view: { menu: true, md: true, html: false } }} // Turn off live preview
+                        />
+                    </div>
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
@@ -422,9 +436,7 @@ const Notes = () => {
                                             Edit
                                         </button>
                                         <span style={{ color: "green", fontWeight: "bold", fontSize: '16px' }}> {item.showRawAnswer ? item.fileName : item.fileName} </span>&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <span style={{ color: "black", fontSize: '12px' }}>
-                                            size: {item.size} &nbsp;&nbsp;&nbsp;&nbsp;
-                                            created:  </span>
+                                        <span style={{ color: "black", fontSize: '12px' }}></span>
                                         <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span> &nbsp;&nbsp;&nbsp;&nbsp;
                                         <span style={{ color: "black", fontSize: '12px' }}>
                                             modified: </span>

@@ -74,12 +74,7 @@ li {
   color: gray;
 }
 
-form {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  margin-bottom: 5px; /* Move the text box up 10 pixels */
-}
+
 .inputtextbox
 {
   padding: 5px;
