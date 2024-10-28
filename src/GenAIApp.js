@@ -253,6 +253,10 @@ const GenAIApp = () => {
                     setShowGpt4oMini(data.showGpt4oMini);
                     setShowLlama(data.showLlama);
                     setShowo1(data.showo1);
+                    setTemperature(data.temperature);
+                    setTop_p(data.top_p);
+                    setAutoPromptLimit(data.autoPromptLimit);
+                    dataLimit = data.dataLimit;
                 }
 
             });
