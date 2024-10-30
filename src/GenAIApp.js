@@ -340,6 +340,11 @@ const GenAIApp = () => {
             }
             const genaiSnapshot = await getDocs(q);
             const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const showFullQuestionState = {};
+            genaiList.forEach(doc => {
+                showFullQuestionState[doc.id] = false;
+            });
+            setShowFullQuestion(showFullQuestionState);
             setGenaiData(genaiList);
             setLastVisible(genaiSnapshot.docs[genaiSnapshot.docs.length - 1]); // Set last visible document
         } catch (error) {
@@ -363,11 +368,7 @@ const GenAIApp = () => {
         vectorSearchResults();
     };
 
-    const [showFullQuestion, setShowFullQuestion] = useState(false);
-
-    const handleShowMore = () => {
-        setShowFullQuestion(true);
-    };
+    const [showFullQuestion, setShowFullQuestion] = useState({});
 
     // Helper function to split messages into chunks
     const splitMessage = (msg, chunkSize = 4000) => {
@@ -416,21 +417,6 @@ const GenAIApp = () => {
             } catch (error) {
                 console.error(`Error synthesizing speech: ${error}`);
             }
-        }
-    };
-
-    // Function to render question with 'More' button
-    const renderQuestion = (question) => {
-        if (showFullQuestion) {
-            return <ReactMarkdown>{question}</ReactMarkdown>;
-        } else {
-            const truncatedQuestion = getQuestionSubstring(question);
-            return (
-                <div>
-                    <ReactMarkdown>{question.substring(0, parseInt(400))}</ReactMarkdown>
-                    <button onClick={handleShowMore}>More</button>
-                </div>
-            );
         }
     };
 
@@ -861,6 +847,28 @@ const GenAIApp = () => {
         );
     }
 
+    // Update saveReaction function to include docId
+    const saveReaction = async (docId, reaction) => {
+        try {
+            const docRef = doc(db, 'genai', uid, 'MyGenAI', docId);
+            await updateDoc(docRef, {
+                reaction: reaction,
+                updatedAt: new Date()
+            });
+
+            // Update local state to reflect the change
+            const updatedData = genaiData.map(item => {
+                if (item.id === docId) {
+                    return { ...item, reaction: reaction };
+                }
+                return item;
+            });
+            setGenaiData(updatedData);
+        } catch (error) {
+            console.error('Error saving reaction:', error);
+        }
+    };
+
     return (
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
@@ -1130,12 +1138,12 @@ const GenAIApp = () => {
           )}*/}
 
                 {/* **Existing Data Display** */}
-                <div className="outputFormat">
+                <div>
                     {isLoading && <p> Loading Data...</p>}
                     {!isLoading && <div>
                         {genaiData.map((item) => (
-                            <div key={item.createdDateTime}>
-                                <div style={{ border: "1px dotted black", padding: "2px", backgroundColor: "#e4ede8" }}>
+                            <div className="outputDetailsFormat" key={item.createdDateTime}>
+                                <div className="responseFormat">
                                     <h4 style={{ color: "brown" }}>
                                         <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
                                         @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
@@ -1157,8 +1165,16 @@ const GenAIApp = () => {
                                         </button>
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.showRawQuestion ? item.question : renderQuestion(item.question)}
+                                        {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{item.question.substring(0, 300)}</ReactMarkdown>)}
                                     </div>
+                                    <button onClick={() => {
+                                        setShowFullQuestion(prev => ({
+                                            ...prev,
+                                            [item.id]: !prev[item.id]
+                                        }));
+                                    }}>            {showFullQuestion[item.id] ? 'Less' : 'More'}
+</button>
+
                                 </div>
                                 <div style={{ border: "1px solid black" }}>
                                     <div style={{ color: "green", fontWeight: "bold" }}>---- Response ----
@@ -1181,9 +1197,37 @@ const GenAIApp = () => {
                                     <div style={{ fontSize: '16px' }}>
                                         {item.showRawAnswer ? item.answer : <ReactMarkdown>{item.answer}</ReactMarkdown>}
                                     </div>
+
+                                    <br />
+                                    <br />
+                                    {/* Add reaction buttons JSX */}
+                                    <div className="reaction-buttons">
+                                        <button
+                                            className={`reaction-btn ${item.reaction === 'love' ? 'active' : ''}`}
+                                            onClick={() => saveReaction(item.id, 'love')}
+                                        >
+                                            🌟 Extremely Helpful
+                                        </button>
+                                        <button
+                                            className={`reaction-btn ${item.reaction === 'like' ? 'active' : ''}`}
+                                            onClick={() => saveReaction(item.id, 'like')}
+                                        >
+                                            👍 Helpful
+                                        </button>
+                                        <button
+                                            className={`reaction-btn ${item.reaction === 'okay' ? 'active' : ''}`}
+                                            onClick={() => saveReaction(item.id, 'okay')}
+                                        >
+                                            😐 Not Bad
+                                        </button>
+                                        <button
+                                            className={`reaction-btn ${item.reaction === 'improve' ? 'active' : ''}`}
+                                            onClick={() => saveReaction(item.id, 'improve')}
+                                        >
+                                            🤔 Could Be Better
+                                        </button>
+                                    </div>
                                 </div>
-                                <br />
-                                <br />
                             </div>
                         ))}
                         <button className="fetchButton" onClick={fetchMoreData} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}>
