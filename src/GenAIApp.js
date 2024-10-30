@@ -1206,25 +1206,19 @@ const GenAIApp = () => {
                                             className={`reaction-btn ${item.reaction === 'love' ? 'active' : ''}`}
                                             onClick={() => saveReaction(item.id, 'love')}
                                         >
-                                            🌟 Extremely Helpful
+                                            🌟 Helpful
                                         </button>
                                         <button
                                             className={`reaction-btn ${item.reaction === 'like' ? 'active' : ''}`}
                                             onClick={() => saveReaction(item.id, 'like')}
                                         >
-                                            👍 Helpful
-                                        </button>
-                                        <button
-                                            className={`reaction-btn ${item.reaction === 'okay' ? 'active' : ''}`}
-                                            onClick={() => saveReaction(item.id, 'okay')}
-                                        >
-                                            😐 Not Bad
+                                            👍 Informative
                                         </button>
                                         <button
                                             className={`reaction-btn ${item.reaction === 'improve' ? 'active' : ''}`}
                                             onClick={() => saveReaction(item.id, 'improve')}
                                         >
-                                            🤔 Could Be Better
+                                            😐 Could be better
                                         </button>
                                     </div>
                                 </div>
