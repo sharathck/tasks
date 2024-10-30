@@ -14,7 +14,10 @@ import VoiceSelect from './VoiceSelect';
 import { TbEmpathize } from "react-icons/tb";
 import { MdSettingsInputComponent } from "react-icons/md";
 import { FaK } from "react-icons/fa6";
-
+import MarkdownIt from 'markdown-it';
+import MdEditor from 'react-markdown-editor-lite';
+// import style manually
+import 'react-markdown-editor-lite/lib/index.css';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -46,10 +49,10 @@ const GenAIApp = () => {
     const [isGeneratingImage_Dall_e_3, setIsGeneratingImage_Dall_e_3] = useState(false);
     const [isGpt4oMini, setIsGpt4oMini] = useState(false);
     const [isGeneratingGpt4oMini, setIsGeneratingGpt4oMini] = useState(false);
-    const [isOpenAI, setIsOpenAI] = useState(true);
+    const [isOpenAI, setIsOpenAI] = useState(false);
     const [isAnthropic, setIsAnthropic] = useState(true);
-    const [isGemini, setIsGemini] = useState(false);
-    const [isGpto1Mini, setIsGpto1Mini] = useState(false);
+    const [isGemini, setIsGemini] = useState(true);
+    const [isGpto1Mini, setIsGpto1Mini] = useState(true);
     const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
     const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
@@ -62,7 +65,7 @@ const GenAIApp = () => {
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
-    const [isGeneratingo1, setIsGeneratingo1] = useState(false); // New state for generating o1
+    const [isGeneratingo1, setIsGeneratingo1] = useState(false);
     const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
     const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
     const [isGeneratingGpt4Turbo, setIsGeneratingGpt4Turbo] = useState(false);
@@ -111,7 +114,8 @@ const GenAIApp = () => {
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
-    const [autoPrompt, setAutoPrompt] = useState(false);
+    const [autoPrompt, setAutoPrompt] = useState(true);
+    const mdParser = new MarkdownIt(/* Markdown-it options */);
 
     const embedPrompt = async (docId) => {
         try {
@@ -220,6 +224,7 @@ const GenAIApp = () => {
                     setGenAIParameter(true);
                 }
                 setUid(currentUser.uid);
+                setEmail(currentUser.email);
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
                 fetchData(currentUser.uid);
@@ -257,6 +262,7 @@ const GenAIApp = () => {
                     setTop_p(data.top_p);
                     setAutoPromptLimit(data.autoPromptLimit);
                     dataLimit = data.dataLimit;
+                    setAutoPrompt(data.autoPrompt);
                 }
 
             });
@@ -857,8 +863,11 @@ const GenAIApp = () => {
 
     return (
         <div>
-            <div>
+            <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
                 <div>
+                    {email == 'erpgenai@gmail.com' &&
+                        (<h3>This site is created by Sharath K for Demo purpose only.</h3>)
+                    }
                     <textarea
                         className="promptInput"
                         value={promptInput}
@@ -880,9 +889,9 @@ const GenAIApp = () => {
                         <label className={isGeneratingo1Mini ? 'flashing' : ''}>o1-mini</label>
                     </button>
                     {showLlama && (
-                    <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
-                        <label className={isGeneratingLlama ? 'flashing' : ''}>Llama</label>
-                    </button>
+                        <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
+                            <label className={isGeneratingLlama ? 'flashing' : ''}>Llama</label>
+                        </button>
                     )}
                     <button className={isMistral ? 'button_selected' : 'button'} onClick={() => setIsMistral(!isMistral)}>
                         <label className={isGeneratingMistral ? 'flashing' : ''}>Mistral</label>
@@ -903,9 +912,9 @@ const GenAIApp = () => {
                         </button>
                     )}
                     {showo1 && (
-                    <button className={iso1 ? 'button_selected' : 'button'} onClick={() => setIso1(!iso1)}>
-                        <label className={isGeneratingo1 ? 'flashing' : ''}>o1</label>
-                    </button>
+                        <button className={iso1 ? 'button_selected' : 'button'} onClick={() => setIso1(!iso1)}>
+                            <label className={isGeneratingo1 ? 'flashing' : ''}>o1</label>
+                        </button>
                     )}
                     {showPerplexityFast && (
                         <button className={isPerplexityFast ? 'button_selected' : 'button'} onClick={() => setIsPerplexityFast(!isPerplexityFast)}>
@@ -984,11 +993,11 @@ const GenAIApp = () => {
                         </button>
                     )}
                     <button className={autoPrompt ? 'button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
-                        AutoAI
+                        AutoPrompt
                     </button>
                     <button
                         onClick={handleGenerate}
-                        className="signonpagebutton"
+                        className="generateButton"
                         style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
                         disabled={
                             isGenerating ||
@@ -1085,8 +1094,8 @@ const GenAIApp = () => {
                     <option value="codestral">CodeStral</option>
                 </select>
                 {showEditPopup && (
-                    <div style={{ border: '4px' }}>
-                        <div className="popup-inner">
+                    <div className="modal-overlay">
+                        <div className="modal-content">
                             <br />
                             <h3>Add/Edit Prompt</h3>
                             <label>Tag:</label>
@@ -1097,10 +1106,12 @@ const GenAIApp = () => {
                                 className="promptTag"
                             />
                             <br />
-                            <textarea
+                            <MdEditor
+                                style={{ height: '500px', fontSize: '2rem' }}
                                 value={editPromptFullText}
-                                onChange={(e) => setEditPromptFullText(e.target.value)}
-                                className="promptFullTextInput"
+                                renderHTML={editPromptFullText => mdParser.render(editPromptFullText)}
+                                onChange={({ text }) => setEditPromptFullText(text)}
+                                config={{ view: { menu: true, md: false, html: true } }}
                             />
                             <div>
                                 <button onClick={handleSavePrompt} className="signinbutton">Save</button>
@@ -1181,7 +1192,7 @@ const GenAIApp = () => {
                     </div>}
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

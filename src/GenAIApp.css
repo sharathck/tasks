@@ -50,8 +50,25 @@
   padding: 2px;
   font-size: 16px;
   height:140px; /* Increase the height */
-  box-shadow: 4px 4px 8px rgba(4, 4, 4, 0.8);
+  box-shadow: 2px 4px 3px rgba(4, 4, 4, 0.8);
   margin-bottom: 8px;
+}
+.promptFullTextInput
+{
+  width: 99%;
+  padding: 2px;
+  font-size: 16px;
+  height:400px; /* Increase the height */
+  box-shadow: 2px 4px 3px rgba(4, 4, 4, 0.8);
+  margin-bottom: 8px;
+}
+.promptTag
+{
+  width: 49%;
+  padding: 2px;
+  font-size: 18px;
+  box-shadow: 2px 3px 2px rgba(4, 4, 4, 0.8);
+  margin-bottom: 4px;
 }
 .outputFormat
 {
@@ -72,12 +89,24 @@
   font-size: 18px; /* make the button text extremely small */
 }
 
+.generateButton
+{
+  background-color: rgb(24, 68, 161);
+  border: 2px solid black;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 24px;
+  box-shadow: 6px 6px 8px rgba(0, 0, 0, 0.8);
+  padding: 6px 6px;
+  font-size: 24px; /* make the button text extremely small */
+}
+
 .signuppagebutton {
   background-color: rgb(148, 118, 9);
   border: none;
   color: #fff;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: 12px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
   padding: 5px 5px;
   font-size: 18px; /* make the button text extremely small */
@@ -378,3 +407,34 @@ form {
 }
 
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 4px 2px 10px rgba(91, 82, 82, 0.806);
+  z-index: 1001;
+  width: 92%;
+  pointer-events: all;
+}
+
+.main-content {
+  transition: filter 0.3s;
+}
+
+.main-content.dimmed {
+  opacity: 0.9;
+  pointer-events: none;
+}
