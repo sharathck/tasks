@@ -29,6 +29,10 @@ let searchModel = 'All';
 let dataLimit = 11;
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
+let fullPromptInput = '';
+let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
+let questionTrimLength = 80;
+let appendPrompt = ' ';
 
 const GenAIApp = () => {
     // **State Variables**
@@ -283,6 +287,7 @@ const GenAIApp = () => {
                 console.log('Data:', data.temperature, data.top_p);
                 setTemperature(data.temperature);
                 setTop_p(data.top_p);
+                setAutoPrompt(data.autoPrompt);
                 setAutoPromptLimit(data.autoPromptLimit);
                 dataLimit = data.dataLimit;
                 setIsAnthropic(data.isAnthropic);
@@ -307,6 +312,12 @@ const GenAIApp = () => {
                 setShowCodeStral(data.showCodeStral);
                 setShowLlama(data.showLlama);
                 setShowo1(data.showo1);
+                if (data.autoPromptSeparator.length > 9) {
+                    autoPromptSeparator = data.autoPromptSeparator;
+                }
+                if (data.questionTrimLength > 0) {
+                    questionTrimLength = data.questionTrimLength;
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -455,8 +466,8 @@ const GenAIApp = () => {
         /* const genaiCollection = collection(db, 'genai', uid, 'prompts');
          const q = query(genaiCollection, where('tag', '==', promptValue), limit(1));
          const genaiSnapshot = await getDocs(q);
-         const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));*/
-        setPromptInput(prevInput => prevInput + "\n " + "------------ prompt --------------" + "\n" + promptValue);
+         const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); */
+        fullPromptInput =  promptValue;
     };
 
     // Sign Out
@@ -490,8 +501,7 @@ const GenAIApp = () => {
             const docsSnapshot = await getDocs(docsQuery);
             const fullTexts = docsSnapshot.docs.map(doc => doc.data().fullText);
             autoPromptInput = promptInput;
-            autoPromptInput = autoPromptInput + "    " + fullTexts.join("\n");
-            setPromptInput(autoPromptInput);
+            autoPromptInput = autoPromptInput + "\n" + autoPromptSeparator + "\n" + fullTexts.join("\n");
         } catch (error) {
             console.error('Error searching prompts:', error);
             alert(`Error: ${error.message}`);
@@ -623,12 +633,16 @@ const GenAIApp = () => {
                 });
             }
             else {
+                let finalPrompt = promptInput;
+                if (fullPromptInput.length > 2) {
+                    finalPrompt = promptInput + autoPromptSeparator + fullPromptInput;
+                }
                 response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ prompt: promptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    body: JSON.stringify({ prompt: finalPrompt, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                 });
             }
             if (!response.ok) {
@@ -1165,7 +1179,7 @@ const GenAIApp = () => {
                                         </button>
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{item.question.substring(0, 300)}</ReactMarkdown>)}
+                                        {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{item.question.substring(0, questionTrimLength)}</ReactMarkdown>)}
                                     </div>
                                     <button onClick={() => {
                                         setShowFullQuestion(prev => ({
@@ -1206,7 +1220,7 @@ const GenAIApp = () => {
                                             className={`reaction-btn ${item.reaction === 'love' ? 'active' : ''}`}
                                             onClick={() => saveReaction(item.id, 'love')}
                                         >
-                                            🌟 Helpful
+                                            👍👍 Helpful
                                         </button>
                                         <button
                                             className={`reaction-btn ${item.reaction === 'like' ? 'active' : ''}`}
@@ -1218,7 +1232,7 @@ const GenAIApp = () => {
                                             className={`reaction-btn ${item.reaction === 'improve' ? 'active' : ''}`}
                                             onClick={() => saveReaction(item.id, 'improve')}
                                         >
-                                            😐 Could be better
+                                            🤔 Could be better
                                         </button>
                                     </div>
                                 </div>
