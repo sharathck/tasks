@@ -460,10 +460,11 @@ form {
 }
 
 .reaction-btn {
+  font-size: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 2px 2px;
   border: 1px solid #ddd;
   border-radius: 20px;
   background: rgb(237, 233, 233);
@@ -478,7 +479,7 @@ form {
 }
 
 .reaction-btn.active {
-  background: #e3f2fd;
+  background: #9ddfe2;
   border-color: #2196f3;
   color: #010a11;
   font-weight: bold;

@@ -392,10 +392,18 @@ const GenAIApp = () => {
 
     // Function to synthesize speech
     const synthesizeSpeech = async (articles, language) => {
+        // Clean the text by removing URLs and special characters
+        const cleanedArticles = articles
+            .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+            .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+            .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .trim(); // Remove leading/trailing spaces
+        
         if (isiPhone) {
             window.scrollTo(0, 0);
             alert('Please go to top of the page to check status and listen to the audio');
-            callTTSAPI(articles, process.env.REACT_APP_TTS_API_URL);
+            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
             return;
         }
         const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
@@ -413,7 +421,7 @@ const GenAIApp = () => {
         const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
         const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
 
-        const chunks = splitMessage(articles);
+        const chunks = splitMessage(cleanedArticles);
         for (const chunk of chunks) {
             try {
                 const result = await speechSynthesizer.speakTextAsync(chunk);

@@ -114,9 +114,16 @@ function Articles() {
     };
 
     const generateTTS = () => {
+        const cleanedArticles = articles
+        .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+        .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+        .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim(); // Remove leading/trailing spaces
+    
         //   setReaderMode(true);
         //log the exact date and time
-        if (articles.length > 2) {
+        if (cleanedArticles.length > 2) {
           /* const chunks = [];
            for (let i = 0; i < promptInput.length; i += 3999) {
              chunks.push(promptInput.substring(i, i + 3999));
@@ -124,10 +131,10 @@ function Articles() {
            for (const chunk of chunks) {
              callTTSAPI(chunk);
            }*/
-          callTTSAPI(articles, process.env.REACT_APP_TTS_API_URL);
+          callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
         }
         else {
-          callTTSAPI(articles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
+          callTTSAPI(cleanedArticles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
         }
       };
 
@@ -137,8 +144,15 @@ function Articles() {
 
         const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
         const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+        const cleanedArticles = articles
+        .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+        .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+        .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim(); // Remove leading/trailing spaces
+    
 
-        const chunks = splitMessage(articles);
+        const chunks = splitMessage(cleanedArticles);
         for (const chunk of chunks) {
             try {
                 const result = await speechSynthesizer.speakTextAsync(chunk);
@@ -291,8 +305,14 @@ function Articles() {
         message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
         // replace -,*,#,_,`,~,=,^,>,< with empty string
         message = message.replace(/[-*#_`~=^><]/g, ''); // Ensure global replacement
-
-        console.log('Calling TTS API with message:', message);
+        const cleanedArticles = message
+        .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+        .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+        .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim(); // Remove leading/trailing spaces
+    
+        console.log('Calling TTS API with message:', cleanedArticles);
 
         try {
             console.log('Inside try Calling TTS API with appUrl:', appUrl);
@@ -301,7 +321,7 @@ function Articles() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: message, uid: uid })
+                body: JSON.stringify({ message: cleanedArticles, uid: uid })
             });
 
             if (!response.ok) {
