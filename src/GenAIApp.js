@@ -31,7 +31,7 @@ let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
-let questionTrimLength = 80;
+let questionTrimLength = 200;
 let appendPrompt = ' ';
 
 const GenAIApp = () => {
@@ -119,6 +119,7 @@ const GenAIApp = () => {
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
     const [autoPrompt, setAutoPrompt] = useState(true);
+    const [showSaveButton, setShowSaveButton] = useState(false);
     const mdParser = new MarkdownIt(/* Markdown-it options */);
 
     const embedPrompt = async (docId) => {
@@ -208,8 +209,13 @@ const GenAIApp = () => {
 
     // Helper function to truncate questions based on limit
     const getQuestionSubstring = (question) => {
-        if (questionLimit) {
-            return question.substring(0, parseInt(questionLimit));
+        const marker = '###';
+        const markerIndex = question.indexOf(marker);
+        console.log('Marker Index:', markerIndex);
+        console.log('questionTrimLength:', questionTrimLength);
+        console.log ('Question:', question.substring(0,Math.min(markerIndex, questionTrimLength)));
+        if (markerIndex !== -1) {
+            return question.substring(0, Math.min(markerIndex, questionTrimLength));
         }
         return question;
     };
@@ -508,6 +514,12 @@ const GenAIApp = () => {
             const docsQuery = query(genaiCollection, where('__name__', 'in', docIds));
             const docsSnapshot = await getDocs(docsQuery);
             const fullTexts = docsSnapshot.docs.map(doc => doc.data().fullText);
+            setEditPromptFullText(fullTexts.join("\n"));
+            const promptTag = docsSnapshot.docs.map(doc => doc.data().tag);
+            setEditPromptTag(promptTag);
+            console.log('Edit Prompt:', editPromptTag);
+            console.log('Select Prompt Tag:', fullTexts);
+            setSelectedPrompt(promptTag);
             autoPromptInput = promptInput;
             autoPromptInput = autoPromptInput + "\n" + autoPromptSeparator + "\n" + fullTexts.join("\n");
         } catch (error) {
@@ -800,8 +812,16 @@ const GenAIApp = () => {
     const handleEditPrompt = () => {
         setShowEditPopup(true);
         if (selectedPrompt) {
+            setShowSaveButton(true);
             setEditPromptTag(selectedPrompt);
             setEditPromptFullText(selectedPromptFullText);
+        }
+    };
+
+    const handleEditSource = async () => {
+        if (selectedPrompt) {
+            setShowSaveButton(false);
+            setShowEditPopup(true);
         }
     };
 
@@ -1075,6 +1095,20 @@ const GenAIApp = () => {
                     ) : (
                         <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     )}
+                    {autoPrompt && selectedPrompt && (
+                        <div style={{ marginTop: '10px', fontSize: '16px' }}>
+                            Source document(s): <button 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleEditSource();
+                            }}
+                            className="sourceDocumentButton"
+                        >
+                        {selectedPrompt}
+                    
+                    </button>
+                        </div>
+                    )}
                 </div>
                 <label>
                     Limit:
@@ -1144,7 +1178,7 @@ const GenAIApp = () => {
                                 config={{ view: { menu: true, md: false, html: true } }}
                             />
                             <div>
-                                <button onClick={handleSavePrompt} className="signinbutton">Save</button>
+                                {showSaveButton && (<button onClick={handleSavePrompt} className="signinbutton">Save</button>)}
                                 <button onClick={() => setShowEditPopup(false)} className="signoutbutton">Cancel</button>
                             </div>
                             <br />
@@ -1187,7 +1221,7 @@ const GenAIApp = () => {
                                         </button>
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{item.question.substring(0, questionTrimLength)}</ReactMarkdown>)}
+                                        {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{getQuestionSubstring(item.question)}</ReactMarkdown>)}
                                     </div>
                                     <button onClick={() => {
                                         setShowFullQuestion(prev => ({
