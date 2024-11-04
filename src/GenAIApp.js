@@ -120,6 +120,7 @@ const GenAIApp = () => {
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
     const [autoPrompt, setAutoPrompt] = useState(true);
     const [showSaveButton, setShowSaveButton] = useState(false);
+    const [showSourceDocument, setShowSourceDocument] = useState(false);
     const mdParser = new MarkdownIt(/* Markdown-it options */);
 
     const embedPrompt = async (docId) => {
@@ -520,6 +521,7 @@ const GenAIApp = () => {
             console.log('Edit Prompt:', editPromptTag);
             console.log('Select Prompt Tag:', fullTexts);
             setSelectedPrompt(promptTag);
+            setShowSourceDocument(true);
             autoPromptInput = promptInput;
             autoPromptInput = autoPromptInput + "\n" + autoPromptSeparator + "\n" + fullTexts.join("\n");
         } catch (error) {
@@ -533,6 +535,7 @@ const GenAIApp = () => {
     // Handler for Generate Button Click
     // **Handler for Generate Button Click**
     const handleGenerate = async () => {
+        setShowSourceDocument(false);
         if (!promptInput.trim()) {
             alert('Please enter a prompt.');
             return;
@@ -1095,7 +1098,7 @@ const GenAIApp = () => {
                     ) : (
                         <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     )}
-                    {autoPrompt && selectedPrompt && (
+                    {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button 
                             onClick={(e) => {
