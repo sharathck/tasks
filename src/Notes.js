@@ -27,7 +27,7 @@ console.log(isiPhone);
 
 let searchQuery = '';
 let searchModel = 'All';
-let dataLimit = 11;
+let dataLimit = 91;
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
 
