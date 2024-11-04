@@ -48,6 +48,7 @@ const Notes = () => {
     const [fileName, setFileName] = useState('');
     const [docId, setDocId] = useState('');
     const mdParser = new MarkdownIt(/* Markdown-it options */);
+    const [showFullQuestion, setShowFullQuestion] = useState({});
 
 
     const embedPrompt = async (enbedDocID) => {
@@ -141,10 +142,11 @@ const Notes = () => {
         vectorSearchResults();
     };
 
-    const [showFullQuestion, setShowFullQuestion] = useState(false);
-
-    const handleShowMore = () => {
-        setShowFullQuestion(true);
+    const toggleShowFullQuestion = (id) => {
+        setShowFullQuestion(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
     };
 
     // Helper function to split messages into chunks
@@ -205,14 +207,19 @@ const Notes = () => {
     };
 
     // Function to render question with 'More' button
-    const renderQuestion = (question) => {
-        if (showFullQuestion) {
-            return <ReactMarkdown>{question}</ReactMarkdown>;
+    const renderQuestion = (question, id) => {
+        if (showFullQuestion[id]) {
+            return (
+                <div>
+                    <ReactMarkdown>{question}</ReactMarkdown>
+                    <button onClick={() => toggleShowFullQuestion(id)}>Less</button>
+                </div>
+            );
         } else {
             return (
                 <div>
-                    <ReactMarkdown>{question.substring(0, parseInt(400))}</ReactMarkdown>
-                    <button onClick={handleShowMore}>More</button>
+                    <ReactMarkdown>{question.substring(0, 400)}</ReactMarkdown>
+                    <button onClick={() => toggleShowFullQuestion(id)}>More</button>
                 </div>
             );
         }
@@ -460,7 +467,7 @@ const Notes = () => {
 
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.promptInput && renderQuestion(item.promptInput)}
+                                        {item.promptInput && renderQuestion(item.promptInput, item.id)}
                                     </div>
                                 </div>
 
