@@ -222,7 +222,9 @@ const GenAIApp = () => {
         if (markerIndex !== -1) {
             return question.substring(0, Math.min(markerIndex, questionTrimLength));
         }
-        return question;
+        else {
+            return question.substring(0, questionTrimLength);
+        }
     };
 
     // Listen for authentication state changes
@@ -662,7 +664,7 @@ const GenAIApp = () => {
                     // Update timestamp
                     lastUpdated: new Date()
                 }, { merge: true });
-            } );  // Optionally, refresh data
+            });  // Optionally, refresh data
 
         } catch (error) {
             console.error('Error updating configuration:', error);
