@@ -90,7 +90,7 @@ const GenAIApp = () => {
     const [top_p, setTop_p] = useState(0.8);
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showGpt4Turbo, setShowGpt4Turbo] = useState(true);
-    const [showMistral, setShowMistral] = useState(true);
+    const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
     const [showGpt4oMini, setShowGpt4oMini] = useState(false);
     const [showGeminiFast, setShowGeminiFast] = useState(true);
@@ -122,6 +122,13 @@ const GenAIApp = () => {
     const [showSaveButton, setShowSaveButton] = useState(false);
     const [showSourceDocument, setShowSourceDocument] = useState(false);
     const mdParser = new MarkdownIt(/* Markdown-it options */);
+
+    // Add new state variables for Claude-Haiku
+    const [isClaudeHaiku, setIsClaudeHaiku] = useState(false);
+    const [isGeneratingClaudeHaiku, setIsGeneratingClaudeHaiku] = useState(false);
+
+    // Add showClaudeHaiku state variable
+    const [showClaudeHaiku, setShowClaudeHaiku] = useState(true); // Set to true or false as needed
 
     const embedPrompt = async (docId) => {
         try {
@@ -212,9 +219,6 @@ const GenAIApp = () => {
     const getQuestionSubstring = (question) => {
         const marker = '###';
         const markerIndex = question.indexOf(marker);
-        console.log('Marker Index:', markerIndex);
-        console.log('questionTrimLength:', questionTrimLength);
-        console.log ('Question:', question.substring(0,Math.min(markerIndex, questionTrimLength)));
         if (markerIndex !== -1) {
             return question.substring(0, Math.min(markerIndex, questionTrimLength));
         }
@@ -240,8 +244,7 @@ const GenAIApp = () => {
                 // Fetch data for the authenticated user
                 fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
-                await fetchGenAIParameters();
-                await fetchAdminSettings(currentUser.email);
+                await fetchGenAIParameters(currentUser.uid);
             }
             else {
                 console.log('No user is signed in');
@@ -250,79 +253,57 @@ const GenAIApp = () => {
         return () => unsubscribe();
     }, [showEditPopup]);
 
-    const fetchAdminSettings = async (userEmail) => {
-        try {
-            console.log('Fetching ADMIN Settings parameters...' + userEmail);
-            const fetchAdminSettingsCollection = collection(db, 'public');
-            const q = query(fetchAdminSettingsCollection, where('setup', '==', 'genaiAdmin'), limit(1));
-            const fetchAdminSettingsSnapshot = await getDocs(q);
-            fetchAdminSettingsSnapshot.forEach(doc => {
-                const data = doc.data();
-                console.log('Data:', data.emailAddresses, data.showTTS, data.showImageDallE3);
-                if (data.emailAddresses.includes(userEmail)) {
-                    console.log('User is admin');
-                    setShowTTS(data.showTTS);
-                    setShowImageDallE3(data.showImageDallE3);
-                    setShowGeminiFast(data.showGeminiFast);
-                    setShowGpt4Turbo(data.showGpt4Turbo);
-                    setShowPerplexityFast(data.showPerplexityFast);
-                    setShowGpt4oMini(data.showGpt4oMini);
-                    setShowLlama(data.showLlama);
-                    setShowo1(data.showo1);
-                    setTemperature(data.temperature);
-                    setTop_p(data.top_p);
-                    setAutoPromptLimit(data.autoPromptLimit);
-                    dataLimit = data.dataLimit;
-                    setAutoPrompt(data.autoPrompt);
-                }
-
-            });
-        } catch (error) {
-            console.error("Error fetching genAI Admin Settings: ", error);
-            return [];
-        }
-    };
-
-    const fetchGenAIParameters = async () => {
+    const fetchGenAIParameters = async (firebaseUserID) => {
         try {
             console.log('Fetching genai parameters...');
-            const voiceNamesCollection = collection(db, 'public');
-            const q = query(voiceNamesCollection, where('setup', '==', 'genai'));
+            const configurationCollection = collection(db, 'genai', firebaseUserID, 'configuration');
+            const q = query(configurationCollection, where('setup', '==', 'genai'));
             const voiceNamesSnapshot = await getDocs(q);
             voiceNamesSnapshot.forEach(doc => {
                 const data = doc.data();
                 console.log('Data:', data.temperature, data.top_p);
-                setTemperature(data.temperature);
-                setTop_p(data.top_p);
-                setAutoPrompt(data.autoPrompt);
-                setAutoPromptLimit(data.autoPromptLimit);
-                dataLimit = data.dataLimit;
-                setIsAnthropic(data.isAnthropic);
-                setIsGemini(data.isGemini);
-                setIsOpenAI(data.isOpenAI);
-                setIsGpto1Mini(data.isGpto1Mini);
-                setIso1(data.iso1);
-                setIsImage_Dall_e_3(data.isImage_Dall_e_3);
-                setIsTTS(data.isTTS);
-                setIsLlama(data.isLlama);
-                setIsMistral(data.isMistral);
-                setIsGpt4Turbo(data.isGpt4Turbo);
-                setIsGpt4oMini(data.isGpt4oMini);
-                setIsGeminiFast(data.isGeminiFast);
-                setIsPerplexityFast(data.isPerplexityFast);
-                setIsPerplexity(data.isPerplexity);
-                setIsCodestral(data.isCodestral);
-                setShowGpt4Turbo(data.showGpt4Turbo);
-                setShowPerplexityFast(data.showPerplexityFast);
-                setShowGpt4oMini(data.showGpt4oMini);
-                setShowGeminiFast(data.showGeminiFast);
-                setShowCodeStral(data.showCodeStral);
-                setShowLlama(data.showLlama);
-                setShowo1(data.showo1);
-                if (data.autoPromptSeparator.length > 9) {
+                if (data.temperature !== undefined) setTemperature(data.temperature);
+                if (data.top_p !== undefined) setTop_p(data.top_p);
+                if (data.autoPrompt !== undefined) setAutoPrompt(data.autoPrompt);
+                if (data.autoPromptLimit !== undefined) setAutoPromptLimit(data.autoPromptLimit);
+                if (data.dataLimit !== undefined) dataLimit = data.dataLimit;
+                if (data.isAnthropic !== undefined) setIsAnthropic(data.isAnthropic);
+                if (data.isGemini !== undefined) setIsGemini(data.isGemini);
+                if (data.isOpenAI !== undefined) setIsOpenAI(data.isOpenAI);
+                if (data.isGpto1Mini !== undefined) setIsGpto1Mini(data.isGpto1Mini);
+                if (data.iso1 !== undefined) setIso1(data.iso1);
+                if (data.isImage_Dall_e_3 !== undefined) setIsImage_Dall_e_3(data.isImage_Dall_e_3);
+                if (data.isTTS !== undefined) setIsTTS(data.isTTS);
+                if (data.isLlama !== undefined) setIsLlama(data.isLlama);
+                if (data.isMistral !== undefined) setIsMistral(data.isMistral);
+                if (data.isGpt4Turbo !== undefined) setIsGpt4Turbo(data.isGpt4Turbo);
+                if (data.isGpt4oMini !== undefined) setIsGpt4oMini(data.isGpt4oMini);
+                if (data.isGeminiFast !== undefined) setIsGeminiFast(data.isGeminiFast);
+                if (data.isPerplexityFast !== undefined) setIsPerplexityFast(data.isPerplexityFast);
+                if (data.isPerplexity !== undefined) setIsPerplexity(data.isPerplexity);
+                if (data.isCodestral !== undefined) setIsCodestral(data.isCodestral);
+                if (data.isClaudeHaiku !== undefined) setIsClaudeHaiku(data.isClaudeHaiku);
+                if (data.showAnthropic !== undefined) setShowAnthropic(data.showAnthropic);
+                if (data.showGemini !== undefined) setShowGemini(data.showGemini);
+                if (data.showOpenAI !== undefined) setShowOpenAI(data.showOpenAI);
+                if (data.showGpt4Turbo !== undefined) setShowGpt4Turbo(data.showGpt4Turbo);
+                if (data.showMistral !== undefined) setShowMistral(data.showMistral);
+                if (data.showPerplexityFast !== undefined) setShowPerplexityFast(data.showPerplexityFast);
+                if (data.showGpt4oMini !== undefined) setShowGpt4oMini(data.showGpt4oMini);
+                if (data.showGeminiFast !== undefined) setShowGeminiFast(data.showGeminiFast);
+                if (data.showCodeStral !== undefined) setShowCodeStral(data.showCodeStral);
+                if (data.showLlama !== undefined) setShowLlama(data.showLlama);
+                if (data.showo1 !== undefined) setShowo1(data.showo1);
+                if (data.showo1Mini !== undefined) setShowo1Mini(data.showo1Mini);
+                if (data.showClaudeHaiku !== undefined) setShowClaudeHaiku(data.showClaudeHaiku);
+                if (data.showTTS !== undefined) {
+                    setShowTTS(data.showTTS);
+                }
+                if (data.showImageDallE3 !== undefined) setShowImageDallE3(data.showImageDallE3);
+                if (data.autoPromptSeparator !== undefined) {
                     autoPromptSeparator = data.autoPromptSeparator;
                 }
-                if (data.questionTrimLength > 0) {
+                if (data.questionTrimLength !== undefined) {
                     questionTrimLength = data.questionTrimLength;
                 }
             });
@@ -406,7 +387,7 @@ const GenAIApp = () => {
             .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
             .replace(/\s+/g, ' ') // Replace multiple spaces with single space
             .trim(); // Remove leading/trailing spaces
-        
+
         if (isiPhone) {
             window.scrollTo(0, 0);
             alert('Please go to top of the page to check status and listen to the audio');
@@ -482,7 +463,7 @@ const GenAIApp = () => {
          const q = query(genaiCollection, where('tag', '==', promptValue), limit(1));
          const genaiSnapshot = await getDocs(q);
          const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); */
-        fullPromptInput =  promptValue;
+        fullPromptInput = promptValue;
     };
 
     // Sign Out
@@ -542,7 +523,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku) {
             alert('Please select at least one model.');
             return;
         }
@@ -637,6 +618,55 @@ const GenAIApp = () => {
                 callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
             }
         }
+
+        if (isClaudeHaiku) {
+            setIsGeneratingClaudeHaiku(true); // Set generating state to true
+            callAPI('Claude-Haiku');
+        }
+
+        try {
+            const configurationCollection = collection(db, 'genai', user.uid, 'configuration');
+            const q = query(configurationCollection, where('setup', '==', 'genai'));
+            const configSnapshot = await getDocs(q);
+            if (configSnapshot.empty) {
+                console.log('No configuration found');
+                return;
+            }
+            configSnapshot.forEach(async (doc) => {
+                await updateDoc(doc.ref, {
+                    // Model states
+                    isOpenAI,
+                    isAnthropic,
+                    isGemini,
+                    isGpto1Mini,
+                    isLlama,
+                    isMistral,
+                    isGpt4Turbo,
+                    isGeminiFast,
+                    isPerplexityFast,
+                    isPerplexity,
+                    isCodestral,
+                    isClaudeHaiku,
+                    iso1,
+
+                    // Feature states
+                    isTTS,
+                    isImage_Dall_e_3,
+
+                    // Parameters
+                    temperature,
+                    top_p,
+                    dataLimit,
+                    autoPrompt,
+
+                    // Update timestamp
+                    lastUpdated: new Date()
+                }, { merge: true });
+            } );  // Optionally, refresh data
+
+        } catch (error) {
+            console.error('Error updating configuration:', error);
+        }
     };
 
     const callAPI = async (selectedModel) => {
@@ -726,7 +756,9 @@ const GenAIApp = () => {
             if (selectedModel === modelCodestralApi) {
                 setIsGeneratingCodeStral(false);
             }
-
+            if (selectedModel === 'Claude-Haiku') {
+                setIsGeneratingClaudeHaiku(false);
+            }
         }
     };
 
@@ -929,26 +961,36 @@ const GenAIApp = () => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                    <button className={isOpenAI ? 'button_selected' : 'button'} onClick={() => setIsOpenAI(!isOpenAI)}>
-                        <label className={isGenerating ? 'flashing' : ''}>ChatGPT</label>
-                    </button>
-                    <button className={isAnthropic ? 'button_selected' : 'button'} onClick={() => setIsAnthropic(!isAnthropic)}>
-                        <label className={isGeneratingAnthropic ? 'flashing' : ''}>Claude</label>
-                    </button>
-                    <button className={isGemini ? 'button_selected' : 'button'} onClick={() => setIsGemini(!isGemini)}>
-                        <label className={isGeneratingGemini ? 'flashing' : ''}>Gemini</label>
-                    </button>
-                    <button className={isGpto1Mini ? 'button_selected' : 'button'} onClick={() => setIsGpto1Mini(!isGpto1Mini)}>
-                        <label className={isGeneratingo1Mini ? 'flashing' : ''}>o1-mini</label>
-                    </button>
+                    {showOpenAI && (
+                        <button className={isOpenAI ? 'button_selected' : 'button'} onClick={() => setIsOpenAI(!isOpenAI)}>
+                            <label className={isGenerating ? 'flashing' : ''}>ChatGPT</label>
+                        </button>
+                    )}
+                    {showAnthropic && (
+                        <button className={isAnthropic ? 'button_selected' : 'button'} onClick={() => setIsAnthropic(!isAnthropic)}>
+                            <label className={isGeneratingAnthropic ? 'flashing' : ''}>Claude</label>
+                        </button>
+                    )}
+                    {showGemini && (
+                        <button className={isGemini ? 'button_selected' : 'button'} onClick={() => setIsGemini(!isGemini)}>
+                            <label className={isGeneratingGemini ? 'flashing' : ''}>Gemini</label>
+                        </button>
+                    )}
+                    {showo1Mini && (
+                        <button className={isGpto1Mini ? 'button_selected' : 'button'} onClick={() => setIsGpto1Mini(!isGpto1Mini)}>
+                            <label className={isGeneratingo1Mini ? 'flashing' : ''}>o1-mini</label>
+                        </button>
+                    )}
+                    {showMistral && (
+                        <button className={isMistral ? 'button_selected' : 'button'} onClick={() => setIsMistral(!isMistral)}>
+                            <label className={isGeneratingMistral ? 'flashing' : ''}>Mistral</label>
+                        </button>
+                    )}
                     {showLlama && (
                         <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
                             <label className={isGeneratingLlama ? 'flashing' : ''}>Llama</label>
                         </button>
                     )}
-                    <button className={isMistral ? 'button_selected' : 'button'} onClick={() => setIsMistral(!isMistral)}>
-                        <label className={isGeneratingMistral ? 'flashing' : ''}>Mistral</label>
-                    </button>
                     {showGpt4Turbo && (
                         <button className={isGpt4Turbo ? 'button_selected' : 'button'} onClick={() => setIsGpt4Turbo(!isGpt4Turbo)}>
                             <label className={isGeneratingGpt4Turbo ? 'flashing' : ''}>Gpt4Turbo</label>
@@ -984,7 +1026,11 @@ const GenAIApp = () => {
                             <label className={isGeneratingCodeStral ? 'flashing' : ''}>CodeStral</label>
                         </button>
                     )}
-
+                    {showClaudeHaiku && (
+                        <button className={isClaudeHaiku ? 'button_selected' : 'button'} onClick={() => setIsClaudeHaiku(!isClaudeHaiku)}>
+                            <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>Claude-Haiku</label>
+                        </button>
+                    )}
                     <label style={{ marginLeft: '8px' }}>
                         Temp:
                         <input
@@ -1066,8 +1112,9 @@ const GenAIApp = () => {
                             isGeneratingGeminiFast ||
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
+                            isGeneratingCodeStral ||
                             isGeneratingGpt4oMini ||
-                            isGeneratingCodeStral
+                            isGeneratingClaudeHaiku
                         }
                     >
                         {isGenerating ||
@@ -1084,7 +1131,8 @@ const GenAIApp = () => {
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
                             isGeneratingCodeStral ||
-                            isGeneratingGpt4oMini ? (
+                            isGeneratingGpt4oMini ||
+                            isGeneratingClaudeHaiku ? (
                             <FaSpinner className="spinning" />
                         ) : (
                             'GenAI'
@@ -1100,16 +1148,16 @@ const GenAIApp = () => {
                     )}
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
-                            Source document(s): <button 
-                            onClick={(e) => {
-                                e.preventDefault();
-                                handleEditSource();
-                            }}
-                            className="sourceDocumentButton"
-                        >
-                        {selectedPrompt}
-                    
-                    </button>
+                            Source document(s): <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleEditSource();
+                                }}
+                                className="sourceDocumentButton"
+                            >
+                                {selectedPrompt}
+
+                            </button>
                         </div>
                     )}
                 </div>
@@ -1159,6 +1207,7 @@ const GenAIApp = () => {
                     <option value="perplexity-fast">PerplexityFast</option>
                     <option value="perplexity">Perplexity</option>
                     <option value="codestral">CodeStral</option>
+                    <option value="Claude-Haiku">Claude-Haiku</option>
                 </select>
                 {showEditPopup && (
                     <div className="modal-overlay">
@@ -1232,7 +1281,7 @@ const GenAIApp = () => {
                                             [item.id]: !prev[item.id]
                                         }));
                                     }}>            {showFullQuestion[item.id] ? 'Less' : 'More'}
-</button>
+                                    </button>
 
                                 </div>
                                 <div style={{ border: "1px solid black" }}>
