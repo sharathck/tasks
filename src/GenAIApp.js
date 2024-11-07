@@ -1305,7 +1305,11 @@ const GenAIApp = () => {
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.showRawAnswer ? item.answer : <ReactMarkdown>{item.answer}</ReactMarkdown>}
+                                        {item.showRawAnswer ? item.answer :                             (<MdEditor
+                                value={editPromptFullText}
+                                renderHTML={editPromptFullText => mdParser.render(item.answer)}
+                                config={{ view: { menu: false, md: false, html: true } }}
+                            />)}
                                     </div>
 
                                     <br />
