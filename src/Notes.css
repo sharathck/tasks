@@ -397,3 +397,26 @@ form {
   font-size: 18px;
 }
 
+
+.mdxeditor {
+    height: 500px !important;
+    width: 100%;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 3px 5px 8px rgba(4, 4, 4, 0.8);
+}
+
+/* Override MDX Editor's default height */
+.mdxeditor [contenteditable="true"] {
+    min-height: 400px !important;
+}
+
+/* Style the toolbar */
+.mdxeditor .toolbar {
+    border-bottom: 1px solid #ccc;
+    padding: 8px;
+    background-color: #f5f5f5;
+}
+
+
