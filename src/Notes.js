@@ -94,7 +94,7 @@ const Notes = () => {
                     const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
                     setFileName('MoM ' + date);
                 }
-        
+
                 // Fetch data for the authenticated user
                 await fetchData(currentUser.uid);
             }
@@ -161,12 +161,12 @@ const Notes = () => {
     // Function to synthesize speech
     const synthesizeSpeech = async (articles, language) => {
         const cleanedArticles = articles
-        .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
-        .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-        .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
-        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-        .trim(); // Remove leading/trailing spaces
-    
+            .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+            .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+            .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .trim(); // Remove leading/trailing spaces
+
         if (isiPhone) {
             window.scrollTo(0, 0);
             alert('Please go to top of the page to check status and listen to the audio');
@@ -208,17 +208,25 @@ const Notes = () => {
 
     // Function to render question with 'More' button
     const renderQuestion = (question, id) => {
+        let showBriefQuestion = question.substring(0, 200);
         if (showFullQuestion[id]) {
+            showBriefQuestion = question;
             return (
                 <div>
-                    <ReactMarkdown>{question}</ReactMarkdown>
-                    <button onClick={() => toggleShowFullQuestion(id)}>Less</button>
+                    <MdEditor
+                        value={question}
+                        renderHTML={text => mdParser.render(question)}
+                        config={{ view: { menu: false, md: false, html: true } }}
+                    />                   
                 </div>
             );
         } else {
             return (
                 <div>
-                    <ReactMarkdown>{question.substring(0, 400)}</ReactMarkdown>
+                    <MdEditor
+                        renderHTML={text => mdParser.render(showBriefQuestion)}
+                        config={{ view: { menu: false, md: false, html: true } }}
+                    />
                     <button onClick={() => toggleShowFullQuestion(id)}>More</button>
                 </div>
             );
@@ -402,7 +410,7 @@ const Notes = () => {
                     ) : (
                         <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     )}
-         
+
                     <div className="container">
                         <MdEditor
                             style={{ height: '600px', fontSize: '2rem' }}
@@ -469,6 +477,7 @@ const Notes = () => {
                                     <div style={{ fontSize: '16px' }}>
                                         {item.promptInput && renderQuestion(item.promptInput, item.id)}
                                     </div>
+
                                 </div>
 
                                 <br />
