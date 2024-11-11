@@ -18,8 +18,6 @@ import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
 // import style manually
 import 'react-markdown-editor-lite/lib/index.css';
-import '@mdxeditor/editor/style.css'
-import { MDXEditor, headingsPlugin } from '@mdxeditor/editor'
 
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
@@ -52,6 +50,17 @@ const Notes = () => {
     const mdParser = new MarkdownIt(/* Markdown-it options */);
     const [showFullQuestion, setShowFullQuestion] = useState({});
 
+    // Add this new handler function
+    const handleEditorChange = ({ text, html }) => {
+        // Add two spaces before each newline if the last character typed was Enter
+        const lastChar = text.slice(-1);
+        if (lastChar === '\n') {
+            const modifiedText = text.replace(/\n/g, '  \n');
+            setPromptInput(modifiedText);
+        } else {
+            setPromptInput(text);
+        }
+    };
 
     const embedPrompt = async (enbedDocID) => {
         try {
@@ -219,9 +228,8 @@ const Notes = () => {
                         value={question}
                         renderHTML={text => mdParser.render(question)}
                         config={{ view: { menu: false, md: false, html: true } }}
-                    />
+                    />                   
                 </div>
-
             );
         } else {
             return (
@@ -415,11 +423,12 @@ const Notes = () => {
                     )}
 
                     <div className="container">
-                        <MDXEditor
-                            style={{ width: '100%', height: '500px', border: '1px solid black' }}
-                            markdown={promptInput}
-                            onChange={setPromptInput}
-                            plugins={[headingsPlugin()]}
+                        <MdEditor
+                            style={{ height: '600px', fontSize: '2rem' }}
+                            value={promptInput}
+                            renderHTML={promptInput => mdParser.render(promptInput)}
+                            onChange={handleEditorChange}
+                            config={{ view: { menu: true, md: true, html: false } }} // Turn off live preview
                         />
                     </div>
                 </div>
