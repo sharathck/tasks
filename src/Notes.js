@@ -424,7 +424,7 @@ const Notes = () => {
 
                     <div className="container">
                         <MdEditor
-                            style={{ height: '600px', fontSize: '2rem' }}
+                            style={{ height: '400px', fontSize: '3rem' }}
                             value={promptInput}
                             renderHTML={promptInput => mdParser.render(promptInput)}
                             onChange={handleEditorChange}
