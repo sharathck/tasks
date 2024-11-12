@@ -123,7 +123,7 @@ const Notes = () => {
                     handleSave();
                 }
             }
-        }, 45000);
+        }, 90000);
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
     }, [promptInput, fileName, docId]);
