@@ -30,6 +30,7 @@ let searchModel = 'All';
 let dataLimit = 29;
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
+let currentDocId = '';
 
 const Notes = () => {
     // **State Variables**
@@ -277,14 +278,13 @@ const Notes = () => {
         });
     };
 
-    // Handler for Generate Button Click
-    // **Handler for Generate Button Click**
-    const handleSave = async () => {
+    const insertIntoBigQuery = async () => {
+
+        await handleSave();
         if (!promptInput.trim()) {
             alert('Please enter the content.');
             return;
         }
-        setIsGenerating(true);
         try {
             const user = auth.currentUser;
             if (!user) {
@@ -293,38 +293,10 @@ const Notes = () => {
             }
             const cleanedPromptInput = promptInput.replace(/{\.mark}/g, '');
             console.log('Prompt Input:', cleanedPromptInput);
-            console.log('Document ID:', docId);
 
-            const currentDateTime = new Date();
-            let documentId = docId;
-
-            if (docId.length > 2) {
-                const docRef = doc(db, 'genai', user.uid, 'notes', docId);
-                await updateDoc(docRef, {
-                    fileName: fileName,
-                    promptInput: cleanedPromptInput,
-                    modifiedDateTime: currentDateTime,
-                    size: cleanedPromptInput.length
-                });
-                embedPrompt(docId);
-                console.log('Document updated with ID: ', docId);
-            } else {
-                const genaiCollection = collection(db, 'genai', user.uid, 'notes');
-                const newDocRef = await addDoc(genaiCollection, {
-                    fileName: fileName,
-                    promptInput: cleanedPromptInput,
-                    createdDateTime: currentDateTime,
-                    modifiedDateTime: currentDateTime,
-                    size: promptInput.length
-                });
-                console.log('Document written with ID: ', newDocRef.id);
-                documentId = newDocRef.id;
-                setDocId(newDocRef.id);
-                embedPrompt(newDocRef.id);
-            }
             // Insert into BigQuery
             const bigQueryData = {
-                docID: documentId,
+                docID: currentDocId,
                 fileName: fileName,
                 promptInput: cleanedPromptInput,
                 uid: user.uid
@@ -337,199 +309,253 @@ const Notes = () => {
                 },
                 body: JSON.stringify(bigQueryData)
             });
+            embedPrompt(currentDocId);
 
             if (!response.ok) {
                 throw new Error('Failed to insert data into BigQuery');
             }
             console.log('Data inserted into BigQuery');
-
-        } catch (error) {
-            console.error("Error saving document: ", error);
+        }
+        catch (error) {
+            console.error("Error saving in BigQuery : ", error);
         } finally {
             setIsGenerating(false);
         }
     };
 
-    // Function to call the TTS API
-    const callTTSAPI = async (message, apiUrl) => {
-        console.log('Calling TTS API with message:', message, ' voiceName:', voiceName);
-        console.log('API URL:', apiUrl);
-        setIsGeneratingTTS(true); // Set generating state to true
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ message: message, uid: uid, source: 'ai', voice_name: voiceName })
-            });
-
-            if (!response.ok) {
-                throw new Error([`Network response was not ok: ${response.statusText}`]);
+    // Handler for Generate Button Click
+    // **Handler for Generate Button Click**
+    const handleSave = async () => {
+            if (!promptInput.trim()) {
+                alert('Please enter the content.');
+                return;
             }
-        } catch (error) {
-            console.error('Error calling TTS API:', error);
-            alert([`Error: ${error.message}`]);
-        } finally {
-            setIsGeneratingTTS(false); // Reset generating state
-            // Optionally, refresh data
-            fetchData(uid);
+            setIsGenerating(true);
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    console.error("No user is signed in");
+                    return;
+                }
+                const cleanedPromptInput = promptInput.replace(/{\.mark}/g, '');
+                console.log('Prompt Input:', cleanedPromptInput);
+                console.log('Document ID:', docId);
+
+                const currentDateTime = new Date();
+                let documentId = docId;
+
+                if (docId.length > 2) {
+                    const docRef = doc(db, 'genai', user.uid, 'notes', docId);
+                    currentDocId = docId;
+                    await updateDoc(docRef, {
+                        fileName: fileName,
+                        promptInput: cleanedPromptInput,
+                        modifiedDateTime: currentDateTime,
+                        size: cleanedPromptInput.length
+                    });
+                    console.log('Document updated with ID: ', docId);
+                } else {
+                    const genaiCollection = collection(db, 'genai', user.uid, 'notes');
+                    const newDocRef = await addDoc(genaiCollection, {
+                        fileName: fileName,
+                        promptInput: cleanedPromptInput,
+                        createdDateTime: currentDateTime,
+                        modifiedDateTime: currentDateTime,
+                        size: promptInput.length
+                    });
+                    console.log('Document written with ID: ', newDocRef.id);
+                    documentId = newDocRef.id;
+                    setDocId(newDocRef.id);
+                    currentDocId = newDocRef.id;
+                }
+
+            } catch (error) {
+                console.error("Error saving document: ", error);
+            } finally {
+                setIsGenerating(false);
+            }
+        };
+
+        // Function to call the TTS API
+        const callTTSAPI = async (message, apiUrl) => {
+            console.log('Calling TTS API with message:', message, ' voiceName:', voiceName);
+            console.log('API URL:', apiUrl);
+            setIsGeneratingTTS(true); // Set generating state to true
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message, uid: uid, source: 'ai', voice_name: voiceName })
+                });
+
+                if (!response.ok) {
+                    throw new Error([`Network response was not ok: ${response.statusText}`]);
+                }
+            } catch (error) {
+                console.error('Error calling TTS API:', error);
+                alert([`Error: ${error.message}`]);
+            } finally {
+                setIsGeneratingTTS(false); // Reset generating state
+                // Optionally, refresh data
+                fetchData(uid);
+            }
+        };
+
+        const vectorSearchResults = async () => {
+            setIsLoading(true);
+            console.log("Fetching data for Vector search query:", searchQuery);
+            console.log("URL:", process.env.REACT_APP_GENAI_API_VECTOR_URL);
+            fetch(process.env.REACT_APP_GENAI_API_VECTOR_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    uid: uid,
+                    collection: 'notes',
+                    q: searchQuery,
+                    limit: dataLimit,
+                })
+            })
+                .then((res) => res.json())
+                .then(async (data) => {
+                    const docIds = data.document_ids;
+                    const genaiCollection = collection(db, 'genai', uid, 'notes');
+                    const docsQuery = query(genaiCollection, where('__name__', 'in', docIds));
+                    const docsSnapshot = await getDocs(docsQuery);
+                    const docsMap = new Map(docsSnapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
+                    const genaiList = docIds.map(id => docsMap.get(id)).filter(doc => doc !== undefined);
+                    setGenaiData(genaiList);
+                    setIsLoading(false);
+                })
+                .catch((error) => {
+                    console.error("Error fetching data:", error);
+                    setIsLoading(false);
+                });
         }
-    };
 
-    const vectorSearchResults = async () => {
-        setIsLoading(true);
-        console.log("Fetching data for Vector search query:", searchQuery);
-        console.log("URL:", process.env.REACT_APP_GENAI_API_VECTOR_URL);
-        fetch(process.env.REACT_APP_GENAI_API_VECTOR_URL, {
-            method: "POST",
-            body: JSON.stringify({
-                uid: uid,
-                collection: 'notes',
-                q: searchQuery,
-                limit: dataLimit,
-            })
-        })
-            .then((res) => res.json())
-            .then(async (data) => {
-                const docIds = data.document_ids;
-                const genaiCollection = collection(db, 'genai', uid, 'notes');
-                const docsQuery = query(genaiCollection, where('__name__', 'in', docIds));
-                const docsSnapshot = await getDocs(docsQuery);
-                const docsMap = new Map(docsSnapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
-                const genaiList = docIds.map(id => docsMap.get(id)).filter(doc => doc !== undefined);
-                setGenaiData(genaiList);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-                setIsLoading(false);
-            });
-    }
+        if (showMainApp) {
+            return (
+                <App user={user} />
+            );
+        }
 
-    if (showMainApp) {
         return (
-            <App user={user} />
-        );
-    }
-
-    return (
-        <div>
             <div>
                 <div>
-                    <input
-                        className="containerInput"
-                        value={fileName}
-                        onChange={(e) => setFileName(e.target.value)}
-                        type="text"
-                        placeholder="Enter filename"
-                        style={{ width: '30%', padding: '10px', marginBottom: '10px', border: '2px', fontSize: '16px' }}
-                    />
-                    <button
-                        onClick={handleSave}
-                        className="signonpagebutton"
-                        style={{ marginLeft: '20px', padding: '10px 10px', fontSize: '16px' }}
-                    >
-                        {isGenerating ? (
-                            <FaSpinner className="spinning" />
-                        ) : (
-                            'Save'
-                        )}
-                    </button>
-                    &nbsp; &nbsp;
-                    {!GenAIParameter ? (
-                        <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                            <FaArrowLeft />
-                        </button>
-                    ) : (
-                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
-                    )}
-
-                    <div className="container">
-                        <MdEditor
-                            style={{ height: '400px', fontSize: '3rem' }}
-                            value={promptInput}
-                            renderHTML={promptInput => mdParser.render(promptInput)}
-                            onChange={({ text }) => setPromptInput(text)}
-                            config={{
-                                view: { menu: true, md: true, html: false },
-                                markdownClass: 'markdown-body'
-                            }} // Turn off live preview
+                    <div>
+                        <input
+                            className="containerInput"
+                            value={fileName}
+                            onChange={(e) => setFileName(e.target.value)}
+                            type="text"
+                            placeholder="Enter filename"
+                            style={{ width: '30%', padding: '10px', marginBottom: '10px', border: '2px', fontSize: '16px' }}
                         />
+                        <button
+                            onClick={insertIntoBigQuery}
+                            className="signonpagebutton"
+                            style={{ marginLeft: '20px', padding: '10px 10px', fontSize: '16px' }}
+                        >
+                            {isGenerating ? (
+                                <FaSpinner className="spinning" />
+                            ) : (
+                                'Save'
+                            )}
+                        </button>
+                        &nbsp; &nbsp;
+                        {!GenAIParameter ? (
+                            <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                                <FaArrowLeft />
+                            </button>
+                        ) : (
+                            <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                        )}
+
+                        <div className="container">
+                            <MdEditor
+                                style={{ height: '400px', fontSize: '3rem' }}
+                                value={promptInput}
+                                renderHTML={promptInput => mdParser.render(promptInput)}
+                                onChange={({ text }) => setPromptInput(text)}
+                                config={{
+                                    view: { menu: true, md: true, html: false },
+                                    markdownClass: 'markdown-body'
+                                }} // Turn off live preview
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                    </div>
+                    <label>
+                        Limit:
+                        <input
+                            className="limitInput"
+                            type="number"
+                            onBlur={(event) => handleLimitChange(event)}
+                            onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleLimitChange(event)}
+                            defaultValue={dataLimit}
+                            style={{ width: "50px", margin: "0 10px" }}
+                            min={1}
+                        />
+                    </label>
+                    <input
+                        className="searchInput"
+                        type="text"
+                        onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
+                        placeholder="Semantic or Vector Search"
+                        style={{ width: '30%', padding: '10px', border: '2px', fontSize: '16px' }}
+                    />
+                    {/* **Existing Data Display** */}
+                    <div className="containerInput">
+                        <br />
+                        <br />
+                        {isLoading && <p> Loading Data...</p>}
+                        {!isLoading && <div>
+                            {genaiData.map((item) => (
+                                <div key={item.id}>
+                                    <div style={{ border: "1px solid black", backgroundColor: "#edf5f1" }}>
+                                        <div >
+                                            <button style={{ color: "blue", fontWeight: "bold", fontSize: '18px' }} onClick={() => {
+                                                setFileName(item.fileName);
+                                                setPromptInput(item.promptInput);
+                                                setDocId(item.id);
+                                                console.log('Document ID:', item.id);
+                                            }}>
+                                                Edit
+                                            </button>
+                                            <span style={{ color: "green", fontWeight: "bold", fontSize: '16px' }}> {item.showRawAnswer ? item.fileName : item.fileName} </span>&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <span style={{ color: "black", fontSize: '12px' }}></span>
+                                            <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span> &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <span style={{ color: "black", fontSize: '12px' }}>
+                                                modified: </span>
+                                            <span style={{ color: "blue", fontSize: "16px" }}>{new Date(item.modifiedDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span> &nbsp;&nbsp;
+                                            <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.promptInput, item.language || "English")}><FaHeadphones /></button>&nbsp;&nbsp;
+                                        </div>
+                                    </div>
+                                    <div style={{ border: "1px dotted black", padding: "2px" }}>
+                                        <h4 style={{ color: "brown" }}>
+
+                                        </h4>
+                                        <div style={{ fontSize: '16px' }}>
+                                            {item.promptInput && renderQuestion(item.promptInput, item.id)}
+                                        </div>
+
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                </div>
+                            ))}
+                            <button className="fetchButton" onClick={fetchMoreData} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}>
+                                Show more information
+                            </button>
+                        </div>}
                     </div>
                 </div>
+            </div >
+        );
+    };
 
-                <div style={{ marginBottom: '20px' }}>
-                </div>
-                <label>
-                    Limit:
-                    <input
-                        className="limitInput"
-                        type="number"
-                        onBlur={(event) => handleLimitChange(event)}
-                        onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleLimitChange(event)}
-                        defaultValue={dataLimit}
-                        style={{ width: "50px", margin: "0 10px" }}
-                        min={1}
-                    />
-                </label>
-                <input
-                    className="searchInput"
-                    type="text"
-                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
-                    placeholder="Semantic or Vector Search"
-                    style={{ width: '30%', padding: '10px', border: '2px', fontSize: '16px' }}
-                />
-                {/* **Existing Data Display** */}
-                <div className="containerInput">
-                    <br />
-                    <br />
-                    {isLoading && <p> Loading Data...</p>}
-                    {!isLoading && <div>
-                        {genaiData.map((item) => (
-                            <div key={item.id}>
-                                <div style={{ border: "1px solid black", backgroundColor: "#edf5f1" }}>
-                                    <div >
-                                        <button style={{ color: "blue", fontWeight: "bold", fontSize: '18px' }} onClick={() => {
-                                            setFileName(item.fileName);
-                                            setPromptInput(item.promptInput);
-                                            setDocId(item.id);
-                                            console.log('Document ID:', item.id);
-                                        }}>
-                                            Edit
-                                        </button>
-                                        <span style={{ color: "green", fontWeight: "bold", fontSize: '16px' }}> {item.showRawAnswer ? item.fileName : item.fileName} </span>&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <span style={{ color: "black", fontSize: '12px' }}></span>
-                                        <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                                        <span style={{ color: "black", fontSize: '12px' }}>
-                                            modified: </span>
-                                        <span style={{ color: "blue", fontSize: "16px" }}>{new Date(item.modifiedDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span> &nbsp;&nbsp;
-                                        <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.promptInput, item.language || "English")}><FaHeadphones /></button>&nbsp;&nbsp;
-                                    </div>
-                                </div>
-                                <div style={{ border: "1px dotted black", padding: "2px" }}>
-                                    <h4 style={{ color: "brown" }}>
-
-                                    </h4>
-                                    <div style={{ fontSize: '16px' }}>
-                                        {item.promptInput && renderQuestion(item.promptInput, item.id)}
-                                    </div>
-
-                                </div>
-
-                                <br />
-                                <br />
-                            </div>
-                        ))}
-                        <button className="fetchButton" onClick={fetchMoreData} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}>
-                            Show more information
-                        </button>
-                    </div>}
-                </div>
-            </div>
-        </div >
-    );
-};
-
-export default Notes;
+    export default Notes;
