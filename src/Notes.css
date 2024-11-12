@@ -419,4 +419,18 @@ form {
     background-color: #f5f5f5;
 }
 
+.markdown-body ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+.markdown-body ul ul {
+  list-style-type: circle;
+}
+
 

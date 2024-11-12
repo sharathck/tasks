@@ -47,20 +47,13 @@ const Notes = () => {
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [fileName, setFileName] = useState('');
     const [docId, setDocId] = useState('');
-    const mdParser = new MarkdownIt(/* Markdown-it options */);
+    const mdParser = new MarkdownIt({
+        breaks: true,
+        lists: true  // Enable lists explicitly
+      }).enable([
+        'list'
+      ]);
     const [showFullQuestion, setShowFullQuestion] = useState({});
-
-    // Add this new handler function
-    const handleEditorChange = ({ text, html }) => {
-        // Add two spaces before each newline if the last character typed was Enter
-        const lastChar = text.slice(-1);
-        if (lastChar === '\n') {
-            const modifiedText = text.replace(/\n/g, '  \n');
-            setPromptInput(modifiedText);
-        } else {
-            setPromptInput(text);
-        }
-    };
 
     const embedPrompt = async (enbedDocID) => {
         try {
@@ -227,7 +220,8 @@ const Notes = () => {
                     <MdEditor
                         value={question}
                         renderHTML={text => mdParser.render(question)}
-                        config={{ view: { menu: false, md: false, html: true } }}
+                        config={{ view: { menu: false, md: false, html: true },
+                        markdownClass: 'markdown-body' }}
                     />                   
                 </div>
             );
@@ -236,7 +230,8 @@ const Notes = () => {
                 <div>
                     <MdEditor
                         renderHTML={text => mdParser.render(showBriefQuestion)}
-                        config={{ view: { menu: false, md: false, html: true } }}
+                        config={{ view: { menu: false, md: false, html: true },
+                        markdownClass: 'markdown-body' }}
                     />
                     <button onClick={() => toggleShowFullQuestion(id)}>More</button>
                 </div>
@@ -427,8 +422,9 @@ const Notes = () => {
                             style={{ height: '400px', fontSize: '3rem' }}
                             value={promptInput}
                             renderHTML={promptInput => mdParser.render(promptInput)}
-                            onChange={handleEditorChange}
-                            config={{ view: { menu: true, md: true, html: false } }} // Turn off live preview
+                            onChange={({ text }) => setPromptInput(text)}
+                            config={{ view: { menu: true, md: true, html: false },
+                            markdownClass: 'markdown-body' }} // Turn off live preview
                         />
                     </div>
                 </div>
