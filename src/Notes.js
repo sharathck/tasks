@@ -50,9 +50,9 @@ const Notes = () => {
     const mdParser = new MarkdownIt({
         breaks: true,
         lists: true  // Enable lists explicitly
-      }).enable([
+    }).enable([
         'list'
-      ]);
+    ]);
     const [showFullQuestion, setShowFullQuestion] = useState({});
 
     const embedPrompt = async (enbedDocID) => {
@@ -76,6 +76,8 @@ const Notes = () => {
             console.error('Error embedding prompt:', error);
             alert(`Error: ${error.message}`);
         }
+
+
     };
 
     // Listen for authentication state changes
@@ -220,9 +222,11 @@ const Notes = () => {
                     <MdEditor
                         value={question}
                         renderHTML={text => mdParser.render(question)}
-                        config={{ view: { menu: false, md: false, html: true },
-                        markdownClass: 'markdown-body' }}
-                    />                   
+                        config={{
+                            view: { menu: false, md: false, html: true },
+                            markdownClass: 'markdown-body'
+                        }}
+                    />
                 </div>
             );
         } else {
@@ -230,8 +234,10 @@ const Notes = () => {
                 <div>
                     <MdEditor
                         renderHTML={text => mdParser.render(showBriefQuestion)}
-                        config={{ view: { menu: false, md: false, html: true },
-                        markdownClass: 'markdown-body' }}
+                        config={{
+                            view: { menu: false, md: false, html: true },
+                            markdownClass: 'markdown-body'
+                        }}
                     />
                     <button onClick={() => toggleShowFullQuestion(id)}>More</button>
                 </div>
@@ -288,34 +294,57 @@ const Notes = () => {
             const cleanedPromptInput = promptInput.replace(/{\.mark}/g, '');
             console.log('Prompt Input:', cleanedPromptInput);
             console.log('Document ID:', docId);
+
+            const currentDateTime = new Date();
+            let documentId = docId;
+
             if (docId.length > 2) {
                 const docRef = doc(db, 'genai', user.uid, 'notes', docId);
                 await updateDoc(docRef, {
                     fileName: fileName,
                     promptInput: cleanedPromptInput,
-                    modifiedDateTime: new Date(),
+                    modifiedDateTime: currentDateTime,
                     size: cleanedPromptInput.length
                 });
                 embedPrompt(docId);
                 console.log('Document updated with ID: ', docId);
-                return;
-            }
-            else {
+            } else {
                 const genaiCollection = collection(db, 'genai', user.uid, 'notes');
                 const newDocRef = await addDoc(genaiCollection, {
                     fileName: fileName,
                     promptInput: cleanedPromptInput,
-                    createdDateTime: new Date(),
-                    modifiedDateTime: new Date(),
+                    createdDateTime: currentDateTime,
+                    modifiedDateTime: currentDateTime,
                     size: promptInput.length
                 });
                 console.log('Document written with ID: ', newDocRef.id);
+                documentId = newDocRef.id;
                 setDocId(newDocRef.id);
                 embedPrompt(newDocRef.id);
-
             }
+            // Insert into BigQuery
+            const bigQueryData = {
+                docID: documentId,
+                fileName: fileName,
+                promptInput: cleanedPromptInput,
+                uid: user.uid
+            };
+
+            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}insert_notes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bigQueryData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to insert data into BigQuery');
+            }
+            console.log('Data inserted into BigQuery');
+
         } catch (error) {
-            console.error("Error adding document: ", error);
+            console.error("Error saving document: ", error);
         } finally {
             setIsGenerating(false);
         }
@@ -423,8 +452,10 @@ const Notes = () => {
                             value={promptInput}
                             renderHTML={promptInput => mdParser.render(promptInput)}
                             onChange={({ text }) => setPromptInput(text)}
-                            config={{ view: { menu: true, md: true, html: false },
-                            markdownClass: 'markdown-body' }} // Turn off live preview
+                            config={{
+                                view: { menu: true, md: true, html: false },
+                                markdownClass: 'markdown-body'
+                            }} // Turn off live preview
                         />
                     </div>
                 </div>
