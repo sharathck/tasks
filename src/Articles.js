@@ -202,6 +202,7 @@ function Articles() {
                 createdDate: new Date(),
                 uemail: user.email
             });
+            articles = textresponse + " " + articles;
             setNewTask('');
         }
     };
