@@ -131,10 +131,16 @@ const GenAIApp = () => {
     const [showClaudeHaiku, setShowClaudeHaiku] = useState(true); // Set to true or false as needed
 
     // Add new state variables for Sambanova
-    const [isSambanova, setIsSambanova] = useState(true);
+    const [isSambanova, setIsSambanova] = useState(false);
     const [isGeneratingSambanova, setIsGeneratingSambanova] = useState(false);
     const [showSambanova, setShowSambanova] = useState(false);
     const [modelSambanova, setModelSambanova] = useState('sambanova');
+
+    // Add new state variables near other model state variables
+    const [isGroq, setIsGroq] = useState(true);
+    const [isGeneratingGroq, setIsGeneratingGroq] = useState(false);
+    const [showGroq, setShowGroq] = useState(false);
+    const [modelGroq, setModelGroq] = useState('groq');
 
     const embedPrompt = async (docId) => {
         try {
@@ -306,6 +312,7 @@ const GenAIApp = () => {
                 if (data.showo1Mini !== undefined) setShowo1Mini(data.showo1Mini);
                 if (data.showClaudeHaiku !== undefined) setShowClaudeHaiku(data.showClaudeHaiku);
                 if (data.showSambanova !== undefined) setShowSambanova(data.showSambanova);
+                if (data.showGroq !== undefined) setShowGroq(data.showGroq);
                 if (data.showTTS !== undefined) {
                     setShowTTS(data.showTTS);
                 }
@@ -533,89 +540,99 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq) {
             alert('Please select at least one model.');
             return;
         }
-        
-        if (isSambanova) {
+
+        if (isGroq && showGroq) {
+            setIsGeneratingGroq(true); // Set generating state to true
+            callAPI(modelGroq);
+        }
+
+        if (isSambanova && showSambanova) {
             setIsGeneratingSambanova(true); // Set generating state to true
             callAPI(modelSambanova);
         }
 
+        if (isClaudeHaiku && showClaudeHaiku) {
+            setIsGeneratingClaudeHaiku(true); // Set generating state to true
+            callAPI('Claude-Haiku');
+        }
+        
         // Generate API calls for each selected model
-        if (isAnthropic) {
+        if (isAnthropic && showAnthropic) {
             setIsGeneratingAnthropic(true); // Set generating state to true
             callAPI(modelAnthropic);
         }
 
-        if (isGemini) {
+        if (isGemini && showGemini) {
             setIsGeneratingGemini(true); // Set generating state to true
             callAPI(modelGemini);
         }
-        if (isOpenAI) {
+        if (isOpenAI && showOpenAI) {
             setIsGenerating(true); // Set generating state to true
             callAPI(modelOpenAI);
         }
 
-        if (isGpto1Mini) {
+        if (isGpto1Mini && showo1Mini) {
             setIsGeneratingo1Mini(true); // Set generating state to true
             callAPI(modelGpto1Mini);
         }
 
-        if (iso1) {
+        if (iso1 && showo1) {
             setIsGeneratingo1(true); // Set generating state to true
             callAPI(modelo1);
         }
 
-        if (isLlama) {
+        if (isLlama && showLlama) {
             setIsGeneratingLlama(true); // Set generating state to true
             callAPI(modelLlama);
         }
 
-        if (isMistral) {
+        if (isMistral && showMistral) {
             setIsGeneratingMistral(true); // Set generating state to true
             callAPI(modelMistral);
         }
 
-        if (isGpt4oMini) {
+        if (isGpt4oMini && showGpt4oMini) {
             setIsGeneratingGpt4oMini(true); // Set generating state to true
             callAPI(modelGpt4oMini);
         }
 
-        if (isGeminiFast) {
+        if (isGeminiFast && showGeminiFast) {
             setIsGeneratingGeminiFast(true); // Set generating state to true
             callAPI(modelGeminiFast);
         }
 
-        if (isGpt4Turbo) {
+        if (isGpt4Turbo && showGpt4Turbo) {
             setIsGeneratingGpt4Turbo(true); // Set generating state to true
             callAPI(modelGpt4Turbo);
         }
 
-        if (isPerplexityFast) {
+        if (isPerplexityFast && showPerplexityFast) {
             setIsGeneratingPerplexityFast(true); // Set generating state to true
             callAPI(modelPerplexityFast);
         }
 
-        if (isPerplexity) {
+        if (isPerplexity && showPerplexity) {
             setIsGeneratingPerplexity(true); // Set generating state to true
             callAPI(modelPerplexity);
         }
 
-        if (isCodestral) {
+        if (isCodestral && showCodeStral) {
             setIsGeneratingCodeStral(true); // Set generating state to true
             callAPI(modelCodestralApi);
         }
 
         // **Handle DALL·E 3 Selection**
-        if (isImage_Dall_e_3) {
+        if (isImage_Dall_e_3 && showImageDallE3) {
             setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
             callAPI(modelImageDallE3);
         }
 
         // **Handle TTS Selection**
-        if (isTTS) {
+        if (isTTS && showTTS) {
             // if promptInput is > 9000 characters, then split it into chunks and call TTS API for each chunk
             //
 
@@ -632,11 +649,6 @@ const GenAIApp = () => {
             else {
                 callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
             }
-        }
-
-        if (isClaudeHaiku) {
-            setIsGeneratingClaudeHaiku(true); // Set generating state to true
-            callAPI('Claude-Haiku');
         }
 
         try {
@@ -664,6 +676,7 @@ const GenAIApp = () => {
                     isClaudeHaiku,
                     iso1,
                     isSambanova, // Add this line
+                    isGroq,
 
                     // Feature states
                     isTTS,
@@ -777,6 +790,9 @@ const GenAIApp = () => {
             }
             if (selectedModel === modelSambanova) {
                 setIsGeneratingSambanova(false);
+            }
+            if (selectedModel === modelGroq) {
+                setIsGeneratingGroq(false);
             }
         }
     };
@@ -980,9 +996,14 @@ const GenAIApp = () => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                   {showSambanova && (
+                    {showGroq && (
+                        <button className={isGroq ? 'button_selected' : 'button'} onClick={() => setIsGroq(!isGroq)}>
+                            <label className={isGeneratingGroq ? 'flashing' : ''}>Llama(G)</label>
+                        </button>
+                    )}
+                    {showSambanova && (
                         <button className={isSambanova ? 'button_selected' : 'button'} onClick={() => setIsSambanova(!isSambanova)}>
-                            <label className={isGeneratingSambanova ? 'flashing' : ''}>Llama</label>
+                            <label className={isGeneratingSambanova ? 'flashing' : ''}>Llama(S)</label>
                         </button>
                     )}
                     {showOpenAI && (
@@ -1139,7 +1160,8 @@ const GenAIApp = () => {
                             isGeneratingCodeStral ||
                             isGeneratingGpt4oMini ||
                             isGeneratingClaudeHaiku ||
-                            isGeneratingSambanova
+                            isGeneratingSambanova ||
+                            isGeneratingGroq
                         }
                     >
                         {isGenerating ||
@@ -1158,7 +1180,8 @@ const GenAIApp = () => {
                             isGeneratingCodeStral ||
                             isGeneratingGpt4oMini ||
                             isGeneratingClaudeHaiku ||
-                            isGeneratingSambanova ? (
+                            isGeneratingSambanova ||
+                            isGeneratingGroq ? (
                             <FaSpinner className="spinning" />
                         ) : (
                             'GenAI'
@@ -1235,6 +1258,7 @@ const GenAIApp = () => {
                     <option value="codestral">CodeStral</option>
                     <option value="Claude-Haiku">Claude-Haiku</option>
                     <option value="sambanova-1">Sambanova</option>
+                    <option value="groq-mixtral">Groq</option>
                 </select>
                 {showEditPopup && (
                     <div className="modal-overlay">
@@ -1330,11 +1354,11 @@ const GenAIApp = () => {
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.showRawAnswer ? item.answer :                             (<MdEditor
-                                value={editPromptFullText}
-                                renderHTML={editPromptFullText => mdParser.render(item.answer)}
-                                config={{ view: { menu: false, md: false, html: true } }}
-                            />)}
+                                        {item.showRawAnswer ? item.answer : (<MdEditor
+                                            value={editPromptFullText}
+                                            renderHTML={editPromptFullText => mdParser.render(item.answer)}
+                                            config={{ view: { menu: false, md: false, html: true } }}
+                                        />)}
                                     </div>
 
                                     <br />
