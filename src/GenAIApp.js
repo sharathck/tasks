@@ -130,6 +130,12 @@ const GenAIApp = () => {
     // Add showClaudeHaiku state variable
     const [showClaudeHaiku, setShowClaudeHaiku] = useState(true); // Set to true or false as needed
 
+    // Add new state variables for Sambanova
+    const [isSambanova, setIsSambanova] = useState(true);
+    const [isGeneratingSambanova, setIsGeneratingSambanova] = useState(false);
+    const [showSambanova, setShowSambanova] = useState(false);
+    const [modelSambanova, setModelSambanova] = useState('sambanova');
+
     const embedPrompt = async (docId) => {
         try {
             console.log('Embedding prompt:', docId);
@@ -285,6 +291,7 @@ const GenAIApp = () => {
                 if (data.isPerplexity !== undefined) setIsPerplexity(data.isPerplexity);
                 if (data.isCodestral !== undefined) setIsCodestral(data.isCodestral);
                 if (data.isClaudeHaiku !== undefined) setIsClaudeHaiku(data.isClaudeHaiku);
+                if (data.isSambanova !== undefined) setIsSambanova(data.isSambanova);
                 if (data.showAnthropic !== undefined) setShowAnthropic(data.showAnthropic);
                 if (data.showGemini !== undefined) setShowGemini(data.showGemini);
                 if (data.showOpenAI !== undefined) setShowOpenAI(data.showOpenAI);
@@ -298,6 +305,7 @@ const GenAIApp = () => {
                 if (data.showo1 !== undefined) setShowo1(data.showo1);
                 if (data.showo1Mini !== undefined) setShowo1Mini(data.showo1Mini);
                 if (data.showClaudeHaiku !== undefined) setShowClaudeHaiku(data.showClaudeHaiku);
+                if (data.showSambanova !== undefined) setShowSambanova(data.showSambanova);
                 if (data.showTTS !== undefined) {
                     setShowTTS(data.showTTS);
                 }
@@ -525,7 +533,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova) {
             alert('Please select at least one model.');
             return;
         }
@@ -626,6 +634,11 @@ const GenAIApp = () => {
             callAPI('Claude-Haiku');
         }
 
+        if (isSambanova) {
+            setIsGeneratingSambanova(true); // Set generating state to true
+            callAPI(modelSambanova);
+        }
+
         try {
             const configurationCollection = collection(db, 'genai', user.uid, 'configuration');
             const q = query(configurationCollection, where('setup', '==', 'genai'));
@@ -650,6 +663,7 @@ const GenAIApp = () => {
                     isCodestral,
                     isClaudeHaiku,
                     iso1,
+                    isSambanova, // Add this line
 
                     // Feature states
                     isTTS,
@@ -760,6 +774,9 @@ const GenAIApp = () => {
             }
             if (selectedModel === 'Claude-Haiku') {
                 setIsGeneratingClaudeHaiku(false);
+            }
+            if (selectedModel === modelSambanova) {
+                setIsGeneratingSambanova(false);
             }
         }
     };
@@ -963,6 +980,11 @@ const GenAIApp = () => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
+                   {showSambanova && (
+                        <button className={isSambanova ? 'button_selected' : 'button'} onClick={() => setIsSambanova(!isSambanova)}>
+                            <label className={isGeneratingSambanova ? 'flashing' : ''}>Llama</label>
+                        </button>
+                    )}
                     {showOpenAI && (
                         <button className={isOpenAI ? 'button_selected' : 'button'} onClick={() => setIsOpenAI(!isOpenAI)}>
                             <label className={isGenerating ? 'flashing' : ''}>ChatGPT</label>
@@ -990,7 +1012,7 @@ const GenAIApp = () => {
                     )}
                     {showLlama && (
                         <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
-                            <label className={isGeneratingLlama ? 'flashing' : ''}>Llama</label>
+                            <label className={isGeneratingLlama ? 'flashing' : ''}>Llama(405B)</label>
                         </button>
                     )}
                     {showGpt4Turbo && (
@@ -1116,7 +1138,8 @@ const GenAIApp = () => {
                             isGeneratingPerplexityFast ||
                             isGeneratingCodeStral ||
                             isGeneratingGpt4oMini ||
-                            isGeneratingClaudeHaiku
+                            isGeneratingClaudeHaiku ||
+                            isGeneratingSambanova
                         }
                     >
                         {isGenerating ||
@@ -1134,7 +1157,8 @@ const GenAIApp = () => {
                             isGeneratingPerplexityFast ||
                             isGeneratingCodeStral ||
                             isGeneratingGpt4oMini ||
-                            isGeneratingClaudeHaiku ? (
+                            isGeneratingClaudeHaiku ||
+                            isGeneratingSambanova ? (
                             <FaSpinner className="spinning" />
                         ) : (
                             'GenAI'
@@ -1210,6 +1234,7 @@ const GenAIApp = () => {
                     <option value="perplexity">Perplexity</option>
                     <option value="codestral">CodeStral</option>
                     <option value="Claude-Haiku">Claude-Haiku</option>
+                    <option value="sambanova-1">Sambanova</option>
                 </select>
                 {showEditPopup && (
                     <div className="modal-overlay">
