@@ -537,6 +537,11 @@ const GenAIApp = () => {
             alert('Please select at least one model.');
             return;
         }
+        
+        if (isSambanova) {
+            setIsGeneratingSambanova(true); // Set generating state to true
+            callAPI(modelSambanova);
+        }
 
         // Generate API calls for each selected model
         if (isAnthropic) {
@@ -632,11 +637,6 @@ const GenAIApp = () => {
         if (isClaudeHaiku) {
             setIsGeneratingClaudeHaiku(true); // Set generating state to true
             callAPI('Claude-Haiku');
-        }
-
-        if (isSambanova) {
-            setIsGeneratingSambanova(true); // Set generating state to true
-            callAPI(modelSambanova);
         }
 
         try {
