@@ -882,8 +882,8 @@ const GenAIApp = () => {
 
     const handleEditPrompt = () => {
         setShowEditPopup(true);
+        setShowSaveButton(true);
         if (selectedPrompt) {
-            setShowSaveButton(true);
             setEditPromptTag(selectedPrompt);
             setEditPromptFullText(selectedPromptFullText);
         }
@@ -891,7 +891,7 @@ const GenAIApp = () => {
 
     const handleEditSource = async () => {
         if (selectedPrompt) {
-            setShowSaveButton(false);
+            setShowSaveButton(true);
             setShowEditPopup(true);
         }
     };
