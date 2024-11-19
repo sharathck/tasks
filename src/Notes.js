@@ -49,6 +49,7 @@ const Notes = () => {
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [fileName, setFileName] = useState('');
     const [docId, setDocId] = useState('');
+    const [isKeyWordSearch, setIsKeyWordSearch] = useState(false);
     const mdParser = new MarkdownIt({
         breaks: true,
         lists: true  // Enable lists explicitly
@@ -152,11 +153,13 @@ const Notes = () => {
     const handleVectorSearchChange = (event) => {
         searchQuery = event.target.value;
         vectorSearchResults();
+        setIsKeyWordSearch(false);
     };
 
     const handleSearchChange = (event) => {
         searchQuery = event.target.value;
         bigQueryResults();
+        setIsKeyWordSearch(true);
     };
 
     const toggleShowFullQuestion = (id) => {
@@ -554,7 +557,7 @@ const Notes = () => {
                     <br />
                     <br />
                     {isLoading && <p> Loading Data...</p>}
-                    {!isLoading && <div>
+                    {!isLoading && !isKeyWordSearch && <div>
                         {genaiData.map((item) => (
                             <div key={item.id}>
                                 <div style={{ border: "1px solid black", backgroundColor: "#edf5f1" }}>
@@ -573,6 +576,44 @@ const Notes = () => {
                                         <span style={{ color: "black", fontSize: '12px' }}>
                                             modified: </span>
                                         <span style={{ color: "blue", fontSize: "16px" }}>{new Date(item.modifiedDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span> &nbsp;&nbsp;
+                                        <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.promptInput, item.language || "English")}><FaHeadphones /></button>&nbsp;&nbsp;
+                                    </div>
+                                </div>
+                                <div style={{ border: "1px dotted black", padding: "2px" }}>
+                                    <h4 style={{ color: "brown" }}>
+
+                                    </h4>
+                                    <div style={{ fontSize: '16px' }}>
+                                        {item.promptInput && renderQuestion(item.promptInput, item.id)}
+                                    </div>
+
+                                </div>
+
+                                <br />
+                                <br />
+                            </div>
+                        ))}
+                        <button className="fetchButton" onClick={fetchMoreData} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}>
+                            Show more information
+                        </button>
+                    </div>}
+                    {!isLoading && isKeyWordSearch && <div>
+                        {genaiData.map((item) => (
+                            <div key={item.id}>
+                                <div style={{ border: "1px solid black", backgroundColor: "#edf5f1" }}>
+                                    <div >
+                                        <button style={{ color: "blue", fontWeight: "bold", fontSize: '18px' }} onClick={() => {
+                                            setFileName(item.fileName);
+                                            setPromptInput(item.promptInput);
+                                            setDocId(item.id);
+                                            console.log('Document ID:', item.id);
+                                        }}>
+                                            Edit
+                                        </button>
+                                        <span style={{ color: "green", fontWeight: "bold", fontSize: '16px' }}> {item.showRawAnswer ? item.fileName : item.fileName} </span>&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span style={{ color: "black", fontSize: '12px' }}></span>
+                                        <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span> &nbsp;&nbsp;&nbsp;&nbsp;
+                                       
                                         <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.promptInput, item.language || "English")}><FaHeadphones /></button>&nbsp;&nbsp;
                                     </div>
                                 </div>
