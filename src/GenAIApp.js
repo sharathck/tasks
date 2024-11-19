@@ -304,6 +304,7 @@ const GenAIApp = () => {
                 if (data.showGpt4Turbo !== undefined) setShowGpt4Turbo(data.showGpt4Turbo);
                 if (data.showMistral !== undefined) setShowMistral(data.showMistral);
                 if (data.showPerplexityFast !== undefined) setShowPerplexityFast(data.showPerplexityFast);
+                if (data.showPerplexity !== undefined) setShowPerplexity(data.showPerplexity);
                 if (data.showGpt4oMini !== undefined) setShowGpt4oMini(data.showGpt4oMini);
                 if (data.showGeminiFast !== undefined) setShowGeminiFast(data.showGeminiFast);
                 if (data.showCodeStral !== undefined) setShowCodeStral(data.showCodeStral);
@@ -559,7 +560,7 @@ const GenAIApp = () => {
             setIsGeneratingClaudeHaiku(true); // Set generating state to true
             callAPI('Claude-Haiku');
         }
-        
+
         // Generate API calls for each selected model
         if (isAnthropic && showAnthropic) {
             setIsGeneratingAnthropic(true); // Set generating state to true
