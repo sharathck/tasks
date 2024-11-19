@@ -56,7 +56,6 @@ const Notes = () => {
         'list'
     ]);
     const [showFullQuestion, setShowFullQuestion] = useState({});
-
     const embedPrompt = async (enbedDocID) => {
         try {
             console.log('Embedding prompt:', enbedDocID);
@@ -153,6 +152,11 @@ const Notes = () => {
     const handleVectorSearchChange = (event) => {
         searchQuery = event.target.value;
         vectorSearchResults();
+    };
+
+    const handleSearchChange = (event) => {
+        searchQuery = event.target.value;
+        bigQueryResults();
     };
 
     const toggleShowFullQuestion = (id) => {
@@ -441,6 +445,30 @@ const Notes = () => {
             });
     }
 
+    const bigQueryResults = () => {
+        setIsLoading(true);
+        console.log("Fetching data for search query:", searchQuery);
+        console.log("search model:", searchModel);
+        console.log("limit:", dataLimit);
+        console.log("URL:", process.env.REACT_APP_NOTES_BIGQUERY_URL);
+        fetch(process.env.REACT_APP_NOTES_BIGQUERY_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                uid: uid,
+                limit: dataLimit,
+                q: searchQuery})
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setGenaiData(data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+                setIsLoading(false);
+            });
+    }
+
     if (showMainApp) {
         return (
             <App user={user} />
@@ -513,6 +541,13 @@ const Notes = () => {
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
                     placeholder="Semantic or Vector Search"
                     style={{ width: '30%', padding: '10px', border: '2px', fontSize: '16px' }}
+                />
+                <input
+                    className="searchInput"
+                    type="text"
+                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
+                    placeholder="Keyword Search"
+                    style={{ width: '30%', padding: '10px', marginLeft: '10px', border: '2px', fontSize: '16px' }}
                 />
                 {/* **Existing Data Display** */}
                 <div className="containerInput">
