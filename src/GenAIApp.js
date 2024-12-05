@@ -142,6 +142,12 @@ const GenAIApp = () => {
     const [showGroq, setShowGroq] = useState(false);
     const [modelGroq, setModelGroq] = useState('groq');
 
+    // Add new state variables for nova after other model state variables
+    const [isNova, setIsNova] = useState(false);
+    const [isGeneratingNova, setIsGeneratingNova] = useState(false);
+    const [showNova, setShowNova] = useState(false);
+    const [modelNova, setModelNova] = useState('nova');
+
     const embedPrompt = async (docId) => {
         try {
             console.log('Embedding prompt:', docId);
@@ -324,6 +330,8 @@ const GenAIApp = () => {
                 if (data.questionTrimLength !== undefined) {
                     questionTrimLength = data.questionTrimLength;
                 }
+                if (data.isNova !== undefined) setIsNova(data.isNova);
+                if (data.showNova !== undefined) setShowNova(data.showNova);
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -541,7 +549,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova) {
             alert('Please select at least one model.');
             return;
         }
@@ -652,6 +660,11 @@ const GenAIApp = () => {
             }
         }
 
+        if (isNova && showNova) {
+            setIsGeneratingNova(true); // Set generating state to true
+            callAPI(modelNova);
+        }
+
         try {
             const configurationCollection = collection(db, 'genai', user.uid, 'configuration');
             const q = query(configurationCollection, where('setup', '==', 'genai'));
@@ -678,6 +691,7 @@ const GenAIApp = () => {
                     iso1,
                     isSambanova, // Add this line
                     isGroq,
+                    isNova,
 
                     // Feature states
                     isTTS,
@@ -794,6 +808,9 @@ const GenAIApp = () => {
             }
             if (selectedModel === modelGroq) {
                 setIsGeneratingGroq(false);
+            }
+            if (selectedModel === modelNova) {
+                setIsGeneratingNova(false);
             }
         }
     };
@@ -1077,6 +1094,11 @@ const GenAIApp = () => {
                             <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>Claude-Haiku</label>
                         </button>
                     )}
+                    {showNova && (
+                        <button className={isNova ? 'button_selected' : 'button'} onClick={() => setIsNova(!isNova)}>
+                            <label className={isGeneratingNova ? 'flashing' : ''}>Nova</label>
+                        </button>
+                    )}
                     <label style={{ marginLeft: '8px' }}>
                         Temp:
                         <input
@@ -1162,7 +1184,8 @@ const GenAIApp = () => {
                             isGeneratingGpt4oMini ||
                             isGeneratingClaudeHaiku ||
                             isGeneratingSambanova ||
-                            isGeneratingGroq
+                            isGeneratingGroq ||
+                            isGeneratingNova
                         }
                     >
                         {isGenerating ||
@@ -1182,7 +1205,8 @@ const GenAIApp = () => {
                             isGeneratingGpt4oMini ||
                             isGeneratingClaudeHaiku ||
                             isGeneratingSambanova ||
-                            isGeneratingGroq ? (
+                            isGeneratingGroq ||
+                            isGeneratingNova ? (
                             <FaSpinner className="spinning" />
                         ) : (
                             'GenAI'
@@ -1260,6 +1284,7 @@ const GenAIApp = () => {
                     <option value="Claude-Haiku">Claude-Haiku</option>
                     <option value="sambanova-1">Sambanova</option>
                     <option value="groq-mixtral">Groq</option>
+                    <option value="nova">Nova</option>
                 </select>
                 {showEditPopup && (
                     <div className="modal-overlay">
