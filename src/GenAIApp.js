@@ -34,6 +34,7 @@ let autoPromptSeparator = '### all the text from below is strictly for reference
 let questionTrimLength = 200;
 let appendPrompt = ' ';
 
+
 const GenAIApp = () => {
     // **State Variables**
     const [genaiData, setGenaiData] = useState([]);
@@ -141,12 +142,31 @@ const GenAIApp = () => {
     const [isGeneratingGroq, setIsGeneratingGroq] = useState(false);
     const [showGroq, setShowGroq] = useState(false);
     const [modelGroq, setModelGroq] = useState('groq');
+    const [labelGroq, setLabelGroq] = useState('Llama');
 
     // Add new state variables for nova after other model state variables
     const [isNova, setIsNova] = useState(false);
     const [isGeneratingNova, setIsGeneratingNova] = useState(false);
     const [showNova, setShowNova] = useState(false);
     const [modelNova, setModelNova] = useState('nova');
+
+    // Add these state variables after other model state variables
+    const [labelOpenAI, setLabelOpenAI] = useState('ChatGPT');
+    const [labelAnthropic, setLabelAnthropic] = useState('Claude');
+    const [labelGemini, setLabelGemini] = useState('Gemini');
+    const [labelGpto1Mini, setLabelGpto1Mini] = useState('o1-mini');
+    const [labelMistral, setLabelMistral] = useState('Mistral');
+    const [labelLlama, setLabelLlama] = useState('Llama(405B)');
+    const [labelGpt4Turbo, setLabelGpt4Turbo] = useState('Gpt4Turbo');
+    const [labelGeminiFast, setLabelGeminiFast] = useState('Gemini-Fast');
+    const [labelGpt4oMini, setLabelGpt4oMini] = useState('Gpt4oMini');
+    const [labelo1, setLabelo1] = useState('o1');
+    const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
+    const [labelPerplexity, setLabelPerplexity] = useState('Plxty');
+    const [labelCodestral, setLabelCodestral] = useState('CodeStral');
+    const [labelClaudeHaiku, setLabelClaudeHaiku] = useState('Claude-Haiku');
+    const [labelSambanova, setLabelSambanova] = useState('Llama(S)');
+    const [labelNova, setLabelNova] = useState('Nova');
 
     const embedPrompt = async (docId) => {
         try {
@@ -320,6 +340,9 @@ const GenAIApp = () => {
                 if (data.showClaudeHaiku !== undefined) setShowClaudeHaiku(data.showClaudeHaiku);
                 if (data.showSambanova !== undefined) setShowSambanova(data.showSambanova);
                 if (data.showGroq !== undefined) setShowGroq(data.showGroq);
+                if (data.labelGroq !== undefined) {
+                    setLabelGroq(data.labelGroq);
+                }
                 if (data.showTTS !== undefined) {
                     setShowTTS(data.showTTS);
                 }
@@ -332,6 +355,24 @@ const GenAIApp = () => {
                 }
                 if (data.isNova !== undefined) setIsNova(data.isNova);
                 if (data.showNova !== undefined) setShowNova(data.showNova);
+                // Add these new label handlers
+                if (data.labelGroq !== undefined) setLabelGroq(data.labelGroq);
+                if (data.labelOpenAI !== undefined) setLabelOpenAI(data.labelOpenAI);
+                if (data.labelAnthropic !== undefined) setLabelAnthropic(data.labelAnthropic);
+                if (data.labelGemini !== undefined) setLabelGemini(data.labelGemini);
+                if (data.labelGpto1Mini !== undefined) setLabelGpto1Mini(data.labelGpto1Mini);
+                if (data.labelMistral !== undefined) setLabelMistral(data.labelMistral);
+                if (data.labelLlama !== undefined) setLabelLlama(data.labelLlama);
+                if (data.labelGpt4Turbo !== undefined) setLabelGpt4Turbo(data.labelGpt4Turbo);
+                if (data.labelGeminiFast !== undefined) setLabelGeminiFast(data.labelGeminiFast);
+                if (data.labelGpt4oMini !== undefined) setLabelGpt4oMini(data.labelGpt4oMini);
+                if (data.labelo1 !== undefined) setLabelo1(data.labelo1);
+                if (data.labelPerplexityFast !== undefined) setLabelPerplexityFast(data.labelPerplexityFast);
+                if (data.labelPerplexity !== undefined) setLabelPerplexity(data.labelPerplexity);
+                if (data.labelCodestral !== undefined) setLabelCodestral(data.labelCodestral);
+                if (data.labelClaudeHaiku !== undefined) setLabelClaudeHaiku(data.labelClaudeHaiku);
+                if (data.labelSambanova !== undefined) setLabelSambanova(data.labelSambanova);
+                if (data.labelNova !== undefined) setLabelNova(data.labelNova);
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -1016,87 +1057,87 @@ const GenAIApp = () => {
                 <div style={{ marginBottom: '20px' }}>
                     {showGroq && (
                         <button className={isGroq ? 'button_selected' : 'button'} onClick={() => setIsGroq(!isGroq)}>
-                            <label className={isGeneratingGroq ? 'flashing' : ''}>Llama(G)</label>
+                            <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
                         </button>
                     )}
                     {showSambanova && (
                         <button className={isSambanova ? 'button_selected' : 'button'} onClick={() => setIsSambanova(!isSambanova)}>
-                            <label className={isGeneratingSambanova ? 'flashing' : ''}>Llama(S)</label>
+                            <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
                         </button>
                     )}
                     {showOpenAI && (
                         <button className={isOpenAI ? 'button_selected' : 'button'} onClick={() => setIsOpenAI(!isOpenAI)}>
-                            <label className={isGenerating ? 'flashing' : ''}>ChatGPT</label>
+                            <label className={isGenerating ? 'flashing' : ''}>{labelOpenAI}</label>
                         </button>
                     )}
                     {showAnthropic && (
                         <button className={isAnthropic ? 'button_selected' : 'button'} onClick={() => setIsAnthropic(!isAnthropic)}>
-                            <label className={isGeneratingAnthropic ? 'flashing' : ''}>Claude</label>
+                            <label className={isGeneratingAnthropic ? 'flashing' : ''}>{labelAnthropic}</label>
                         </button>
                     )}
                     {showGemini && (
                         <button className={isGemini ? 'button_selected' : 'button'} onClick={() => setIsGemini(!isGemini)}>
-                            <label className={isGeneratingGemini ? 'flashing' : ''}>Gemini</label>
+                            <label className={isGeneratingGemini ? 'flashing' : ''}>{labelGemini}</label>
                         </button>
                     )}
                     {showo1Mini && (
                         <button className={isGpto1Mini ? 'button_selected' : 'button'} onClick={() => setIsGpto1Mini(!isGpto1Mini)}>
-                            <label className={isGeneratingo1Mini ? 'flashing' : ''}>o1-mini</label>
+                            <label className={isGeneratingo1Mini ? 'flashing' : ''}>{labelGpto1Mini}</label>
                         </button>
                     )}
                     {showMistral && (
                         <button className={isMistral ? 'button_selected' : 'button'} onClick={() => setIsMistral(!isMistral)}>
-                            <label className={isGeneratingMistral ? 'flashing' : ''}>Mistral</label>
+                            <label className={isGeneratingMistral ? 'flashing' : ''}>{labelMistral}</label>
                         </button>
                     )}
                     {showLlama && (
                         <button className={isLlama ? 'button_selected' : 'button'} onClick={() => setIsLlama(!isLlama)}>
-                            <label className={isGeneratingLlama ? 'flashing' : ''}>Llama(405B)</label>
+                            <label className={isGeneratingLlama ? 'flashing' : ''}>{labelLlama}</label>
                         </button>
                     )}
                     {showGpt4Turbo && (
                         <button className={isGpt4Turbo ? 'button_selected' : 'button'} onClick={() => setIsGpt4Turbo(!isGpt4Turbo)}>
-                            <label className={isGeneratingGpt4Turbo ? 'flashing' : ''}>Gpt4Turbo</label>
+                            <label className={isGeneratingGpt4Turbo ? 'flashing' : ''}>{labelGpt4Turbo}</label>
                         </button>
                     )}
                     {showGeminiFast && (
                         <button className={isGeminiFast ? 'button_selected' : 'button'} onClick={() => setIsGeminiFast(!isGeminiFast)}>
-                            <label className={isGeneratingGeminiFast ? 'flashing' : ''}>Gemini-Fast</label>
+                            <label className={isGeneratingGeminiFast ? 'flashing' : ''}>{labelGeminiFast}</label>
                         </button>
                     )}
                     {showGpt4oMini && (
                         <button className={isGpt4oMini ? 'button_selected' : 'button'} onClick={() => setIsGpt4oMini(!isGpt4oMini)}>
-                            <label className={isGeneratingGpt4oMini ? 'flashing' : ''}>Gpt4oMini</label>
+                            <label className={isGeneratingGpt4oMini ? 'flashing' : ''}>{labelGpt4oMini}</label>
                         </button>
                     )}
                     {showo1 && (
                         <button className={iso1 ? 'button_selected' : 'button'} onClick={() => setIso1(!iso1)}>
-                            <label className={isGeneratingo1 ? 'flashing' : ''}>o1</label>
+                            <label className={isGeneratingo1 ? 'flashing' : ''}>{labelo1}</label>
                         </button>
                     )}
                     {showPerplexityFast && (
                         <button className={isPerplexityFast ? 'button_selected' : 'button'} onClick={() => setIsPerplexityFast(!isPerplexityFast)}>
-                            <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>Perplexity-Fast</label>
+                            <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>{labelPerplexityFast}</label>
                         </button>
                     )}
                     {showPerplexity && (
                         <button className={isPerplexity ? 'button_selected' : 'button'} onClick={() => setIsPerplexity(!isPerplexity)}>
-                            <label className={isGeneratingPerplexity ? 'flashing' : ''}>Plxty</label>
+                            <label className={isGeneratingPerplexity ? 'flashing' : ''}>{labelPerplexity}</label>
                         </button>
                     )}
                     {showCodeStral && (
                         <button className={isCodestral ? 'button_selected' : 'button'} onClick={() => setIsCodestral(!isCodestral)}>
-                            <label className={isGeneratingCodeStral ? 'flashing' : ''}>CodeStral</label>
+                            <label className={isGeneratingCodeStral ? 'flashing' : ''}>{labelCodestral}</label>
                         </button>
                     )}
                     {showClaudeHaiku && (
                         <button className={isClaudeHaiku ? 'button_selected' : 'button'} onClick={() => setIsClaudeHaiku(!isClaudeHaiku)}>
-                            <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>Claude-Haiku</label>
+                            <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>{labelClaudeHaiku}</label>
                         </button>
                     )}
                     {showNova && (
                         <button className={isNova ? 'button_selected' : 'button'} onClick={() => setIsNova(!isNova)}>
-                            <label className={isGeneratingNova ? 'flashing' : ''}>Nova</label>
+                            <label className={isGeneratingNova ? 'flashing' : ''}>{labelNova}</label>
                         </button>
                     )}
                     <label style={{ marginLeft: '8px' }}>
