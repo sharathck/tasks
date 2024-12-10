@@ -408,6 +408,12 @@ form {
   border-radius: 10px;
 }
 
+.button:hover {
+  box-shadow: 6px 6px 8px rgba(34, 33, 33, 0.4);
+  transform: translateX(-1px);
+  border: 2px solid black;
+}
+
 .button_selected {
   font-size: 16px;
   margin-left: 8px;

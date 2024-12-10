@@ -40,6 +40,8 @@ let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
 let questionTrimLength = 200;
 let appendPrompt = ' ';
+let imagePromptInput = '';
+let imageSelected = false;
 
 
 const GenAIApp = () => {
@@ -178,6 +180,10 @@ const GenAIApp = () => {
     const [labelClaudeHaiku, setLabelClaudeHaiku] = useState('Claude-Haiku');
     const [labelSambanova, setLabelSambanova] = useState('Llama(S)');
     const [labelNova, setLabelNova] = useState('Nova');
+    const [isYouTubeTitle, setIsYouTubeTitle] = useState(false);
+    const [isImagesSearch, setIsImagesSearch] = useState(false);
+    const [showImagesSearchWordsButton, setShowImagesSearchWordsButton] = useState(false);
+    const [showYouTubeTitleDescriptionButton, setShowYouTubeTitleDescriptionButton] = useState(false);
 
     const embedPrompt = async (docId) => {
         try {
@@ -218,7 +224,7 @@ const GenAIApp = () => {
                 return;
             }
             const genaiCollection = collection(db, 'genai', user.uid, 'prompts');
-            if (selectedPrompt == 'NA' || selectedPrompt == null) {
+            if (selectedPrompt === 'NA' || selectedPrompt == null) {
                 console.log('Adding new prompt');
                 const newDocRef = await addDoc(genaiCollection, {
                     tag: editPromptTag,
@@ -386,6 +392,8 @@ const GenAIApp = () => {
                 if (data.labelSambanova !== undefined) setLabelSambanova(data.labelSambanova);
                 if (data.labelNova !== undefined) setLabelNova(data.labelNova);
                 if (data.showYouTubeButton !== undefined) setShowYouTubeButton(data.showYouTubeButton);
+                if (data.showImagesSearchWordsButton !== undefined) setShowImagesSearchWordsButton(data.showImagesSearchWordsButton);
+                if (data.showYouTubeTitleDescriptionButton !== undefined) setShowYouTubeTitleDescriptionButton(data.showYouTubeTitleDescriptionButton);
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -767,45 +775,54 @@ const GenAIApp = () => {
         }
     };
 
-    const callAPI = async (selectedModel) => {
+    const callAPI = async (selectedModel, invocationType = '') => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput);
-
         try {
             let response;
-            if (youtubeSelected) {
-                response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt: youtubePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                });
-            }
-            else {
-                if (autoPrompt) {
-                    await searchPrompts();
-                    console.log('Prompt:', autoPromptInput);
+            switch (invocationType) {
+                case 'youtubeTitleDescription':
                     response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ prompt: autoPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                        body: JSON.stringify({ prompt: youtubePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                     });
-                }
-                else {
-                    let finalPrompt = promptInput;
-                    if (fullPromptInput.length > 2) {
-                        finalPrompt = promptInput + autoPromptSeparator + fullPromptInput;
+                    break;
+                case 'imagesSearchWords':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: imagePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
+                default:
+                    if (autoPrompt) {
+                        await searchPrompts();
+                        console.log('Prompt:', autoPromptInput);
+                        response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ prompt: autoPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                        });
                     }
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: finalPrompt, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
-                }
+                    else {
+                        let finalPrompt = promptInput;
+                        if (fullPromptInput.length > 2) {
+                            finalPrompt = promptInput + autoPromptSeparator + fullPromptInput;
+                        }
+                        response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ prompt: finalPrompt, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                        });
+                    }
             }
             if (!response.ok) {
                 const errorData = await response.json();
@@ -822,6 +839,9 @@ const GenAIApp = () => {
             searchQuery = '';
             searchModel = 'All';
             youtubeSelected = false;
+            imageSelected = false;
+            setIsYouTubeTitle(false);
+            setIsImagesSearch(false);
             console.log('Fetching data after generating content');
             fetchData(uid);
             if (selectedModel === modelOpenAI) {
@@ -1262,7 +1282,7 @@ const GenAIApp = () => {
                         <button className={isTTS ? 'button_selected' : 'button'}
                             onClick={() => handleTTSChange(!isTTS)}>
                             <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                Audio    <img src={speakerIcon} alt="speaker" height= "16px" />
+                                Audio    <img src={speakerIcon} alt="speaker" height="16px" />
                             </label>
                         </button>
                     }
@@ -1504,48 +1524,99 @@ const GenAIApp = () => {
                                     <div style={{ color: "green", fontWeight: "bold" }}>---- Response ----
                                         {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
                                             <>
-                                                {( !isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
-                                                   Live Audio  <FaHeadphones />
+                                                {(!isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
+                                                    Live Audio  <FaHeadphones />
                                                 </button>
                                                 )}
-                                                <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={() => {
-                                                    const cleanedArticles = item.answer
-                                                        .replace(/https?:\/\/[^\s]+/g, '')
-                                                        .replace(/http?:\/\/[^\s]+/g, '')
-                                                        .replace(/[^a-zA-Z0-9\s]/g, ' ')
-                                                        .replace(/\s+/g, ' ')
-                                                        .trim();
-                                                    setIsGeneratingTTS(true);
-                                                    callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+                                                {((isiPhone || showYouTubeTitleDescriptionButton) &&
+                                                    <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={() => {
+                                                        const cleanedArticles = item.answer
+                                                            .replace(/https?:\/\/[^\s]+/g, '')
+                                                            .replace(/http?:\/\/[^\s]+/g, '')
+                                                            .replace(/[^a-zA-Z0-9\s]/g, ' ')
+                                                            .replace(/\s+/g, ' ')
+                                                            .trim();
+                                                        setIsGeneratingTTS(true);
+                                                        callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
 
-                                                }}>
-                                                    <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                                    Download Audio <img src={speakerIcon} alt="speaker" height= "22px"/>
-                                                    </label>
-                                                </button>
-                                                {(showYouTubeButton && <button className={isGeneratingGemini ? 'button_selected' : 'button'} onClick={() => {
+                                                    }}>
+                                                        <label className={isGeneratingTTS ? 'flashing' : ''}>
+                                                            Download Audio <img src={speakerIcon} alt="speaker" height="22px" />
+                                                        </label>
+                                                    </button>
+                                                )}
+                                                {(showYouTubeTitleDescriptionButton && <button className={isGeneratingGemini && isYouTubeTitle ? 'button_selected' : 'button'} onClick={() => {
                                                     youtubePromptInput = youtubeTitlePrompt + item.answer;
                                                     youtubeSelected = true;
+                                                    setIsYouTubeTitle(true);
                                                     setIsGemini(true);
                                                     setIsGeneratingGemini(true);
-                                                    callAPI(modelGemini);
+                                                    callAPI(modelGemini, 'youtubeTitleDescription');
                                                 }}>
-                                                    <label className={isGeneratingGemini ? 'flashing' : ''}>
-                                                    YouTube Title / Description <img src={youtubeIcon} alt="youtube" height= "22px" />
+                                                    <label className={isGeneratingGemini && isYouTubeTitle ? 'flashing' : ''}>
+                                                        YouTube Title / Description <img src={youtubeIcon} alt="youtube" height="22px" />
                                                     </label>
-                                                    </button>
+                                                </button>
                                                 )}
-                                                {(showYouTubeButton && <button className={isGeneratingo1 ? 'button_selected' : 'button'} onClick={() => {
-                                                    youtubePromptInput = imagesSearchPrompt + item.answer;
-                                                    youtubeSelected = true;
+                                                {(showImagesSearchWordsButton && <button className={isGeneratingo1 && isImagesSearch ? 'button_selected' : 'button'} onClick={() => {
+                                                    imagePromptInput = imagesSearchPrompt + item.answer;
+                                                    imageSelected = true;
+                                                    setIsImagesSearch(true);
                                                     setIso1(true);
                                                     setIsGeneratingo1(true);
-                                                    callAPI(modelo1);
+                                                    callAPI(modelo1, 'imagesSearchWords');
                                                 }}>
-                                                    <label className={isGeneratingo1 ? 'flashing' : ''}>
-                                                    Images Search Words <img src={imageIcon} alt="youtube" height= "22px" />
+                                                    <label className={isGeneratingo1 && isImagesSearch ? 'flashing' : ''}>
+                                                        Images Search Words <img src={imageIcon} alt="youtube" height="22px" />
                                                     </label>
-                                                    </button>
+                                                </button>
+                                                )}
+                                                {(showYouTubeButton && <button
+                                                    className={
+                                                        (isGeneratingTTS ||
+                                                            (isGeneratingGemini && isYouTubeTitle) ||
+                                                            (isGeneratingo1 && isImagesSearch)) ?
+                                                            'button_selected' : 'button'
+                                                    }
+                                                    onClick={() => {
+                                                        // Execute TTS
+                                                        const cleanedArticles = item.answer
+                                                            .replace(/https?:\/\/[^\s]+/g, '')
+                                                            .replace(/http?:\/\/[^\s]+/g, '')
+                                                            .replace(/[^a-zA-Z0-9\s]/g, ' ')
+                                                            .replace(/\s+/g, ' ')
+                                                            .trim();
+                                                        setIsGeneratingTTS(true);
+                                                        callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+
+                                                        // Execute YouTube Title/Description
+                                                        youtubePromptInput = youtubeTitlePrompt + item.answer;
+                                                        youtubeSelected = true;
+                                                        setIsYouTubeTitle(true);
+                                                        setIsGemini(true);
+                                                        setIsGeneratingGemini(true);
+                                                        callAPI(modelGemini, 'youtubeTitleDescription');
+
+                                                        // Execute Image Search
+                                                        imagePromptInput = imagesSearchPrompt + item.answer;
+                                                        imageSelected = true;
+                                                        setIsImagesSearch(true);
+                                                        setIso1(true);
+                                                        setIsGeneratingo1(true);
+                                                        callAPI(modelo1, 'imagesSearchWords');
+                                                    }}>
+                                                    <label className={
+                                                        (isGeneratingTTS ||
+                                                            (isGeneratingGemini && isYouTubeTitle) ||
+                                                            (isGeneratingo1 && isImagesSearch)) ?
+                                                            'flashing' : ''
+                                                    }>
+                                                        YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} /> 
+                                                        / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} /> 
+                                                        / Image Search Words
+                                                        <img src={imageIcon} alt="image" height="22px"  style={{ marginRight: '4px' }}  />
+                                                    </label>
+                                                </button>
                                                 )}
                                             </>
                                         )}
