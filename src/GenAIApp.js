@@ -1683,9 +1683,11 @@ const GenAIApp = () => {
                                         }}>
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
+                                        &nbsp; &nbsp; &nbsp;
                                         <button
                                             edge="end"
                                             aria-label="print answer"
+                                            className="button"
                                             onClick={() => {
                                                 const printWindow = window.open('', '', 'height=500,width=800');
                                                 const htmlContent = mdParser.render(item.answer);
@@ -1728,7 +1730,7 @@ const GenAIApp = () => {
                                                 printWindow.print();
                                             }}
                                         >
-                                            <FaPrint />
+                                            Print <FaPrint />
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
