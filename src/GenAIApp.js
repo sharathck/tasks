@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
-import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube } from 'react-icons/fa';
+import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint } from 'react-icons/fa';
 import './GenAIApp.css';
 import { collection, doc, where, addDoc, getDocs, query, orderBy, startAfter, limit, updateDoc } from 'firebase/firestore';
 import {
@@ -42,6 +42,7 @@ let questionTrimLength = 200;
 let appendPrompt = ' ';
 let imagePromptInput = '';
 let imageSelected = false;
+let homeWorkInput = '';
 
 
 const GenAIApp = () => {
@@ -184,6 +185,8 @@ const GenAIApp = () => {
     const [isImagesSearch, setIsImagesSearch] = useState(false);
     const [showImagesSearchWordsButton, setShowImagesSearchWordsButton] = useState(false);
     const [showYouTubeTitleDescriptionButton, setShowYouTubeTitleDescriptionButton] = useState(false);
+    const [isHomeWork, setIsHomeWork] = useState(false);
+    const [showHomeWorkButton, setShowHomeWorkButton] = useState(false);
 
     const embedPrompt = async (docId) => {
         try {
@@ -394,6 +397,7 @@ const GenAIApp = () => {
                 if (data.showYouTubeButton !== undefined) setShowYouTubeButton(data.showYouTubeButton);
                 if (data.showImagesSearchWordsButton !== undefined) setShowImagesSearchWordsButton(data.showImagesSearchWordsButton);
                 if (data.showYouTubeTitleDescriptionButton !== undefined) setShowYouTubeTitleDescriptionButton(data.showYouTubeTitleDescriptionButton);
+                if (data.showHomeWorkButton !== undefined) setShowHomeWorkButton(data.showHomeWorkButton);  
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -798,6 +802,15 @@ const GenAIApp = () => {
                         body: JSON.stringify({ prompt: imagePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                     });
                     break;
+                case 'homeWork':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: homeWorkInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
@@ -840,6 +853,7 @@ const GenAIApp = () => {
             searchModel = 'All';
             youtubeSelected = false;
             imageSelected = false;
+            setIsHomeWork(false);
             setIsYouTubeTitle(false);
             setIsImagesSearch(false);
             console.log('Fetching data after generating content');
@@ -1127,6 +1141,29 @@ const GenAIApp = () => {
         }, 1000);
     };
 
+    const handleHomeWork = async () => {
+        setIsHomeWork(true);
+        // Ensure genaiPrompts is populated
+        if (genaiPrompts.length === 0) {
+            await fetchPrompts(uid); // Fetch prompts if not already loaded
+        }
+
+        // Correct the tag name and add null check
+        const prompt = genaiPrompts.find(prompt => prompt.tag === 'Intelligent-Questions');
+        const intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
+
+        if (intelligentQuestionsPrompt === '') {
+            console.error('Intelligent-Questions prompt not found.');
+        }
+
+        // Append the prompt to promptInput
+        homeWorkInput = promptInput + intelligentQuestionsPrompt;
+        setIsGeneratingo1(true); // Set generating state to true
+        // Call the API with the 'o1' model
+        await callAPI(modelo1, 'homeWork');
+
+    };
+
     return (
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
@@ -1371,6 +1408,20 @@ const GenAIApp = () => {
                             'GenAI'
                         )}
                     </button>
+                    {( showHomeWorkButton  &&
+                    <button
+                        onClick={handleHomeWork}
+                        className="generateButton"
+                        style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: 'brown' }}
+                    >
+                        {isHomeWork
+                            ? (
+                                <FaSpinner className="spinning" />
+                            ) : (
+                                'HomeWork'
+                            )}
+                    </button>
+                    )}
                     &nbsp; &nbsp;
                     {!GenAIParameter ? (
                         <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
@@ -1611,10 +1662,10 @@ const GenAIApp = () => {
                                                             (isGeneratingo1 && isImagesSearch)) ?
                                                             'flashing' : ''
                                                     }>
-                                                        YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} /> 
-                                                        / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} /> 
+                                                        YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
+                                                        / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
                                                         / Image Search Words
-                                                        <img src={imageIcon} alt="image" height="22px"  style={{ marginRight: '4px' }}  />
+                                                        <img src={imageIcon} alt="image" height="22px" style={{ marginRight: '4px' }} />
                                                     </label>
                                                 </button>
                                                 )}
@@ -1631,6 +1682,53 @@ const GenAIApp = () => {
                                             setGenaiData(updatedData);
                                         }}>
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
+                                        </button>
+                                        <button
+                                            edge="end"
+                                            aria-label="print answer"
+                                            onClick={() => {
+                                                const printWindow = window.open('', '', 'height=500,width=800');
+                                                const htmlContent = mdParser.render(item.answer);
+                                                printWindow.document.write('<html><head><title>Print</title>');
+                                                printWindow.document.write('<style>');
+                                                printWindow.document.write(`
+                                                    body {
+                                                        font-family: Arial, sans-serif;
+                                                        margin: 20px;
+                                                    }
+                                                    table {
+                                                        width: 100%;
+                                                        border-collapse: collapse;
+                                                        margin-bottom: 20px;
+                                                    }
+                                                    table, th, td {
+                                                        border: 1px solid #ccc;
+                                                    }
+                                                    th, td {
+                                                        padding: 8px;
+                                                        text-align: left;
+                                                    }
+                                                    th {
+                                                        background-color: #f2f2f2;
+                                                    }
+                                                    pre {
+                                                        background-color: #f5f5f5;
+                                                        padding: 10px;
+                                                        overflow: auto;
+                                                    }
+                                                    code {
+                                                        background-color: #f5f5f5;
+                                                        padding: 2px 4px;
+                                                    }
+                                                `);
+                                                printWindow.document.write('</style></head><body>');
+                                                printWindow.document.write(htmlContent);
+                                                printWindow.document.write('</body></html>');
+                                                printWindow.document.close();
+                                                printWindow.print();
+                                            }}
+                                        >
+                                            <FaPrint />
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
