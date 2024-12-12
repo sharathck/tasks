@@ -406,6 +406,7 @@ const GenAIApp = () => {
                 if (data.showImagesSearchWordsButton !== undefined) setShowImagesSearchWordsButton(data.showImagesSearchWordsButton);
                 if (data.showYouTubeTitleDescriptionButton !== undefined) setShowYouTubeTitleDescriptionButton(data.showYouTubeTitleDescriptionButton);
                 if (data.showHomeWorkButton !== undefined) setShowHomeWorkButton(data.showHomeWorkButton);
+                if (data.voiceName !== undefined) setVoiceName(data.voiceName);
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
