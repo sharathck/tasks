@@ -33,6 +33,8 @@ let dataLimit = 11;
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let youtubePromptInput = '';
+let googleSearchPromptInput = '';
+let googleSearchPrompt = '  ####  prompt starts from here #####  search for up-to-date and latest news and information about above topic(s). --Provide response with maximum details possible in response. Use all max tokens available to the max in response.';
 let youtubeSelected = false;
 let youtubeTitlePrompt = 'Generate a catchy, clickable and search engine optimized YouTube title, description for the content below  ::::  ';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
@@ -129,7 +131,7 @@ const GenAIApp = () => {
     const [modelLlama, setModelLlama] = useState('llama');
     const [modelMistral, setModelMistral] = useState('mistral');
     const [modelGpt4oMini, setModelGpt4oMini] = useState('gpt-4o-mini');
-    const [modelGeminiFast, setModelGeminiFast] = useState('gemini-flash-fast');
+    const [modelGeminiFast, setModelGeminiFast] = useState('gemini-search');
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-flash');
     const [modelGpt4Turbo, setModelGpt4Turbo] = useState('gpt-4-turbo');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
@@ -176,7 +178,7 @@ const GenAIApp = () => {
     const [labelMistral, setLabelMistral] = useState('Mistral');
     const [labelLlama, setLabelLlama] = useState('Llama(405B)');
     const [labelGpt4Turbo, setLabelGpt4Turbo] = useState('Gpt4Turbo');
-    const [labelGeminiFast, setLabelGeminiFast] = useState('Gemini Fast');
+    const [labelGeminiFast, setLabelGeminiFast] = useState('Gemini Search');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
     const [labelGpt4oMini, setLabelGpt4oMini] = useState('Gpt4oMini');
     const [labelo1, setLabelo1] = useState('o1');
@@ -192,6 +194,10 @@ const GenAIApp = () => {
     const [showYouTubeTitleDescriptionButton, setShowYouTubeTitleDescriptionButton] = useState(false);
     const [isHomeWork, setIsHomeWork] = useState(false);
     const [showHomeWorkButton, setShowHomeWorkButton] = useState(false);
+
+    // Add state variable for AI Search
+    const [isAISearch, setIsAISearch] = useState(false);
+    const [showAISearchButton, setShowAISearchButton] = useState(true); // or set based on configuration
 
     const embedPrompt = async (docId) => {
         try {
@@ -826,6 +832,15 @@ const GenAIApp = () => {
                         body: JSON.stringify({ prompt: homeWorkInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                     });
                     break;
+                case 'google-search':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: googleSearchPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
@@ -871,6 +886,8 @@ const GenAIApp = () => {
             setIsHomeWork(false);
             setIsYouTubeTitle(false);
             setIsImagesSearch(false);
+            setIsGeneratingGeminiFast(false);
+            setIsAISearch(false);
             console.log('Fetching data after generating content');
             fetchData(uid);
             if (selectedModel === modelOpenAI) {
@@ -1184,6 +1201,16 @@ const GenAIApp = () => {
 
     };
 
+    // Add handler for AI Search
+    const handleAISearch = async () => {
+        setIsAISearch(true);
+        // Append the search prompt to promptInput
+        googleSearchPromptInput = promptInput + googleSearchPrompt;
+        setIsGeneratingGeminiFast(true);
+        // Call the API with gemini-search model
+        await callAPI(modelGeminiFast, 'google-search');
+    };
+
     return (
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
@@ -1452,6 +1479,15 @@ const GenAIApp = () => {
                                 )}
                         </button>
                     )}
+                    {showAISearchButton && (
+                        <button
+                            onClick={handleAISearch}
+                            className="generateButton"
+                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
+                        >
+                            {isAISearch ? (<FaSpinner className="spinning" />) : ('AI Search')}
+                        </button>
+                    )}
                     &nbsp; &nbsp;
                     {!GenAIParameter ? (
                         <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
@@ -1517,7 +1553,7 @@ const GenAIApp = () => {
                     <option value="meta-llama-3.1-405b-instruct">Llama</option>
                     <option value="gpt-4-turbo">Gpt4Turbo</option>
                     <option value="gpt-4o-mini">Gpt4oMini</option>
-                    <option value="gemini-flash-fast">GeminiFast</option>
+                    <option value="gemini-search">GeminiFast</option>
                     <option value="gemini-flash">Gemini Flash</option>
                     <option value="perplexity-fast">PerplexityFast</option>
                     <option value="perplexity">Perplexity</option>
@@ -1606,53 +1642,7 @@ const GenAIApp = () => {
                                     <div style={{ color: "green", fontWeight: "bold" }}>---- Response ----
                                         {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
                                             <>
-                                                {(!isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
-                                                    Live Audio  <FaHeadphones />
-                                                </button>
-                                                )}
-                                                {((isiPhone || showYouTubeTitleDescriptionButton) &&
-                                                    <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={() => {
-                                                        const cleanedArticles = item.answer
-                                                            .replace(/https?:\/\/[^\s]+/g, '')
-                                                            .replace(/http?:\/\/[^\s]+/g, '')
-                                                            .replace(/[^a-zA-Z0-9\s]/g, ' ')
-                                                            .replace(/\s+/g, ' ')
-                                                            .trim();
-                                                        setIsGeneratingTTS(true);
-                                                        callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
 
-                                                    }}>
-                                                        <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                                            Download Audio <img src={speakerIcon} alt="speaker" height="22px" />
-                                                        </label>
-                                                    </button>
-                                                )}
-                                                {(showYouTubeTitleDescriptionButton && <button className={isGeneratingGemini && isYouTubeTitle ? 'button_selected' : 'button'} onClick={() => {
-                                                    youtubePromptInput = youtubeTitlePrompt + item.answer;
-                                                    youtubeSelected = true;
-                                                    setIsYouTubeTitle(true);
-                                                    setIsGemini(true);
-                                                    setIsGeneratingGemini(true);
-                                                    callAPI(modelGemini, 'youtubeTitleDescription');
-                                                }}>
-                                                    <label className={isGeneratingGemini && isYouTubeTitle ? 'flashing' : ''}>
-                                                        YouTube Title / Description <img src={youtubeIcon} alt="youtube" height="22px" />
-                                                    </label>
-                                                </button>
-                                                )}
-                                                {(showImagesSearchWordsButton && <button className={isGeneratingo1 && isImagesSearch ? 'button_selected' : 'button'} onClick={() => {
-                                                    imagePromptInput = imagesSearchPrompt + item.answer;
-                                                    imageSelected = true;
-                                                    setIsImagesSearch(true);
-                                                    setIso1(true);
-                                                    setIsGeneratingo1(true);
-                                                    callAPI(modelo1, 'imagesSearchWords');
-                                                }}>
-                                                    <label className={isGeneratingo1 && isImagesSearch ? 'flashing' : ''}>
-                                                        Images Search Words <img src={imageIcon} alt="youtube" height="22px" />
-                                                    </label>
-                                                </button>
-                                                )}
                                                 {(showYouTubeButton && <button
                                                     className={
                                                         (isGeneratingTTS ||
@@ -1697,6 +1687,52 @@ const GenAIApp = () => {
                                                         / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
                                                         / Image Search Words
                                                         <img src={imageIcon} alt="image" height="22px" style={{ marginRight: '4px' }} />
+                                                    </label>
+                                                </button>
+                                                )}
+                                                {(!isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
+                                                    Live Audio  <FaHeadphones />
+                                                </button>
+                                                )}
+
+                                                <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={() => {
+                                                    const cleanedArticles = item.answer
+                                                        .replace(/https?:\/\/[^\s]+/g, '')
+                                                        .replace(/http?:\/\/[^\s]+/g, '')
+                                                        .replace(/[^a-zA-Z0-9\s]/g, ' ')
+                                                        .replace(/\s+/g, ' ')
+                                                        .trim();
+                                                    setIsGeneratingTTS(true);
+                                                    callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+
+                                                }}>
+                                                    <label className={isGeneratingTTS ? 'flashing' : ''}>
+                                                        <img src={speakerIcon} alt="speaker" height="22px" />
+                                                    </label>
+                                                </button>
+                                                {(showYouTubeTitleDescriptionButton && <button className={isGeneratingGemini && isYouTubeTitle ? 'button_selected' : 'button'} onClick={() => {
+                                                    youtubePromptInput = youtubeTitlePrompt + item.answer;
+                                                    youtubeSelected = true;
+                                                    setIsYouTubeTitle(true);
+                                                    setIsGemini(true);
+                                                    setIsGeneratingGemini(true);
+                                                    callAPI(modelGemini, 'youtubeTitleDescription');
+                                                }}>
+                                                    <label className={isGeneratingGemini && isYouTubeTitle ? 'flashing' : ''}>
+                                                        YouTube Title / Description <img src={youtubeIcon} alt="youtube" height="22px" />
+                                                    </label>
+                                                </button>
+                                                )}
+                                                {(showImagesSearchWordsButton && <button className={isGeneratingo1 && isImagesSearch ? 'button_selected' : 'button'} onClick={() => {
+                                                    imagePromptInput = imagesSearchPrompt + item.answer;
+                                                    imageSelected = true;
+                                                    setIsImagesSearch(true);
+                                                    setIso1(true);
+                                                    setIsGeneratingo1(true);
+                                                    callAPI(modelo1, 'imagesSearchWords');
+                                                }}>
+                                                    <label className={isGeneratingo1 && isImagesSearch ? 'flashing' : ''}>
+                                                        Images Search Words <img src={imageIcon} alt="youtube" height="22px" />
                                                     </label>
                                                 </button>
                                                 )}
