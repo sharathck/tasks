@@ -34,7 +34,6 @@ let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let youtubePromptInput = '';
 let googleSearchPromptInput = '';
-let googleSearchPrompt = '  ####  prompt starts from here #####  search for up-to-date and latest news and information about above topic(s). --Provide response with maximum details possible in response. Use all max tokens available to the max in response.';
 let youtubeSelected = false;
 let youtubeTitlePrompt = 'Generate a catchy, clickable and search engine optimized YouTube title, description for the content below  ::::  ';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
@@ -73,12 +72,12 @@ const GenAIApp = () => {
     const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
     const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
-    const [isGeminiFast, setIsGeminiFast] = useState(true);
+    const [isGeminiSearch, setIsGeminiSearch] = useState(true);
     const [isGeminiFlash, setIsGeminiFlash] = useState(false);
     const [isPerplexityFast, setIsPerplexityFast] = useState(false);
     const [isPerplexity, setIsPerplexity] = useState(false);
     const [isCodestral, setIsCodestral] = useState(false);
-    const [isGeneratingGeminiFast, setIsGeneratingGeminiFast] = useState(false);
+    const [isGeneratingGeminiSearch, setIsGeneratingGeminiSearch] = useState(false);
     const [isGeneratingGeminiFlash, setIsGeneratingGeminiFlash] = useState(false);
     const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
     const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
@@ -110,7 +109,7 @@ const GenAIApp = () => {
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
     const [showGpt4oMini, setShowGpt4oMini] = useState(false);
-    const [showGeminiFast, setShowGeminiFast] = useState(true);
+    const [showGeminiSearch, setShowGeminiSearch] = useState(true);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
     const [showPerplexityFast, setShowPerplexityFast] = useState(false);
     const [showPerplexity, setShowPerplexity] = useState(false);
@@ -121,7 +120,7 @@ const GenAIApp = () => {
     const [showo1, setShowo1] = useState(false);
     const [showImageDallE3, setShowImageDallE3] = useState(false);
     const [showTTS, setShowTTS] = useState(false);
-    const [showo1Mini, setShowo1Mini] = useState(false);
+    const [showo1Mini, setShowo1Mini] = useState(true);
     const [showAutoPrompt, setShowAutoPrompt] = useState(true);
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
@@ -131,7 +130,7 @@ const GenAIApp = () => {
     const [modelLlama, setModelLlama] = useState('llama');
     const [modelMistral, setModelMistral] = useState('mistral');
     const [modelGpt4oMini, setModelGpt4oMini] = useState('gpt-4o-mini');
-    const [modelGeminiFast, setModelGeminiFast] = useState('gemini-search');
+    const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-flash');
     const [modelGpt4Turbo, setModelGpt4Turbo] = useState('gpt-4-turbo');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
@@ -178,7 +177,7 @@ const GenAIApp = () => {
     const [labelMistral, setLabelMistral] = useState('Mistral');
     const [labelLlama, setLabelLlama] = useState('Llama(405B)');
     const [labelGpt4Turbo, setLabelGpt4Turbo] = useState('Gpt4Turbo');
-    const [labelGeminiFast, setLabelGeminiFast] = useState('Gemini Search');
+    const [labelGeminiSearch, setLabelGeminiSearch] = useState('SearchGenAI');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
     const [labelGpt4oMini, setLabelGpt4oMini] = useState('Gpt4oMini');
     const [labelo1, setLabelo1] = useState('o1');
@@ -350,7 +349,7 @@ const GenAIApp = () => {
                 if (data.isMistral !== undefined) setIsMistral(data.isMistral);
                 if (data.isGpt4Turbo !== undefined) setIsGpt4Turbo(data.isGpt4Turbo);
                 if (data.isGpt4oMini !== undefined) setIsGpt4oMini(data.isGpt4oMini);
-                if (data.isGeminiFast !== undefined) setIsGeminiFast(data.isGeminiFast);
+                if (data.isGeminiSearch !== undefined) setIsGeminiSearch(data.isGeminiSearch);
                 if (data.isGeminiFlash !== undefined) setIsGeminiFlash(data.isGeminiFlash);
                 if (data.isPerplexityFast !== undefined) setIsPerplexityFast(data.isPerplexityFast);
                 if (data.isPerplexity !== undefined) setIsPerplexity(data.isPerplexity);
@@ -365,7 +364,7 @@ const GenAIApp = () => {
                 if (data.showPerplexityFast !== undefined) setShowPerplexityFast(data.showPerplexityFast);
                 if (data.showPerplexity !== undefined) setShowPerplexity(data.showPerplexity);
                 if (data.showGpt4oMini !== undefined) setShowGpt4oMini(data.showGpt4oMini);
-                if (data.showGeminiFast !== undefined) setShowGeminiFast(data.showGeminiFast);
+                if (data.showGeminiSearch !== undefined) setShowGeminiSearch(data.showGeminiSearch);
                 if (data.showGeminiFlash !== undefined) setShowGeminiFlash(data.showGeminiFlash);
                 if (data.showCodeStral !== undefined) setShowCodeStral(data.showCodeStral);
                 if (data.showLlama !== undefined) setShowLlama(data.showLlama);
@@ -398,7 +397,7 @@ const GenAIApp = () => {
                 if (data.labelMistral !== undefined) setLabelMistral(data.labelMistral);
                 if (data.labelLlama !== undefined) setLabelLlama(data.labelLlama);
                 if (data.labelGpt4Turbo !== undefined) setLabelGpt4Turbo(data.labelGpt4Turbo);
-                if (data.labelGeminiFast !== undefined) setLabelGeminiFast(data.labelGeminiFast);
+                if (data.labelGeminiSearch !== undefined) setLabelGeminiSearch(data.labelGeminiSearch);
                 if (data.labelGeminiFlash !== undefined) setLabelGeminiFlash(data.labelGeminiFlash);
                 if (data.labelGpt4oMini !== undefined) setLabelGpt4oMini(data.labelGpt4oMini);
                 if (data.labelo1 !== undefined) setLabelo1(data.labelo1);
@@ -630,7 +629,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova) {
             alert('Please select at least one model.');
             return;
         }
@@ -690,9 +689,9 @@ const GenAIApp = () => {
             callAPI(modelGpt4oMini);
         }
 
-        if (isGeminiFast && showGeminiFast) {
-            setIsGeneratingGeminiFast(true); // Set generating state to true
-            callAPI(modelGeminiFast);
+        if (isGeminiSearch && showGeminiSearch) {
+            setIsGeneratingGeminiSearch(true); // Set generating state to true
+            callAPI(modelGeminiSearch);
         }
 
         if (isGeminiFlash && showGeminiFlash) {
@@ -769,7 +768,7 @@ const GenAIApp = () => {
                     isLlama,
                     isMistral,
                     isGpt4Turbo,
-                    isGeminiFast,
+                    isGeminiSearch,
                     isGeminiFlash,
                     isPerplexityFast,
                     isPerplexity,
@@ -886,7 +885,7 @@ const GenAIApp = () => {
             setIsHomeWork(false);
             setIsYouTubeTitle(false);
             setIsImagesSearch(false);
-            setIsGeneratingGeminiFast(false);
+            setIsGeneratingGeminiSearch(false);
             setIsAISearch(false);
             console.log('Fetching data after generating content');
             fetchData(uid);
@@ -920,8 +919,8 @@ const GenAIApp = () => {
             if (selectedModel === modelGpt4oMini) {
                 setIsGeneratingGpt4oMini(false);
             }
-            if (selectedModel === modelGeminiFast) {
-                setIsGeneratingGeminiFast(false);
+            if (selectedModel === modelGeminiSearch) {
+                setIsGeneratingGeminiSearch(false);
             }
             if (selectedModel === modelGeminiFlash) {
                 setIsGeneratingGeminiFlash(false);
@@ -1025,7 +1024,7 @@ const GenAIApp = () => {
         setIsMistral(status);
         setIsGpt4Turbo(status);
         setIsGpt4oMini(status);
-        setIsGeminiFast(status);
+        setIsGeminiSearch(status);
         setIsGeminiFlash(status);
         setIsPerplexityFast(status);
         setIsPerplexity(status);
@@ -1045,7 +1044,7 @@ const GenAIApp = () => {
         setShowMistral(status);
         setShowGpt4Turbo(status);
         setShowGpt4oMini(status);
-        setShowGeminiFast(status);
+        setShowGeminiSearch(status);
         setShowGeminiFlash(status);
         setShowPerplexityFast(status);
         setShowPerplexity(status);
@@ -1187,28 +1186,41 @@ const GenAIApp = () => {
 
         // Correct the tag name and add null check
         const prompt = genaiPrompts.find(prompt => prompt.tag === 'Intelligent-Questions');
-        const intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
+        let intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
 
         if (intelligentQuestionsPrompt === '') {
+            intelligentQuestionsPrompt = '--------- please generate practice questions based on the topic(s) mentioned above ---------  Text from below is prompt purpose only :::::::::::::::: Rules for practice questions for home work to students ::::* design 20 questions that are tricky, intelligent and brain twister questions    * questions should provoke thinking in student mind * ask questions with more practical and real-life scenarios ### ---------  response should be  markdown table with only two columns1. Category2. Question------------------------';
             console.error('Intelligent-Questions prompt not found.');
         }
 
         // Append the prompt to promptInput
         homeWorkInput = promptInput + intelligentQuestionsPrompt;
+        setIsGeneratingGeminiFlash(true);
+        callAPI(modelGeminiFlash, 'homeWork');
         setIsGeneratingo1(true); // Set generating state to true
-        // Call the API with the 'o1' model
-        await callAPI(modelo1, 'homeWork');
-
+        callAPI(modelo1, 'homeWork');
     };
 
     // Add handler for AI Search
     const handleAISearch = async () => {
         setIsAISearch(true);
+                // Ensure genaiPrompts is populated
+                if (genaiPrompts.length === 0) {
+                    await fetchPrompts(uid); // Fetch prompts if not already loaded
+                }
+        
+                // Correct the tag name and add null check
+                const prompt = genaiPrompts.find(prompt => prompt.tag === 'Search-GenAI');
+                let googleSearchPrompt = prompt ? prompt.fullText : '';
+        
+                if (googleSearchPrompt === '') {
+                    googleSearchPrompt = '  ####  prompt starts from here #####  search for current, up-to-date and latest news and information about above topic(s) from google search. --Provide response with maximum details possible in response. Use all max tokens available to the max in response.';
+                }
         // Append the search prompt to promptInput
         googleSearchPromptInput = promptInput + googleSearchPrompt;
-        setIsGeneratingGeminiFast(true);
+        setIsGeneratingGeminiSearch(true);
         // Call the API with gemini-search model
-        await callAPI(modelGeminiFast, 'google-search');
+        await callAPI(modelGeminiSearch, 'google-search');
     };
 
     return (
@@ -1278,10 +1290,10 @@ const GenAIApp = () => {
                             <label className={isGeneratingGpt4Turbo ? 'flashing' : ''}>{labelGpt4Turbo}</label>
                         </button>
                     )}
-                    {showGeminiFast && (
-                        <button className={isGeminiFast ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGeminiFast, !isGeminiFast)}>
-                            <label className={isGeneratingGeminiFast ? 'flashing' : ''}>{labelGeminiFast}</label>
+                    {showGeminiSearch && (
+                        <button className={isGeminiSearch ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGeminiSearch, !isGeminiSearch)}>
+                            <label className={isGeneratingGeminiSearch ? 'flashing' : ''}>{labelGeminiSearch}</label>
                         </button>
                     )}
                     {showGeminiFlash && (
@@ -1413,7 +1425,8 @@ const GenAIApp = () => {
                             AutoPrompt
                         </button>
                     )}
-                    <button
+                    {!isAISearch && !isHomeWork && (
+                        <button
                         onClick={handleGenerate}
                         className="generateButton"
                         style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
@@ -1428,7 +1441,7 @@ const GenAIApp = () => {
                             isGeneratingMistral ||
                             isGeneratingLlama ||
                             isGeneratingGpt4Turbo ||
-                            isGeneratingGeminiFast ||
+                            isGeneratingGeminiSearch ||
                             isGeneratingGeminiFlash ||
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
@@ -1450,7 +1463,7 @@ const GenAIApp = () => {
                             isGeneratingMistral ||
                             isGeneratingLlama ||
                             isGeneratingGpt4Turbo ||
-                            isGeneratingGeminiFast ||
+                            isGeneratingGeminiSearch ||
                             isGeneratingGeminiFlash ||
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
@@ -1465,7 +1478,8 @@ const GenAIApp = () => {
                             'GenAI'
                         )}
                     </button>
-                    {(showHomeWorkButton &&
+                    )}
+                    {(showHomeWorkButton && !isAISearch &&
                         <button
                             onClick={handleHomeWork}
                             className="generateButton"
@@ -1479,13 +1493,13 @@ const GenAIApp = () => {
                                 )}
                         </button>
                     )}
-                    {showAISearchButton && (
+                    {showAISearchButton && !isHomeWork && (
                         <button
                             onClick={handleAISearch}
                             className="generateButton"
                             style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
                         >
-                            {isAISearch ? (<FaSpinner className="spinning" />) : ('AI Search')}
+                            {isAISearch ? (<FaSpinner className="spinning" />) : ('GoogleSearch + GenAI')}
                         </button>
                     )}
                     &nbsp; &nbsp;
@@ -1553,7 +1567,7 @@ const GenAIApp = () => {
                     <option value="meta-llama-3.1-405b-instruct">Llama</option>
                     <option value="gpt-4-turbo">Gpt4Turbo</option>
                     <option value="gpt-4o-mini">Gpt4oMini</option>
-                    <option value="gemini-search">GeminiFast</option>
+                    <option value="gemini-search">GeminiSearch</option>
                     <option value="gemini-flash">Gemini Flash</option>
                     <option value="perplexity-fast">PerplexityFast</option>
                     <option value="perplexity">Perplexity</option>
