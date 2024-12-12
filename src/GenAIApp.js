@@ -71,22 +71,24 @@ const GenAIApp = () => {
     const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
     const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
-    const [isGeminiFast, setIsGeminiFast] = useState(false);
+    const [isGeminiFast, setIsGeminiFast] = useState(true);
+    const [isGeminiFlash, setIsGeminiFlash] = useState(false);
     const [isPerplexityFast, setIsPerplexityFast] = useState(false);
     const [isPerplexity, setIsPerplexity] = useState(false);
     const [isCodestral, setIsCodestral] = useState(false);
     const [isGeneratingGeminiFast, setIsGeneratingGeminiFast] = useState(false);
+    const [isGeneratingGeminiFlash, setIsGeneratingGeminiFlash] = useState(false);
+    const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
     const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
-    const [isGeneratingo1, setIsGeneratingo1] = useState(false);
-    const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
+    const [isGeneratingo1, setIsGeneratingo1] = useState(false); 
     const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
     const [isGeneratingGpt4Turbo, setIsGeneratingGpt4Turbo] = useState(false);
-    const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
     const [isGeneratingCodeStral, setIsGeneratingCodeStral] = useState(false);
+    const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
     const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
@@ -102,21 +104,22 @@ const GenAIApp = () => {
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showTemp, setShowTemp] = useState(true);
     const [showTop_p, setShowTop_p] = useState(true);
-    const [showGpt4Turbo, setShowGpt4Turbo] = useState(true);
+    const [showGpt4Turbo, setShowGpt4Turbo] = useState(false);
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
     const [showGpt4oMini, setShowGpt4oMini] = useState(false);
     const [showGeminiFast, setShowGeminiFast] = useState(true);
+    const [showGeminiFlash, setShowGeminiFlash] = useState(false);
     const [showPerplexityFast, setShowPerplexityFast] = useState(false);
-    const [showPerplexity, setShowPerplexity] = useState(true);
-    const [showCodeStral, setShowCodeStral] = useState(true);
+    const [showPerplexity, setShowPerplexity] = useState(false);
+    const [showCodeStral, setShowCodeStral] = useState(false);
     const [showGemini, setShowGemini] = useState(true);
     const [showAnthropic, setShowAnthropic] = useState(true);
     const [showOpenAI, setShowOpenAI] = useState(true);
     const [showo1, setShowo1] = useState(false);
     const [showImageDallE3, setShowImageDallE3] = useState(false);
     const [showTTS, setShowTTS] = useState(false);
-    const [showo1Mini, setShowo1Mini] = useState(true);
+    const [showo1Mini, setShowo1Mini] = useState(false);
     const [showAutoPrompt, setShowAutoPrompt] = useState(true);
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
@@ -127,6 +130,7 @@ const GenAIApp = () => {
     const [modelMistral, setModelMistral] = useState('mistral');
     const [modelGpt4oMini, setModelGpt4oMini] = useState('gpt-4o-mini');
     const [modelGeminiFast, setModelGeminiFast] = useState('gemini-flash-fast');
+    const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-flash');
     const [modelGpt4Turbo, setModelGpt4Turbo] = useState('gpt-4-turbo');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
@@ -172,7 +176,8 @@ const GenAIApp = () => {
     const [labelMistral, setLabelMistral] = useState('Mistral');
     const [labelLlama, setLabelLlama] = useState('Llama(405B)');
     const [labelGpt4Turbo, setLabelGpt4Turbo] = useState('Gpt4Turbo');
-    const [labelGeminiFast, setLabelGeminiFast] = useState('Gemini-Fast');
+    const [labelGeminiFast, setLabelGeminiFast] = useState('Gemini Fast');
+    const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
     const [labelGpt4oMini, setLabelGpt4oMini] = useState('Gpt4oMini');
     const [labelo1, setLabelo1] = useState('o1');
     const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
@@ -340,6 +345,7 @@ const GenAIApp = () => {
                 if (data.isGpt4Turbo !== undefined) setIsGpt4Turbo(data.isGpt4Turbo);
                 if (data.isGpt4oMini !== undefined) setIsGpt4oMini(data.isGpt4oMini);
                 if (data.isGeminiFast !== undefined) setIsGeminiFast(data.isGeminiFast);
+                if (data.isGeminiFlash !== undefined) setIsGeminiFlash(data.isGeminiFlash);
                 if (data.isPerplexityFast !== undefined) setIsPerplexityFast(data.isPerplexityFast);
                 if (data.isPerplexity !== undefined) setIsPerplexity(data.isPerplexity);
                 if (data.isCodestral !== undefined) setIsCodestral(data.isCodestral);
@@ -354,6 +360,7 @@ const GenAIApp = () => {
                 if (data.showPerplexity !== undefined) setShowPerplexity(data.showPerplexity);
                 if (data.showGpt4oMini !== undefined) setShowGpt4oMini(data.showGpt4oMini);
                 if (data.showGeminiFast !== undefined) setShowGeminiFast(data.showGeminiFast);
+                if (data.showGeminiFlash !== undefined) setShowGeminiFlash(data.showGeminiFlash);
                 if (data.showCodeStral !== undefined) setShowCodeStral(data.showCodeStral);
                 if (data.showLlama !== undefined) setShowLlama(data.showLlama);
                 if (data.showo1 !== undefined) setShowo1(data.showo1);
@@ -386,6 +393,7 @@ const GenAIApp = () => {
                 if (data.labelLlama !== undefined) setLabelLlama(data.labelLlama);
                 if (data.labelGpt4Turbo !== undefined) setLabelGpt4Turbo(data.labelGpt4Turbo);
                 if (data.labelGeminiFast !== undefined) setLabelGeminiFast(data.labelGeminiFast);
+                if (data.labelGeminiFlash !== undefined) setLabelGeminiFlash(data.labelGeminiFlash);
                 if (data.labelGpt4oMini !== undefined) setLabelGpt4oMini(data.labelGpt4oMini);
                 if (data.labelo1 !== undefined) setLabelo1(data.labelo1);
                 if (data.labelPerplexityFast !== undefined) setLabelPerplexityFast(data.labelPerplexityFast);
@@ -615,7 +623,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiFast && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova) {
             alert('Please select at least one model.');
             return;
         }
@@ -680,6 +688,11 @@ const GenAIApp = () => {
             callAPI(modelGeminiFast);
         }
 
+        if (isGeminiFlash && showGeminiFlash) {
+            setIsGeneratingGeminiFlash(true); // Set generating state to true
+            callAPI(modelGeminiFlash);
+        }
+
         if (isGpt4Turbo && showGpt4Turbo) {
             setIsGeneratingGpt4Turbo(true); // Set generating state to true
             callAPI(modelGpt4Turbo);
@@ -713,7 +726,7 @@ const GenAIApp = () => {
 
             if (promptInput.length > 2) {
                 /* const chunks = [];
-                 for (let i = 0; i < promptInput.length; i += 3999) {
+                 for (let i = 0; promptInput.length; i += 3999) {
                    chunks.push(promptInput.substring(i, i + 3999));
                  }
                  for (const chunk of chunks) {
@@ -750,6 +763,7 @@ const GenAIApp = () => {
                     isMistral,
                     isGpt4Turbo,
                     isGeminiFast,
+                    isGeminiFlash,
                     isPerplexityFast,
                     isPerplexity,
                     isCodestral,
@@ -891,6 +905,9 @@ const GenAIApp = () => {
             if (selectedModel === modelGeminiFast) {
                 setIsGeneratingGeminiFast(false);
             }
+            if (selectedModel === modelGeminiFlash) {
+                setIsGeneratingGeminiFlash(false);
+            }
             if (selectedModel === modelPerplexityFast) {
                 setIsGeneratingPerplexityFast(false);
             }
@@ -991,6 +1008,7 @@ const GenAIApp = () => {
         setIsGpt4Turbo(status);
         setIsGpt4oMini(status);
         setIsGeminiFast(status);
+        setIsGeminiFlash(status);
         setIsPerplexityFast(status);
         setIsPerplexity(status);
         setIsCodestral(status);
@@ -1010,6 +1028,7 @@ const GenAIApp = () => {
         setShowGpt4Turbo(status);
         setShowGpt4oMini(status);
         setShowGeminiFast(status);
+        setShowGeminiFlash(status);
         setShowPerplexityFast(status);
         setShowPerplexity(status);
         setShowCodeStral(status);
@@ -1237,6 +1256,16 @@ const GenAIApp = () => {
                             <label className={isGeneratingGeminiFast ? 'flashing' : ''}>{labelGeminiFast}</label>
                         </button>
                     )}
+                    {showGeminiFlash && (
+                        <button 
+                            className={isGeminiFlash ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGeminiFlash, !isGeminiFlash)}
+                        >
+                            <label className={isGeneratingGeminiFlash ? 'flashing' : ''}>
+                                {labelGeminiFlash}
+                            </label>
+                        </button>
+                    )}
                     {showGpt4oMini && (
                         <button className={isGpt4oMini ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGpt4oMini, !isGpt4oMini)}>
@@ -1374,6 +1403,7 @@ const GenAIApp = () => {
                             isGeneratingLlama ||
                             isGeneratingGpt4Turbo ||
                             isGeneratingGeminiFast ||
+                            isGeneratingGeminiFlash ||
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
                             isGeneratingCodeStral ||
@@ -1395,6 +1425,7 @@ const GenAIApp = () => {
                             isGeneratingLlama ||
                             isGeneratingGpt4Turbo ||
                             isGeneratingGeminiFast ||
+                            isGeneratingGeminiFlash ||
                             isGeneratingPerplexity ||
                             isGeneratingPerplexityFast ||
                             isGeneratingCodeStral ||
@@ -1488,6 +1519,7 @@ const GenAIApp = () => {
                     <option value="gpt-4-turbo">Gpt4Turbo</option>
                     <option value="gpt-4o-mini">Gpt4oMini</option>
                     <option value="gemini-flash-fast">GeminiFast</option>
+                    <option value="gemini-flash">Gemini Flash</option>
                     <option value="perplexity-fast">PerplexityFast</option>
                     <option value="perplexity">Perplexity</option>
                     <option value="codestral">CodeStral</option>
