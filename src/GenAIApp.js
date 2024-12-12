@@ -83,13 +83,13 @@ const GenAIApp = () => {
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
-    const [isGeneratingo1, setIsGeneratingo1] = useState(false); 
+    const [isGeneratingo1, setIsGeneratingo1] = useState(false);
     const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
     const [isGeneratingGpt4Turbo, setIsGeneratingGpt4Turbo] = useState(false);
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
     const [isGeneratingCodeStral, setIsGeneratingCodeStral] = useState(false);
     const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-AriaNeural');
+    const [voiceName, setVoiceName] = useState('en-US-Aria:DragonHDLatestNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
     const [editPromptTag, setEditPromptTag] = useState('');
@@ -405,7 +405,7 @@ const GenAIApp = () => {
                 if (data.showYouTubeButton !== undefined) setShowYouTubeButton(data.showYouTubeButton);
                 if (data.showImagesSearchWordsButton !== undefined) setShowImagesSearchWordsButton(data.showImagesSearchWordsButton);
                 if (data.showYouTubeTitleDescriptionButton !== undefined) setShowYouTubeTitleDescriptionButton(data.showYouTubeTitleDescriptionButton);
-                if (data.showHomeWorkButton !== undefined) setShowHomeWorkButton(data.showHomeWorkButton);  
+                if (data.showHomeWorkButton !== undefined) setShowHomeWorkButton(data.showHomeWorkButton);
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -1257,7 +1257,7 @@ const GenAIApp = () => {
                         </button>
                     )}
                     {showGeminiFlash && (
-                        <button 
+                        <button
                             className={isGeminiFlash ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGeminiFlash, !isGeminiFlash)}
                         >
@@ -1352,12 +1352,10 @@ const GenAIApp = () => {
                             </label>
                         </button>
                     }
-                    {isTTS && (
-                        <VoiceSelect
-                            selectedVoice={voiceName} // Current selected voice
-                            onVoiceChange={setVoiceName} // Handler to update selected voice
-                        />
-                    )}
+                    <VoiceSelect
+                        selectedVoice={voiceName} // Current selected voice
+                        onVoiceChange={setVoiceName} // Handler to update selected voice
+                    />
                     {!isTTS && (
                         <select className="promptDropdownInput" id="promptSelect"
                             onChange={(e) => {
@@ -1439,19 +1437,19 @@ const GenAIApp = () => {
                             'GenAI'
                         )}
                     </button>
-                    {( showHomeWorkButton  &&
-                    <button
-                        onClick={handleHomeWork}
-                        className="generateButton"
-                        style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: 'brown' }}
-                    >
-                        {isHomeWork
-                            ? (
-                                <FaSpinner className="spinning" />
-                            ) : (
-                                'HomeWork'
-                            )}
-                    </button>
+                    {(showHomeWorkButton &&
+                        <button
+                            onClick={handleHomeWork}
+                            className="generateButton"
+                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: 'brown' }}
+                        >
+                            {isHomeWork
+                                ? (
+                                    <FaSpinner className="spinning" />
+                                ) : (
+                                    'HomeWork'
+                                )}
+                        </button>
                     )}
                     &nbsp; &nbsp;
                     {!GenAIParameter ? (
