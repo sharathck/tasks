@@ -20,6 +20,7 @@ li-audio {
   border: 3px solid #daeacc; /* Adjust border color */
   background-color: #96c9e1; /* Adjust background color */
   color: #ece5e5; /* Adjust text color */
+  background-color: #f0f0f0 !important;
 }
 
 .AudioApp-header {
@@ -37,6 +38,27 @@ li-audio {
 }
 ul {
   margin-left: 0;
+}
+ul li {
+  transition: background-color 0.3s ease;
+}
+
+ul li:hover {
+  background-color: #f8f8f8 !important;
+}
+
+ul li input[type="text"] {
+  width: 90%;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+ul li > div {
+  padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 @keyframes App-logo-spin {
   from {

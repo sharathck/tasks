@@ -32,6 +32,8 @@ function AudioApp() {
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
   const [showArticlesOnly, setShowArticlesOnly] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [newFileName, setNewFileName] = useState('');
 
    // Listen for authentication state changes
    useEffect(() => {
@@ -121,7 +123,12 @@ function AudioApp() {
       );
       const genaiSnapshot = await getDocs(q);
       const genaiList = genaiSnapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() })); 
+      .map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        // Calculate file size - this is an estimation since we don't have direct access to file size
+        const sizeInKB = Math.round(data.answer.length / 100); // rough estimation
+        return { ...data, sizeKB: sizeInKB };
+      }); 
       // Replace '[play/download](' and ')' from answer field
       genaiList.forEach(item => {
         // check if status field exists
@@ -144,6 +151,26 @@ function AudioApp() {
     setCurrentFileUrl(url);
     setIsPlaying(true);
     setSelectedFileIndex(index);
+  };
+
+  const handleRename = async (itemId, newName) => {
+    try {
+      const docRef = doc(db, 'genai', user.uid, 'MyGenAI', itemId);
+      await updateDoc(docRef, {
+        customFileName: newName
+      });
+      setEditingId(null);
+      // Update local state
+      setGenaiData(prevData =>
+        prevData.map(item =>
+          item.id === itemId
+            ? { ...item, customFileName: newName }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error("Error renaming file:", error);
+    }
   };
 
   const handleSignInWithEmail = async () => {
@@ -218,28 +245,70 @@ function AudioApp() {
               />
               <ul style={{ listStyleType: 'none', padding: 0 }}>
                 {genaiData.map((item, index) => (
-                <li key={index} className={selectedFileIndex === index ? 'selected-file' : ''} style={{ margin: '10px 0', padding: '2px', height: '40px', borderRadius: '2px', backgroundColor: selectedFileIndex === index ? '#f0f0f0' : '#fff' }}>
-                  <a href={item.answer} download onClick={(e) => { e.preventDefault(); setAudioSource(item.answer, index); }}>
-                    {item.answer.replace('https://storage.googleapis.com/audio-genai/', '').replace(new RegExp(`_${user.uid}_[^_]*_`), '_').replace('.mp3', '').replace(uid, '').replace('https://storage.googleapis.com/reviewtext-ad5c6.appspot.com/user_audio/', '').replace('/', '')} {/* Fall back to a generic name if none is provided */}
-                  </a>
-                  &nbsp;&nbsp;
-                  <input
-                    type="checkbox"
-                    checked={item.status === true}
-                    onChange={async (e) => {
-                      const newStatus = e.target.checked;
-                      const docRef = doc(db, 'genai', user.uid, 'MyGenAI', item.id);
-                      await updateDoc(docRef, { status: newStatus });
-                      setGenaiData((prevData) =>
-                        prevData.map((dataItem) =>
-                          dataItem.id === item.id ? { ...dataItem, status: newStatus } : dataItem
-                        )
-                      );
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
+                  <li key={index} className={selectedFileIndex === index ? 'selected-file' : ''} 
+                      style={{ margin: '10px 0', padding: '2px', minHeight: '40px', borderRadius: '2px', 
+                              backgroundColor: selectedFileIndex === index ? '#f0f0f0' : '#fff',
+                              display: 'grid', gridTemplateColumns: '30% 40% 10% 10% 10%', alignItems: 'center' }}>
+                    
+                    {/* File Name/Rename Column */}
+                    <div>
+                      {editingId === item.id ? (
+                        <input
+                          type="text"
+                          value={newFileName}
+                          onChange={(e) => setNewFileName(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleRename(item.id, newFileName);
+                            }
+                          }}
+                          onBlur={() => handleRename(item.id, newFileName)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span onDoubleClick={() => {
+                          setEditingId(item.id);
+                          setNewFileName(item.customFileName || item.answer.split('/').pop().replace('.mp3', ''));
+                        }}>
+                          {item.customFileName || item.answer.split('/').pop().replace('.mp3', '')}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Question Preview Column */}
+                    <div style={{ fontSize: '0.9em', color: '#666' }}>
+                      {item.question ? item.question.substring(0, 50) + (item.question.length > 50 ? '...' : '') : 'No question available'}
+                    </div>
+
+                    {/* File Size Column */}
+                    <div>{item.question.length  || 'N/A'} </div>
+
+                    {/* Play Button Column */}
+                    <a href={item.answer} download onClick={(e) => { 
+                      e.preventDefault(); 
+                      setAudioSource(item.answer, index); 
+                    }}>
+                      Play
+                    </a>
+
+                    {/* Status Checkbox Column */}
+                    <input
+                      type="checkbox"
+                      checked={item.status === true}
+                      onChange={async (e) => {
+                        const newStatus = e.target.checked;
+                        const docRef = doc(db, 'genai', user.uid, 'MyGenAI', item.id);
+                        await updateDoc(docRef, { status: newStatus });
+                        setGenaiData((prevData) =>
+                          prevData.map((dataItem) =>
+                            dataItem.id === item.id ? { ...dataItem, status: newStatus } : dataItem
+                          )
+                        );
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
           </div>
         </header>
       </div>
