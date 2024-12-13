@@ -490,7 +490,7 @@ const GenAIApp = () => {
         const cleanedArticles = articles
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-            .replace(/[#*-:;]/g, ' ') // Remove # or *
+            .replace(/[#:\-*]/g, ' ')
             .trim(); // Remove leading/trailing spaces
 
         if (isiPhone) {
@@ -954,8 +954,7 @@ const GenAIApp = () => {
         const cleanedArticles = message
         .replace(/https?:\/\/[^\s]+/g, '')
         .replace(/http?:\/\/[^\s]+/g, '')
-        .replace(/[#*-:;]/g, ' ')
-        .replace(/\s+/g, ' ')
+        .replace(/[#:\-*]/g, ' ')
         .trim();
         try {
             const response = await fetch(apiUrl, {
