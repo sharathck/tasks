@@ -34,6 +34,8 @@ function AudioApp() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [newFileName, setNewFileName] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState('');
 
    // Listen for authentication state changes
    useEffect(() => {
@@ -193,6 +195,22 @@ function AudioApp() {
       alert('Error signing out: ' + error.message);
     });
   };
+
+  const QuestionPopup = ({ question, onClose }) => {
+    return (
+      <div className="popup-overlay" onClick={onClose}>
+        <div className="popup-content" onClick={e => e.stopPropagation()}>
+          <div className="popup-header">
+            <button className="close-button" onClick={onClose}>×</button>
+          </div>
+          <div className="popup-body">
+            {question}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (showMainApp) {
     return (
       <App user={user} />
@@ -206,6 +224,12 @@ function AudioApp() {
 
   return (
     <div>
+      {showPopup && (
+        <QuestionPopup
+          question={selectedQuestion}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
       <div className="AudioApp">
         <button className={showMainApp ? 'button_selected' : 'button'} onClick={() => setShowMainApp(!showMainApp)}>
           <FaArrowLeft />
@@ -268,16 +292,22 @@ function AudioApp() {
                       ) : (
                         <span onDoubleClick={() => {
                           setEditingId(item.id);
-                          setNewFileName(item.customFileName || item.answer.split('/').pop().replace('.mp3', ''));
+                          setNewFileName(item.customFileName || item.answer.split('/').pop().replace(/\d{4}/, (year) => year.slice(-2)).replace('.mp3', ''));
                         }}>
-                          {item.customFileName || item.answer.split('/').pop().replace('.mp3', '')}
+                          {item.customFileName || item.answer.split('/').pop().replace(/\d{4}/, (year) => year.slice(-2)).replace('.mp3', '')}
                         </span>
-                      )}
-                    </div>
+                        )}
+                      </div>
 
-                    {/* Question Preview Column */}
-                    <div style={{ fontSize: '0.9em', color: '#666' }}>
-                      {item.question ? item.question.substring(0, 50) + (item.question.length > 50 ? '...' : '') : 'No question available'}
+                      {/* Question Preview Column */}
+                    <div 
+                      style={{ fontSize: '0.9em', color: '#666', cursor: 'pointer' }}
+                      onClick={() => {
+                        setSelectedQuestion(item.question || 'No question available');
+                        setShowPopup(true);
+                      }}
+                    >
+                      {item.question ? item.question.substring(0, 100) + (item.question.length > 100 ? '...' : '') : 'No question available'}
                     </div>
 
                     {/* File Size Column */}
