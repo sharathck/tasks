@@ -260,6 +260,7 @@ const GenAIApp = () => {
                     size: promptSize
                 });
                 docId = docRef.id;
+                await fetchPrompts(user.uid);
             }
             embedPrompt(docId);
             setEditPromptTag('');
