@@ -90,7 +90,7 @@ const GenAIApp = () => {
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
     const [isGeneratingCodeStral, setIsGeneratingCodeStral] = useState(false);
     const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-Aria:DragonHDLatestNeural');
+    const [voiceName, setVoiceName] = useState('en-US-LunaNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
     const [editPromptTag, setEditPromptTag] = useState('');
@@ -490,8 +490,7 @@ const GenAIApp = () => {
         const cleanedArticles = articles
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-            .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
-            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .replace(/[#*-:;]/g, ' ') // Remove # or *
             .trim(); // Remove leading/trailing spaces
 
         if (isiPhone) {
@@ -740,9 +739,7 @@ const GenAIApp = () => {
                  }*/
                 callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
             }
-            else {
-                callTTSAPI(promptInput, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
-            }
+
         }
 
         if (isNova && showNova) {
@@ -954,14 +951,19 @@ const GenAIApp = () => {
         console.log('Calling TTS API with message:', message, ' voiceName:', voiceName);
         console.log('API URL:', apiUrl);
         setIsGeneratingTTS(true); // Set generating state to true
-
+        const cleanedArticles = message
+        .replace(/https?:\/\/[^\s]+/g, '')
+        .replace(/http?:\/\/[^\s]+/g, '')
+        .replace(/[#*-:;]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: message, uid: uid, source: 'ai', voice_name: voiceName })
+                body: JSON.stringify({ message: cleanedArticles, uid: uid, source: 'ai', voice_name: voiceName })
             });
 
             if (!response.ok) {
@@ -1639,6 +1641,9 @@ const GenAIApp = () => {
                                         }}>
                                             {item.showRawQuestion ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
+                                        &nbsp; &nbsp;
+                                            <span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span><span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
+                                        </span>
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
                                         {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{getQuestionSubstring(item.question)}</ReactMarkdown>)}
@@ -1665,14 +1670,9 @@ const GenAIApp = () => {
                                                             'button_selected' : 'button'
                                                     }
                                                     onClick={() => {
-                                                        // Execute TTS
-                                                        const cleanedArticles = item.answer
-                                                            .replace(/https?:\/\/[^\s]+/g, '')
-                                                            .replace(/http?:\/\/[^\s]+/g, '')
-                                                            .replace(/[^a-zA-Z0-9\s]/g, ' ')
-                                                            .replace(/\s+/g, ' ')
-                                                            .trim();
-                                                        callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+                                
+                                                        setIsGeneratingTTS(true);
+                                                        callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL);
 
                                                         // Execute YouTube Title/Description
                                                         youtubePromptInput = youtubeTitlePrompt + item.answer;
@@ -1703,20 +1703,15 @@ const GenAIApp = () => {
                                                     </label>
                                                 </button>
                                                 )}
-                                                {( (!isiPhone || isiPhone) && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
+                                                {(!isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
                                                     Live Audio  <FaHeadphones />
                                                 </button>
                                                 )}
 
                                                 <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={() => {
-                                                    const cleanedArticles = item.answer
-                                                        .replace(/https?:\/\/[^\s]+/g, '')
-                                                        .replace(/http?:\/\/[^\s]+/g, '')
-                                                        .replace(/[^a-zA-Z0-9\s]/g, ' ')
-                                                        .replace(/\s+/g, ' ')
-                                                        .trim();
+                                                   
                                                     setIsGeneratingTTS(true);
-                                                    callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+                                                    callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL);
 
                                                 }}>
                                                     <label className={isGeneratingTTS ? 'flashing' : ''}>
@@ -1763,7 +1758,10 @@ const GenAIApp = () => {
                                         }}>
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
-                                        &nbsp; &nbsp; &nbsp;
+                                        &nbsp; &nbsp; 
+                                        <span style={{ color: "black", fontSize: "12px" }}> #Char(Ans):</span>
+                                         <span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
+                                        &nbsp; &nbsp;
                                         <button
                                             edge="end"
                                             aria-label="print answer"
