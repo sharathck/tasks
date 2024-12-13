@@ -1672,7 +1672,6 @@ const GenAIApp = () => {
                                                             .replace(/[^a-zA-Z0-9\s]/g, ' ')
                                                             .replace(/\s+/g, ' ')
                                                             .trim();
-                                                        setIsGeneratingTTS(true);
                                                         callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
 
                                                         // Execute YouTube Title/Description
@@ -1704,7 +1703,7 @@ const GenAIApp = () => {
                                                     </label>
                                                 </button>
                                                 )}
-                                                {(!isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
+                                                {( (!isiPhone || isiPhone) && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
                                                     Live Audio  <FaHeadphones />
                                                 </button>
                                                 )}
