@@ -187,7 +187,7 @@ const Notes = () => {
         const cleanedArticles = articles
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-            .replace(/[^a-zA-Z0-9\s]/g, ' ') // Remove special characters
+            .replace(/[#:\-*]/g, ' ') // Remove special characters
             .replace(/\s+/g, ' ') // Replace multiple spaces with single space
             .trim(); // Remove leading/trailing spaces
 
