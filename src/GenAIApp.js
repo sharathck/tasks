@@ -44,6 +44,8 @@ let appendPrompt = ' ';
 let imagePromptInput = '';
 let imageSelected = false;
 let homeWorkInput = '';
+let chunk_size = 4000;
+let silence_break = 900;
 
 
 const GenAIApp = () => {
@@ -418,6 +420,12 @@ const GenAIApp = () => {
                 if (data.showYouTubeTitleDescriptionButton !== undefined) setShowYouTubeTitleDescriptionButton(data.showYouTubeTitleDescriptionButton);
                 if (data.showHomeWorkButton !== undefined) setShowHomeWorkButton(data.showHomeWorkButton);
                 if (data.voiceName !== undefined) setVoiceName(data.voiceName);
+                if (data.chunk_size !== undefined) {
+                    chunk_size = data.chunk_size;
+                }
+                if (data.silence_break !== undefined) {
+                    silence_break = data.silence_break;
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -502,7 +510,7 @@ const GenAIApp = () => {
         if (isiPhone) {
             window.scrollTo(0, 0);
             alert('Please go to top of the page to check status and listen to the audio');
-            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
             return;
         }
         try 
@@ -764,7 +772,7 @@ const GenAIApp = () => {
                  for (const chunk of chunks) {
                    callTTSAPI(chunk);
                  }*/
-                callTTSAPI(promptInput, process.env.REACT_APP_TTS_API_URL);
+                callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
             }
 
         }
@@ -989,7 +997,14 @@ const GenAIApp = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: cleanedArticles, uid: uid, source: 'ai', voice_name: voiceName })
+                body: JSON.stringify({ 
+                    message: cleanedArticles, 
+                    uid: uid, 
+                    source: 'ai', 
+                    voice_name: voiceName,
+                    chunk_size: chunk_size,
+                    silence_break: silence_break
+                })
             });
 
             if (!response.ok) {
@@ -1696,7 +1711,7 @@ const GenAIApp = () => {
                                                     onClick={() => {
                                                         setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: true }));
                                                         setIsGeneratingTTS(true);
-                                                        callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL);
+                                                        callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL);
 
                                                         // Execute YouTube Title/Description
                                                         youtubePromptInput = youtubeTitlePrompt + item.answer;
@@ -1751,7 +1766,7 @@ const GenAIApp = () => {
     className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'} 
     onClick={() => {
         setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
-        callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL)
+        callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
             .finally(() => setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: false })));
     }}
 >
