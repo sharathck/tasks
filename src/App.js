@@ -455,7 +455,7 @@ function App() {
        for (const chunk of chunks) {
          callTTSAPI(chunk);
        }*/
-      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
     }
     else {
       callTTSAPI(cleanedArticles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');

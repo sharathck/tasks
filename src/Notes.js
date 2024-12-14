@@ -194,7 +194,7 @@ const Notes = () => {
         if (isiPhone) {
             window.scrollTo(0, 0);
             alert('Please go to top of the page to check status and listen to the audio');
-            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
+            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
             return;
         }
         const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
