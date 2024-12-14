@@ -197,6 +197,11 @@ const GenAIApp = () => {
     // Add state variable for AI Search
     const [isAISearch, setIsAISearch] = useState(false);
     const [showAISearchButton, setShowAISearchButton] = useState(true); // or set based on configuration
+   // Add these state variables near other state declarations
+   const [isLiveAudioPlaying, setIsLiveAudioPlaying] = useState({});
+   const [isGeneratingDownloadableAudio, setIsGeneratingDownloadableAudio] = useState({});
+   // Add new state variable for YouTube audio title button
+   const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
 
     const embedPrompt = async (docId) => {
         try {
@@ -500,37 +505,58 @@ const GenAIApp = () => {
             callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_API_URL);
             return;
         }
-        const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-        speechConfig.speechSynthesisVoiceName = voiceName;
-        if (language === "Spanish") {
+        try 
+        {
+        try {
+            const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+            speechConfig.speechSynthesisVoiceName = voiceName;
+            if (language === "Spanish") {
             speechConfig.speechSynthesisVoiceName = "es-MX-DaliaNeural";
-        }
-        if (language === "Hindi") {
+            }
+            if (language === "Hindi") {
             speechConfig.speechSynthesisVoiceName = "hi-IN-SwaraNeural";
-        }
-        if (language === "Telugu") {
+            }
+            if (language === "Telugu") {
             speechConfig.speechSynthesisVoiceName = "te-IN-ShrutiNeural";
-        }
+            }
 
-        const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
-        const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+            const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+            const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
 
-        const chunks = splitMessage(cleanedArticles);
-        for (const chunk of chunks) {
-            try {
-                const result = await speechSynthesizer.speakTextAsync(chunk);
+            const chunks = splitMessage(cleanedArticles);
+            for (const chunk of chunks) {
+            await new Promise((resolve, reject) => {
+                speechSynthesizer.speakTextAsync(chunk, result => {
                 if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
                     console.log(`Speech synthesized to speaker for text: [${chunk}]`);
+                    resolve();
                 } else if (result.reason === speechsdk.ResultReason.Canceled) {
                     const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
                     if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
-                        console.error(`Error details: ${cancellationDetails.errorDetails}`);
+                    console.error(`Error details: ${cancellationDetails.errorDetails}`);
+                    reject(new Error(cancellationDetails.errorDetails));
+                    } else {
+                    reject(new Error('Speech synthesis canceled'));
                     }
                 }
-            } catch (error) {
+                }, error => {
                 console.error(`Error synthesizing speech: ${error}`);
+                reject(error);
+                });
+            });
             }
+        } catch (error) {
+            console.error(`Error synthesizing speech: ${error}`);
+        } finally {
+            setIsLiveAudioPlaying(false);
         }
+    }
+    catch (error) {
+        console.error(`Error synthesizing speech: ${error}`);
+    }
+    finally {
+        setIsLiveAudioPlaying(false);
+    }
     };
 
     // Function to fetch more data for pagination
@@ -1664,13 +1690,11 @@ const GenAIApp = () => {
 
                                                 {(showYouTubeButton && <button
                                                     className={
-                                                        (isGeneratingTTS ||
-                                                            (isGeneratingGemini && isYouTubeTitle) ||
-                                                            (isGeneratingo1 && isImagesSearch)) ?
+                                                        (isGeneratingYouTubeAudioTitle[item.id]) ?
                                                             'button_selected' : 'button'
                                                     }
                                                     onClick={() => {
-                                
+                                                        setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: true }));
                                                         setIsGeneratingTTS(true);
                                                         callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL);
 
@@ -1688,62 +1712,54 @@ const GenAIApp = () => {
                                                         setIsImagesSearch(true);
                                                         setIso1(true);
                                                         setIsGeneratingo1(true);
-                                                        callAPI(modelo1, 'imagesSearchWords');
+                                                        callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: false })));;
                                                     }}>
                                                     <label className={
-                                                        (isGeneratingTTS ||
-                                                            (isGeneratingGemini && isYouTubeTitle) ||
-                                                            (isGeneratingo1 && isImagesSearch)) ?
+                                                        (isGeneratingYouTubeAudioTitle[item.id]) ?
                                                             'flashing' : ''
                                                     }>
                                                         YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
                                                         / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
                                                         / Image Search Words
-                                                        <img src={imageIcon} alt="image" height="22px" style={{ marginRight: '4px' }} />
+                                                        <img src={imageIcon} alt="" height="22px" style={{ marginRight: '4px' }} />
                                                     </label>
-                                                </button>
-                                                )}
-                                                {(!isiPhone && <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.answer, item.language || "English")}>
-                                                    Live Audio  <FaHeadphones />
                                                 </button>
                                                 )}
 
-                                                <button className={isGeneratingTTS ? 'button_selected' : 'button'} onClick={() => {
-                                                   
-                                                    setIsGeneratingTTS(true);
-                                                    callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL);
+                                                {(!isiPhone && 
+    <button 
+        className={isLiveAudioPlaying[item.id] ? 'button_selected' : 'button'} 
+        onClick={async () => {
+            try {
+                setIsLiveAudioPlaying(prev => ({ ...prev, [item.id]: true }));
+                const result = await synthesizeSpeech(item.answer, item.language || "English");
+                if (!result) {
+                    throw new Error('Speech synthesis failed');
+                }
+            } catch (error) {
+                console.error('Error playing audio:', error);
+            } 
+        }}
+    >
+        <label className={isLiveAudioPlaying[item.id] ? 'flashing' : ''}>
+            <FaPlay /> Audio
+        </label>
+    </button>
+)}
 
-                                                }}>
-                                                    <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                                        <img src={speakerIcon} alt="speaker" height="22px" />
-                                                    </label>
-                                                </button>
-                                                {(showYouTubeTitleDescriptionButton && <button className={isGeneratingGemini && isYouTubeTitle ? 'button_selected' : 'button'} onClick={() => {
-                                                    youtubePromptInput = youtubeTitlePrompt + item.answer;
-                                                    youtubeSelected = true;
-                                                    setIsYouTubeTitle(true);
-                                                    setIsGemini(true);
-                                                    setIsGeneratingGemini(true);
-                                                    callAPI(modelGemini, 'youtubeTitleDescription');
-                                                }}>
-                                                    <label className={isGeneratingGemini && isYouTubeTitle ? 'flashing' : ''}>
-                                                        YouTube Title / Description <img src={youtubeIcon} alt="youtube" height="22px" />
-                                                    </label>
-                                                </button>
-                                                )}
-                                                {(showImagesSearchWordsButton && <button className={isGeneratingo1 && isImagesSearch ? 'button_selected' : 'button'} onClick={() => {
-                                                    imagePromptInput = imagesSearchPrompt + item.answer;
-                                                    imageSelected = true;
-                                                    setIsImagesSearch(true);
-                                                    setIso1(true);
-                                                    setIsGeneratingo1(true);
-                                                    callAPI(modelo1, 'imagesSearchWords');
-                                                }}>
-                                                    <label className={isGeneratingo1 && isImagesSearch ? 'flashing' : ''}>
-                                                        Images Search Words <img src={imageIcon} alt="youtube" height="22px" />
-                                                    </label>
-                                                </button>
-                                                )}
+                                                <button 
+    className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'} 
+    onClick={() => {
+        setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
+        callTTSAPI(item.answer, process.env.REACT_APP_TTS_API_URL)
+            .finally(() => setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: false })));
+    }}
+>
+    <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
+        <FaCloudDownloadAlt /> Audio
+    </label>
+</button>
+
                                             </>
                                         )}
                                         &nbsp; &nbsp; &nbsp;
