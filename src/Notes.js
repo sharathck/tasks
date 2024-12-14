@@ -44,7 +44,7 @@ const Notes = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-Aria:DragonHDLatestNeural');
+    const [voiceName, setVoiceName] = useState('en-US-Ava:DragonHDLatestNeural');
     const [showMainApp, setShowMainApp] = useState(false);
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [fileName, setFileName] = useState('');
@@ -167,6 +167,10 @@ const Notes = () => {
             ...prev,
             [id]: !prev[id]
         }));
+    };
+
+    const handleVoiceChange = (voice) => {
+        setVoiceName(voice);
     };
 
     // Helper function to split messages into chunks
@@ -573,9 +577,15 @@ const Notes = () => {
                                         <span style={{ color: "green", fontWeight: "bold", fontSize: '16px' }}> {item.showRawAnswer ? item.fileName : item.fileName} </span>&nbsp;&nbsp;&nbsp;&nbsp;
                                         <span style={{ color: "black", fontSize: '12px' }}></span>
                                         <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                                        <span style={{ color: "black", fontSize: '12px' }}>
-                                            modified: </span>
-                                        <span style={{ color: "blue", fontSize: "16px" }}>{new Date(item.modifiedDateTime.toDate()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span> &nbsp;&nbsp;
+                                        <span style={{ color: "blue", fontSize: "16px" }}>
+                                            {new Date(item.modifiedDateTime.toDate()).toLocaleDateString('en-US', 
+                                                { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </span> &nbsp;&nbsp;
+                                        <VoiceSelect 
+                                            selectedVoice={voiceName}
+                                            onVoiceChange={handleVoiceChange}
+                                            style={{ marginRight: '10px' }}
+                                        />
                                         <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.promptInput, item.language || "English")}><FaHeadphones /></button>&nbsp;&nbsp;
                                     </div>
                                 </div>
@@ -613,7 +623,11 @@ const Notes = () => {
                                         <span style={{ color: "green", fontWeight: "bold", fontSize: '16px' }}> {item.showRawAnswer ? item.fileName : item.fileName} </span>&nbsp;&nbsp;&nbsp;&nbsp;
                                         <span style={{ color: "black", fontSize: '12px' }}></span>
                                         <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                                       
+                                        <VoiceSelect 
+                                            selectedVoice={voiceName}
+                                            onVoiceChange={handleVoiceChange}
+                                            style={{ marginRight: '10px' }}
+                                        />
                                         <button className="signgooglepagebutton" onClick={() => synthesizeSpeech(item.promptInput, item.language || "English")}><FaHeadphones /></button>&nbsp;&nbsp;
                                     </div>
                                 </div>

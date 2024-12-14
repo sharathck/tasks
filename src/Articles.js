@@ -38,7 +38,7 @@ function Articles() {
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [showMainApp, setShowMainApp] = useState(false);
     const [showAudioApp, setShowAudioApp] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-Aria:DragonHDLatestNeural');
+    const [voiceName, setVoiceName] = useState('en-US-Ava:DragonHDLatestNeural');
     const [limitActiveValue, setLimitActiveValue] = useState(limitMax);
     const [showLiveTTS, setShowLiveTTS] = useState(false);
 
