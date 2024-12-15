@@ -199,11 +199,11 @@ const GenAIApp = () => {
     // Add state variable for AI Search
     const [isAISearch, setIsAISearch] = useState(false);
     const [showAISearchButton, setShowAISearchButton] = useState(true); // or set based on configuration
-   // Add these state variables near other state declarations
-   const [isLiveAudioPlaying, setIsLiveAudioPlaying] = useState({});
-   const [isGeneratingDownloadableAudio, setIsGeneratingDownloadableAudio] = useState({});
-   // Add new state variable for YouTube audio title button
-   const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
+    // Add these state variables near other state declarations
+    const [isLiveAudioPlaying, setIsLiveAudioPlaying] = useState({});
+    const [isGeneratingDownloadableAudio, setIsGeneratingDownloadableAudio] = useState({});
+    // Add new state variable for YouTube audio title button
+    const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
 
     const embedPrompt = async (docId) => {
         try {
@@ -505,7 +505,7 @@ const GenAIApp = () => {
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/[#:\-*]/g, ' ')
-                    .replace(/[&]/g, ' and ')
+                        .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
             .replace(/["]/g, '&quot;')
             .replace(/[']/g, '&apos;')
@@ -517,58 +517,57 @@ const GenAIApp = () => {
             callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
             return;
         }
-        try 
-        {
         try {
-            const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-            speechConfig.speechSynthesisVoiceName = voiceName;
-            if (language === "Spanish") {
-            speechConfig.speechSynthesisVoiceName = "es-MX-DaliaNeural";
-            }
-            if (language === "Hindi") {
-            speechConfig.speechSynthesisVoiceName = "hi-IN-SwaraNeural";
-            }
-            if (language === "Telugu") {
-            speechConfig.speechSynthesisVoiceName = "te-IN-ShrutiNeural";
-            }
-
-            const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
-            const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
-
-            const chunks = splitMessage(cleanedArticles);
-            for (const chunk of chunks) {
-            await new Promise((resolve, reject) => {
-                speechSynthesizer.speakTextAsync(chunk, result => {
-                if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-                    console.log(`Speech synthesized to speaker for text: [${chunk}]`);
-                    resolve();
-                } else if (result.reason === speechsdk.ResultReason.Canceled) {
-                    const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
-                    if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
-                    console.error(`Error details: ${cancellationDetails.errorDetails}`);
-                    reject(new Error(cancellationDetails.errorDetails));
-                    } else {
-                    reject(new Error('Speech synthesis canceled'));
-                    }
+            try {
+                const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+                speechConfig.speechSynthesisVoiceName = voiceName;
+                if (language === "Spanish") {
+                    speechConfig.speechSynthesisVoiceName = "es-MX-DaliaNeural";
                 }
-                }, error => {
+                if (language === "Hindi") {
+                    speechConfig.speechSynthesisVoiceName = "hi-IN-SwaraNeural";
+                }
+                if (language === "Telugu") {
+                    speechConfig.speechSynthesisVoiceName = "te-IN-ShrutiNeural";
+                }
+
+                const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+                const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+                const chunks = splitMessage(cleanedArticles);
+                for (const chunk of chunks) {
+                    await new Promise((resolve, reject) => {
+                        speechSynthesizer.speakTextAsync(chunk, result => {
+                            if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                                console.log(`Speech synthesized to speaker for text: [${chunk}]`);
+                                resolve();
+                            } else if (result.reason === speechsdk.ResultReason.Canceled) {
+                                const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
+                                if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
+                                    console.error(`Error details: ${cancellationDetails.errorDetails}`);
+                                    reject(new Error(cancellationDetails.errorDetails));
+                                } else {
+                                    reject(new Error('Speech synthesis canceled'));
+                                }
+                            }
+                        }, error => {
+                            console.error(`Error synthesizing speech: ${error}`);
+                            reject(error);
+                        });
+                    });
+                }
+            } catch (error) {
                 console.error(`Error synthesizing speech: ${error}`);
-                reject(error);
-                });
-            });
+            } finally {
+                setIsLiveAudioPlaying(false);
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error(`Error synthesizing speech: ${error}`);
-        } finally {
+        }
+        finally {
             setIsLiveAudioPlaying(false);
         }
-    }
-    catch (error) {
-        console.error(`Error synthesizing speech: ${error}`);
-    }
-    finally {
-        setIsLiveAudioPlaying(false);
-    }
     };
 
     // Function to fetch more data for pagination
@@ -987,28 +986,29 @@ const GenAIApp = () => {
 
     // Function to call the TTS API
     const callTTSAPI = async (message, apiUrl) => {
-        console.log('Calling TTS API with message:', message, ' voiceName:', voiceName);
-        console.log('API URL:', apiUrl);
+
         setIsGeneratingTTS(true); // Set generating state to true
         const cleanedArticles = message
-        .replace(/https?:\/\/[^\s]+/g, '')
-        .replace(/http?:\/\/[^\s]+/g, '')
-        .replace(/[#:\-*]/g, ' ')
-                    .replace(/[&]/g, ' and ')
+            .replace(/https?:\/\/[^\s]+/g, '')
+            .replace(/http?:\/\/[^\s]+/g, '')
+            .replace(/[#:\-*]/g, ' ')
+            .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
             .replace(/["]/g, '&quot;')
             .replace(/[']/g, '&apos;')
-        .trim();
+            .trim();
+            console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
+            console.log('API URL:', apiUrl);
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    message: cleanedArticles, 
-                    uid: uid, 
-                    source: 'ai', 
+                body: JSON.stringify({
+                    message: cleanedArticles,
+                    uid: uid,
+                    source: 'ai',
                     voice_name: voiceName,
                     chunk_size: chunk_size,
                     silence_break: silence_break
@@ -1236,7 +1236,7 @@ const GenAIApp = () => {
         }
 
         // Correct the tag name and add null check
-        const prompt = genaiPrompts.find(prompt => prompt.tag === 'Intelligent-Questions');
+        const prompt = genaiPrompts.find(prompt => prompt.tag === 'Questions');
         let intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
 
         if (intelligentQuestionsPrompt === '') {
@@ -1246,27 +1246,27 @@ const GenAIApp = () => {
 
         // Append the prompt to promptInput
         homeWorkInput = promptInput + intelligentQuestionsPrompt;
-        setIsGeneratingGeminiFlash(true);
-        callAPI(modelGeminiFlash, 'homeWork');
-        setIsGeneratingo1(true); // Set generating state to true
-        callAPI(modelo1, 'homeWork');
+        setIsGeneratingGemini(true);
+        callAPI(modelGemini, 'homeWork');
+        setIsGeneratingo1Mini(true); // Set generating state to true
+        callAPI(modelGpto1Mini, 'homeWork');
     };
 
     // Add handler for AI Search
     const handleAISearch = async () => {
         setIsAISearch(true);
-                // Ensure genaiPrompts is populated
-                if (genaiPrompts.length === 0) {
-                    await fetchPrompts(uid); // Fetch prompts if not already loaded
-                }
-        
-                // Correct the tag name and add null check
-                const prompt = genaiPrompts.find(prompt => prompt.tag === 'Search-GenAI');
-                let googleSearchPrompt = prompt ? prompt.fullText : '';
-        
-                if (googleSearchPrompt === '') {
-                    googleSearchPrompt = '  ####  prompt starts from here #####  search for current, up-to-date and latest news and information about above topic(s) from google search. --Provide response with maximum details possible in response. Use all max tokens available to the max in response.';
-                }
+        // Ensure genaiPrompts is populated
+        if (genaiPrompts.length === 0) {
+            await fetchPrompts(uid); // Fetch prompts if not already loaded
+        }
+
+        // Correct the tag name and add null check
+        const prompt = genaiPrompts.find(prompt => prompt.tag === 'Search-GenAI');
+        let googleSearchPrompt = prompt ? prompt.fullText : '';
+
+        if (googleSearchPrompt === '') {
+            googleSearchPrompt = '  ####  prompt starts from here #####  search for current, up-to-date and latest news and information about above topic(s) from google search. --Provide response with maximum details possible in response. Use all max tokens available to the max in response.';
+        }
         // Append the search prompt to promptInput
         googleSearchPromptInput = promptInput + googleSearchPrompt;
         setIsGeneratingGeminiSearch(true);
@@ -1278,7 +1278,7 @@ const GenAIApp = () => {
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
                 <div>
-                    {email == 'erpgenai@gmail.com' &&
+                    {email === 'erpgenai@gmail.com' &&
                         (<h3>This site is created by Sharath K for Demo purpose only.</h3>)
                     }
                     <textarea
@@ -1478,57 +1478,57 @@ const GenAIApp = () => {
                     )}
                     {!isAISearch && !isHomeWork && (
                         <button
-                        onClick={handleGenerate}
-                        className="generateButton"
-                        style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
-                        disabled={
-                            isGenerating ||
-                            isGeneratingGemini ||
-                            isGeneratingAnthropic ||
-                            isGeneratingo1Mini ||
-                            isGeneratingo1 ||
-                            isGeneratingImage_Dall_e_3 ||
-                            isGeneratingTTS ||
-                            isGeneratingMistral ||
-                            isGeneratingLlama ||
-                            isGeneratingGpt4Turbo ||
-                            isGeneratingGeminiSearch ||
-                            isGeneratingGeminiFlash ||
-                            isGeneratingPerplexity ||
-                            isGeneratingPerplexityFast ||
-                            isGeneratingCodeStral ||
-                            isGeneratingGpt4oMini ||
-                            isGeneratingClaudeHaiku ||
-                            isGeneratingSambanova ||
-                            isGeneratingGroq ||
-                            isGeneratingNova
-                        }
-                    >
-                        {isGenerating ||
-                            isGeneratingGemini ||
-                            isGeneratingAnthropic ||
-                            isGeneratingo1Mini ||
-                            isGeneratingo1 ||
-                            isGeneratingImage_Dall_e_3 ||
-                            isGeneratingTTS ||
-                            isGeneratingMistral ||
-                            isGeneratingLlama ||
-                            isGeneratingGpt4Turbo ||
-                            isGeneratingGeminiSearch ||
-                            isGeneratingGeminiFlash ||
-                            isGeneratingPerplexity ||
-                            isGeneratingPerplexityFast ||
-                            isGeneratingCodeStral ||
-                            isGeneratingGpt4oMini ||
-                            isGeneratingClaudeHaiku ||
-                            isGeneratingSambanova ||
-                            isGeneratingGroq ||
-                            isGeneratingNova ? (
-                            <FaSpinner className="spinning" />
-                        ) : (
-                            'GenAI'
-                        )}
-                    </button>
+                            onClick={handleGenerate}
+                            className="generateButton"
+                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
+                            disabled={
+                                isGenerating ||
+                                isGeneratingGemini ||
+                                isGeneratingAnthropic ||
+                                isGeneratingo1Mini ||
+                                isGeneratingo1 ||
+                                isGeneratingImage_Dall_e_3 ||
+                                isGeneratingTTS ||
+                                isGeneratingMistral ||
+                                isGeneratingLlama ||
+                                isGeneratingGpt4Turbo ||
+                                isGeneratingGeminiSearch ||
+                                isGeneratingGeminiFlash ||
+                                isGeneratingPerplexity ||
+                                isGeneratingPerplexityFast ||
+                                isGeneratingCodeStral ||
+                                isGeneratingGpt4oMini ||
+                                isGeneratingClaudeHaiku ||
+                                isGeneratingSambanova ||
+                                isGeneratingGroq ||
+                                isGeneratingNova
+                            }
+                        >
+                            {isGenerating ||
+                                isGeneratingGemini ||
+                                isGeneratingAnthropic ||
+                                isGeneratingo1Mini ||
+                                isGeneratingo1 ||
+                                isGeneratingImage_Dall_e_3 ||
+                                isGeneratingTTS ||
+                                isGeneratingMistral ||
+                                isGeneratingLlama ||
+                                isGeneratingGpt4Turbo ||
+                                isGeneratingGeminiSearch ||
+                                isGeneratingGeminiFlash ||
+                                isGeneratingPerplexity ||
+                                isGeneratingPerplexityFast ||
+                                isGeneratingCodeStral ||
+                                isGeneratingGpt4oMini ||
+                                isGeneratingClaudeHaiku ||
+                                isGeneratingSambanova ||
+                                isGeneratingGroq ||
+                                isGeneratingNova ? (
+                                <FaSpinner className="spinning" />
+                            ) : (
+                                'GenAI'
+                            )}
+                        </button>
                     )}
                     {(showHomeWorkButton && !isAISearch &&
                         <button
@@ -1691,7 +1691,7 @@ const GenAIApp = () => {
                                             {item.showRawQuestion ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
                                         &nbsp; &nbsp;
-                                            <span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span><span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
+                                        <span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span><span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
                                         </span>
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
@@ -1749,39 +1749,39 @@ const GenAIApp = () => {
                                                 </button>
                                                 )}
 
-                                                {(!isiPhone && 
-    <button 
-        className={isLiveAudioPlaying[item.id] ? 'button_selected' : 'button'} 
-        onClick={async () => {
-            try {
-                setIsLiveAudioPlaying(prev => ({ ...prev, [item.id]: true }));
-                const result = await synthesizeSpeech(item.answer, item.language || "English");
-                if (!result) {
-                    throw new Error('Speech synthesis failed');
-                }
-            } catch (error) {
-                console.error('Error playing audio:', error);
-            } 
-        }}
-    >
-        <label className={isLiveAudioPlaying[item.id] ? 'flashing' : ''}>
-            <FaPlay /> Audio
-        </label>
-    </button>
-)}
+                                                {(!isiPhone &&
+                                                    <button
+                                                        className={isLiveAudioPlaying[item.id] ? 'button_selected' : 'button'}
+                                                        onClick={async () => {
+                                                            try {
+                                                                setIsLiveAudioPlaying(prev => ({ ...prev, [item.id]: true }));
+                                                                const result = await synthesizeSpeech(item.answer, item.language || "English");
+                                                                if (!result) {
+                                                                    throw new Error('Speech synthesis failed');
+                                                                }
+                                                            } catch (error) {
+                                                                console.error('Error playing audio:', error);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <label className={isLiveAudioPlaying[item.id] ? 'flashing' : ''}>
+                                                            <FaPlay /> Audio
+                                                        </label>
+                                                    </button>
+                                                )}
 
-                                                <button 
-    className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'} 
-    onClick={() => {
-        setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
-        callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
-            .finally(() => setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: false })));
-    }}
->
-    <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
-        <FaCloudDownloadAlt /> Audio
-    </label>
-</button>
+                                                <button
+                                                    className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'}
+                                                    onClick={() => {
+                                                        setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
+                                                        callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
+                                                            .finally(() => setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: false })));
+                                                    }}
+                                                >
+                                                    <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
+                                                        <FaCloudDownloadAlt /> Audio
+                                                    </label>
+                                                </button>
 
                                             </>
                                         )}
@@ -1797,9 +1797,9 @@ const GenAIApp = () => {
                                         }}>
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
-                                        &nbsp; &nbsp; 
+                                        &nbsp; &nbsp;
                                         <span style={{ color: "black", fontSize: "12px" }}> #Char(Ans):</span>
-                                         <span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
+                                        <span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
                                         &nbsp; &nbsp;
                                         <button
                                             edge="end"
