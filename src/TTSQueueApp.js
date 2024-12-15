@@ -119,7 +119,8 @@ function TTSQueueApp() {
         const cleanedArticles = articles
         .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-        .replace(/[#:\-*]/g, ' ') // Remove special characters
+        .replace(/[#:\-*]/g, ' ')
+        .replace(/[&]/g, ' and ') // Remove special characters
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim(); // Remove leading/trailing spaces
     
@@ -147,7 +148,8 @@ function TTSQueueApp() {
         const cleanedArticles = articles
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-            .replace(/[#:\-*]/g, ' ') // Remove special characters
+            .replace(/[#:\-*]/g, ' ')
+        .replace(/[&]/g, ' and ') // Remove special characters
             .replace(/\s+/g, ' ') // Replace multiple spaces with single space
             .trim(); // Remove leading/trailing spaces
         
