@@ -44,7 +44,7 @@ const Notes = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-Ava:DragonHDLatestNeural');
+    const [voiceName, setVoiceName] = useState('en-US-LunaNeural');
     const [showMainApp, setShowMainApp] = useState(false);
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [fileName, setFileName] = useState('');
