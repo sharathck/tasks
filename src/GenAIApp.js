@@ -505,7 +505,10 @@ const GenAIApp = () => {
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/[#:\-*]/g, ' ')
-        .replace(/[&]/g, ' and ')
+                    .replace(/[&]/g, ' and ')
+            .replace(/[<>]/g, ' ')
+            .replace(/["]/g, '&quot;')
+            .replace(/[']/g, '&apos;')
             .trim(); // Remove leading/trailing spaces
 
         if (isiPhone) {
@@ -991,7 +994,10 @@ const GenAIApp = () => {
         .replace(/https?:\/\/[^\s]+/g, '')
         .replace(/http?:\/\/[^\s]+/g, '')
         .replace(/[#:\-*]/g, ' ')
-        .replace(/[&]/g, ' and ')
+                    .replace(/[&]/g, ' and ')
+            .replace(/[<>]/g, ' ')
+            .replace(/["]/g, '&quot;')
+            .replace(/[']/g, '&apos;')
         .trim();
         try {
             const response = await fetch(apiUrl, {

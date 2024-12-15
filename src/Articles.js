@@ -118,7 +118,10 @@ function Articles() {
         .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/[#:\-*]/g, ' ')
-        .replace(/[&]/g, ' and ') // Remove special characters
+                    .replace(/[&]/g, ' and ')
+            .replace(/[<>]/g, ' ')
+            .replace(/["]/g, '&quot;')
+            .replace(/[']/g, '&apos;') // Remove special characters
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim(); // Remove leading/trailing spaces
     
@@ -149,7 +152,10 @@ function Articles() {
         .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/[#:\-*]/g, ' ')
-        .replace(/[&]/g, ' and ') // Remove special characters
+                    .replace(/[&]/g, ' and ')
+            .replace(/[<>]/g, ' ')
+            .replace(/["]/g, '&quot;')
+            .replace(/[']/g, '&apos;') // Remove special characters
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim(); // Remove leading/trailing spaces
     
@@ -312,7 +318,10 @@ function Articles() {
         .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/[#:\-*]/g, ' ')
-        .replace(/[&]/g, ' and ') // Remove special characters
+                    .replace(/[&]/g, ' and ')
+            .replace(/[<>]/g, ' ')
+            .replace(/["]/g, '&quot;')
+            .replace(/[']/g, '&apos;') // Remove special characters
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim(); // Remove leading/trailing spaces
     
