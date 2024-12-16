@@ -589,6 +589,50 @@ function App() {
     setSharedTasks(!sharedTasks);
   }
 
+  const showSharathTasks = async () => {
+    if (!sharedTasks) {
+      const tasksCollection = collection(db, fireBaseTasksCollection);
+      const currentDate = new Date();
+      console.log('Admin user');
+      const sharedQuery = query(tasksCollection, where('userId', '==', 'bTGBBpeYPmPJonItYpUOCYhdIlr1'), where('status', '==', false), where('dueDate', '<', currentDate), orderBy('dueDate', 'desc'), limit(500));
+      const tasksSnapshot = await getDocs(sharedQuery);
+      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTasks(tasksList);
+    }
+    else {
+      setShowCurrent(!showCurrent);
+    }
+    setSharedTasks(!sharedTasks);
+  }
+  
+
+  // Add URL detection helper function
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  // Add task text renderer function
+  const renderTaskText = (text) => {
+    if (isValidUrl(text.trim())) {
+      return (
+        <a 
+          href={text.trim()}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#0066cc', textDecoration: 'underline' }}
+        >
+          {text}
+        </a>
+      );
+    }
+    return text;
+  };
+
   if (showGenAIApp) {
     return (
       <GenAIApp user={user} />
@@ -710,7 +754,7 @@ function App() {
                             <FaCheck />
                           </button>
                           <span>
-                            {task.task}
+                            {renderTaskText(task.task)}
                             {task.recurrence && task.recurrence !== 'ad-hoc' && (
                               <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                             )}
@@ -767,6 +811,16 @@ function App() {
                       {!sharedTasks ? 'Show Aarush Tasks' : 'Hide Aarush Tasks'}
                     </button>
                     <br />
+                    <br /> 
+                                        <button className="button" onClick={showSharathTasks}>
+                      {!sharedTasks ? 'Show Sharath Tasks' : 'Hide Sharath Tasks'}
+                    </button>
+                    <br />       
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
                     <br />
                   </div>
                 )}
@@ -783,7 +837,7 @@ function App() {
                         <button className='donemarkcompletebutton' onClick={() => handleToggleStatus(task.id, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
                           <FaCheck />
                         </button>
-                        {task.task} &nbsp;&nbsp;
+                        {renderTaskText(task.task)} &nbsp;&nbsp;
                         {task.recurrence && task.recurrence !== 'ad-hoc' && (
                           <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                         )}
@@ -811,7 +865,7 @@ function App() {
                     .filter((task) => (searchQuery ? task.task.toLowerCase().includes(searchQuery.toLowerCase()) : true))
                     .map((task) => (
                       <li key={task.id}>
-                        {task.task}
+                        {renderTaskText(task.task)}
                         &nbsp;
                         {showDueDates && (
                           <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
