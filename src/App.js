@@ -13,7 +13,7 @@ import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 import Notes from './Notes';
 import Articles from './Articles';
-import Homework from './Homework';
+import Practice from './Practice';
 
 const fireBaseTasksCollection = process.env.REACT_APP_FIREBASE_TASKS_COLLECTION;
 console.log('Firebase tasks collection:', fireBaseTasksCollection);
@@ -620,7 +620,7 @@ function App() {
 
   if (showHomeworkApp) {  // Add this block
     return (
-      <Homework user={user} sourceDocumentID={currentDocId} onBack={() => setShowHomeworkApp(false)} />
+      <Practice user={user} sourceDocumentID={currentDocId} onBack={() => setShowHomeworkApp(false)} />
     );
   }
 

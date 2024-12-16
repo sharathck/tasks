@@ -53,11 +53,9 @@ const Homework = ({sourceDocumentID}) => {
                 console.error("No valid questions found in data");
                 return;
             }
-
             // Add questions to homework collection
             const currentDateTime = new Date();
             const batch = writeBatch(db);
-
             questions.forEach((question) => {
                 const docRef = doc(homeworkCollection);
                 batch.set(docRef, {
@@ -70,9 +68,24 @@ const Homework = ({sourceDocumentID}) => {
                     sourceDocumentIDCreatedDateTime: currentDateTime
                 });
             });
-
             await batch.commit();
-            console.log('Homework data initialized successfully');
+            console.log('Personal Homework data initialized successfully');
+            const sharedHomeworkCollection = collection(db, 'homework');
+            const sharedbatch = writeBatch(db);
+            questions.forEach((question) => {
+                const docRef = doc(sharedHomeworkCollection);
+                sharedbatch.set(docRef, {
+                    question: question.Question || question.question,
+                    correctAnswer: question.Answer || question.answer || question.correctAnswer,
+                    userAnswer: '',
+                    createdDateTime: currentDateTime,
+                    modifiedDateTime: currentDateTime,
+                    sourceDocumentID: sourceDocID,
+                    sourceDocumentIDCreatedDateTime: currentDateTime
+                });
+            });
+            await sharedbatch.commit();
+            console.log('Shared Homework data initialized successfully');
         } catch (error) {
             console.error("Error initializing homework data:", error);
             console.log("Firestore Data received:", firestoreData);
@@ -251,6 +264,23 @@ const Homework = ({sourceDocumentID}) => {
                     >
                         Fetch Questions
                     </button>
+                    <button 
+                            className="button"
+                            onClick={() => {
+                                const baseUrl = window.location.href.split('?')[0];
+                                const newUrl = `${baseUrl}?h=${sourceDocID}`;
+                                navigator.clipboard.writeText(newUrl)
+                                    .then(() => {
+                                        alert('URL copied to clipboard!');
+                                    })
+                                    .catch(err => {
+                                        console.error('Failed to copy URL:', err);
+                                        alert('Failed to copy URL');
+                                    });
+                            }}
+                        >
+                            Copy URL
+                        </button>
                 </div>
                 <button
                     className='show-answers-button'

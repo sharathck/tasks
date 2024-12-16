@@ -1250,7 +1250,7 @@ const GenAIApp = () => {
         }
 
         // Correct the tag name and add null check
-        const prompt = genaiPrompts.find(prompt => prompt.tag === 'Questions');
+        const prompt = genaiPrompts.find(prompt => prompt.tag === 'AutoQ');
         let intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
 
         if (intelligentQuestionsPrompt === '') {
@@ -1870,11 +1870,27 @@ const GenAIApp = () => {
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
-                                        {item.showRawAnswer ? item.answer : (<MdEditor
-                                            value={editPromptFullText}
-                                            renderHTML={editPromptFullText => mdParser.render(item.answer)}
-                                            config={{ view: { menu: false, md: false, html: true } }}
-                                        />)}
+                                        {item.showRawAnswer ? item.answer : (
+                                            <MdEditor
+                                                value={item.answer || ''} // Add default empty string
+                                                renderHTML={text => mdParser.render(text || '')} // Add default empty string
+                                                readOnly={true}
+                                                config={{
+                                                    view: { 
+                                                        menu: false,
+                                                        md: false,
+                                                        html: true 
+                                                    },
+                                                    canView: {
+                                                        menu: false,
+                                                        md: false,
+                                                        html: true,
+                                                        fullScreen: false,
+                                                        hideMenu: true
+                                                    }
+                                                }}
+                                            />
+                                        )}
                                     </div>
 
                                     <br />
