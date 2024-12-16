@@ -868,6 +868,9 @@ const GenAIApp = () => {
                         },
                         body: JSON.stringify({ prompt: homeWorkInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                     });
+                    //.then(homework_response => homework_response.json());
+                    //console.log('Response:', homework_response);
+                    //console.log('docID:', homework_response[0].results[0].docID);
                     break;
                 case 'google-search':
                     response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
@@ -904,12 +907,20 @@ const GenAIApp = () => {
                         });
                     }
             }
+
             if (!response.ok) {
                 const errorData = await response.json();
                 alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
             const data = await response.json();
+            if (invocationType === 'homeWork' ) {
+                console.log('Homework Response:', data);
+                const baseUrl = window.location.href.split('?')[0];
+                const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
+                window.open(newUrl, '_blank');
+            }
+
             console.log('Response:', data);
         } catch (error) {
             console.error('Error generating content:', error);
