@@ -718,9 +718,6 @@ function App() {
             <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
               <FaNewspaper />
             </button>
-            <button className={showHomeworkApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowHomeworkApp(!showHomeworkApp)}>
-              <FaFileWord />
-            </button>
             {showSearchBox && (
               <div> <input
                 type="text"
