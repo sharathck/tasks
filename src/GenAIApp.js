@@ -27,7 +27,7 @@ const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
-
+const ADMIN_USER_ID = 'bTGBBpeYPmPJonItYpUOCYhdIlr1';
 let searchQuery = '';
 let searchModel = 'All';
 let dataLimit = 11;
@@ -214,6 +214,7 @@ const GenAIApp = () => {
     const [showVoiceSelect, setShowVoiceSelect] = useState(false);
     const [showEditPromptButton, setShowEditPromptButton] = useState(false);
     const [showPromptsDropDownAfterSearch, setShowPromptsDropDownAfterSearch] = useState(false);
+    const [showBackToAppButton, setShowBackToAppButton] = useState(false);
 
     const embedPrompt = async (docId) => {
         try {
@@ -328,6 +329,8 @@ const GenAIApp = () => {
                 }
                 setUid(currentUser.uid);
                 setEmail(currentUser.email);
+                // Set visibility of back button based on admin status
+                setShowBackToAppButton(currentUser.uid === ADMIN_USER_ID);
                 console.log('User is signed in:', currentUser.uid);
                 // Fetch data for the authenticated user
                 fetchData(currentUser.uid);
@@ -1267,7 +1270,12 @@ const GenAIApp = () => {
     };
 
     const handleHomeWork = async () => {
+        if (!promptInput.trim()) {
+            alert('Please enter a prompt.');
+            return;
+        }
         setIsHomeWork(true);
+
         // Ensure genaiPrompts is populated
         if (genaiPrompts.length === 0) {
             await fetchPrompts(uid); // Fetch prompts if not already loaded
@@ -1333,6 +1341,10 @@ const GenAIApp = () => {
 
     // Add handler for AI Search
     const handleAISearch = async () => {
+        if (!promptInput.trim()) {
+            alert('Please enter a prompt.');
+            return;
+        }
         setIsAISearch(true);
         // Ensure genaiPrompts is populated
         if (genaiPrompts.length === 0) {
@@ -1635,8 +1647,15 @@ const GenAIApp = () => {
                         </button>
                     )}
                     &nbsp; &nbsp;
-
-                    <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    {!GenAIParameter ? (
+                        showBackToAppButton && (
+                            <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                                <FaArrowLeft />
+                            </button>
+                        )
+                    ) : (
+                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    )}
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button
