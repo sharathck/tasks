@@ -179,7 +179,7 @@ const Homework = ({sourceDocumentID}) => {
     };
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
-        const homeworkParam = urlParams.get('h');
+        const homeworkParam = urlParams.get('g');
         if (homeworkParam && homeworkParam.length > 5) {
             setShowMainAppButton(false);
         }
@@ -271,7 +271,11 @@ const Homework = ({sourceDocumentID}) => {
                                 const newUrl = `${baseUrl}?h=${sourceDocID}`;
                                 navigator.clipboard.writeText(newUrl)
                                     .then(() => {
-                                        alert('URL copied to clipboard!');
+                                        const notification = document.createElement('div');
+                                        notification.textContent = 'URL copied';
+                                        notification.style.cssText = 'position: fixed; right: 20px; top: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 4px; animation: fadeOut 2s forwards;';
+                                        document.body.appendChild(notification);
+                                        setTimeout(() => notification.remove(), 2000);
                                     })
                                     .catch(err => {
                                         console.error('Failed to copy URL:', err);
@@ -279,7 +283,7 @@ const Homework = ({sourceDocumentID}) => {
                                     });
                             }}
                         >
-                            Copy URL
+                            Copy URL for student
                         </button>
                 </div>
                 <button

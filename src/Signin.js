@@ -6,6 +6,8 @@ import './Signin.css';
 import React, { useEffect, useState, useRef } from 'react';
 import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
 import { auth, db } from './Firebase';
+import Practice from './Practice';
+
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -91,7 +93,13 @@ function SigninApp() {
             alert('Error signing in with Google: ' + error.message);
         });
     };
-
+    const urlParams = new URLSearchParams(window.location.search);
+    const homeworkParam = urlParams.get('h');
+    if (homeworkParam && homeworkParam.length > 5) {
+        return (
+            <Practice sourceDocumentID={homeworkParam} />
+          );
+    }
     if (user) {
         if (MainApp === 'GenAIApp') {
             return (

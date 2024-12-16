@@ -9,7 +9,6 @@ import GenAIApp from './GenAIApp';
 const Practice = ({sourceDocumentID}) => {
     // Convert markdown content to JSON
     const [problems, setProblems] = useState([]);
-    const [user, setUser] = useState(null);
     const [showMainApp, setShowMainApp] = useState(false);
     const [showAnswers, setShowAnswers] = useState(false);
     const [pinInput, setPinInput] = useState('');
@@ -50,8 +49,6 @@ const Practice = ({sourceDocumentID}) => {
     };
 
     const loadQuestions = async () => {
-        if (!user?.uid) return;
-
         if (!sourceDocID) {
             return;
         }
@@ -69,16 +66,10 @@ const Practice = ({sourceDocumentID}) => {
             setShowMainAppButton(true);
         }
         loadQuestions();
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-        return () => unsubscribe();
-    }, [user]);
+    }, [sourceDocumentID]);
 
     const handleAnswerChange = async (index, value) => {
         try {
-            if (!user) return;
-
             const problem = problems[index];
             const currentDateTime = new Date();
 
@@ -119,7 +110,7 @@ const Practice = ({sourceDocumentID}) => {
     };
 
     if (showMainApp) {
-        return <GenAIApp user={user} />;
+        return <GenAIApp />;
     }
 
     return (

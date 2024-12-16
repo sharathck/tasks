@@ -1862,8 +1862,9 @@ const GenAIApp = () => {
                                         <button 
                                             className="button"
                                             onClick={() => {
-                                                setCurrentDocId(item.id);
-                                                setShowHomeworkApp(true);
+                                                const baseUrl = window.location.href.split('?')[0];
+                                                const newUrl = `${baseUrl}?g=${item.id}`;
+                                                window.open(newUrl, '_blank');
                                             }}
                                         >
                                          Answer Online

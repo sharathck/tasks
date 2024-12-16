@@ -14,6 +14,7 @@ import VoiceSelect from './VoiceSelect';
 import Notes from './Notes';
 import Articles from './Articles';
 import Practice from './Practice';
+import Homework from './Homework';
 
 const fireBaseTasksCollection = process.env.REACT_APP_FIREBASE_TASKS_COLLECTION;
 console.log('Firebase tasks collection:', fireBaseTasksCollection);
@@ -73,6 +74,7 @@ function App() {
   const [showArticlesApp, setShowArticlesApp] = useState(false);
   const [showLiveTTS, setShowLiveTTS] = useState(false);
   const [showHomeworkApp, setShowHomeworkApp] = useState(false);  // Add this line
+  const [showGenerateHomeworkApp, setShowGenerateHomeworkApp] = useState(false);  // Add this line
   const [currentDocId, setCurrentDocId] = useState(null);
 
   useEffect(() => {
@@ -95,6 +97,11 @@ function App() {
       if (homeworkParam && homeworkParam.length > 5) {
         setCurrentDocId(homeworkParam);
         setShowHomeworkApp(true);
+      }
+      const genHomeworkParam = urlParams.get('g');
+      if (genHomeworkParam && genHomeworkParam.length > 5) {
+        setCurrentDocId(genHomeworkParam);
+        setShowGenerateHomeworkApp(true);
       }
       const limitParam = urlParams.get('limit');
       const showCurrentLimitValue = limitParam ? parseInt(limitParam) : tasksLimit;
@@ -665,6 +672,12 @@ function App() {
   if (showHomeworkApp) {  // Add this block
     return (
       <Practice user={user} sourceDocumentID={currentDocId} onBack={() => setShowHomeworkApp(false)} />
+    );
+  }
+
+  if (showGenerateHomeworkApp) {  // Add this block
+    return (
+      <Homework user={user} sourceDocumentID={currentDocId} onBack={() => showGenerateHomeworkApp(false)} />
     );
   }
 
