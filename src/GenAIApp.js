@@ -206,6 +206,7 @@ const GenAIApp = () => {
     // Add new state variable for YouTube audio title button
     const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
     const [showHomeworkApp, setShowHomeworkApp] = useState(false);
+    const [currentDocId, setCurrentDocId] = useState(null);
 
     const embedPrompt = async (docId) => {
         try {
@@ -1203,7 +1204,11 @@ const GenAIApp = () => {
 
     if (showHomeworkApp) {  // Add this block
         return (
-          <Homework user={user} onBack={() => setShowHomeworkApp(false)} />
+          <Homework 
+            user={user} 
+            onBack={() => setShowHomeworkApp(false)}
+            sourceDocumentID={currentDocId}
+          />
         );
       }
     
@@ -1856,9 +1861,12 @@ const GenAIApp = () => {
                                         &nbsp; &nbsp;
                                         <button 
                                             className="button"
-                                            onClick={() => setShowHomeworkApp(true)}
+                                            onClick={() => {
+                                                setCurrentDocId(item.id);
+                                                setShowHomeworkApp(true);
+                                            }}
                                         >
-                                         HomeWork
+                                         Answer Online
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
