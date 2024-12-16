@@ -1,0 +1,14 @@
+[
+    {
+      "Question": "A car travels at a constant speed and covers 150 kilometers in 3 hours. What is the car's speed in kilometers per hour?",
+      "Answer": "50 km/h"
+    },
+    {
+      "Question": "If the area of a rectangle is 84 square meters and its length is 12 meters, what is the width?",
+      "Answer": "7 meters"
+    },
+    {
+      "Question": "A recipe requires 3 cups of flour to make 24 cookies. How many cups of flour are needed to make 60 cookies?",
+      "Answer": "7.5 cups"
+    }
+  ]

@@ -1657,29 +1657,24 @@ const GenAIApp = () => {
                         </div>
                     </div>
                 )}
-                {/* **Display Generated Response** 
-          {generatedResponse && (
-            <div style={{ marginTop: '20px', border: '1px solid #ccc', padding: '20px', borderRadius: '5px' }}>
-              <h3>Response is generated, click Refresh button to see results</h3>
-            </div>
-          )}*/}
 
-                {/* **Existing Data Display** */}
-                <div>
-                    {isLoading && <p> Loading Data...</p>}
-                    {!isLoading && <div>
-                        {genaiData.map((item) => (
-                            <div className="outputDetailsFormat" key={item.createdDateTime}>
-                                <div className="responseFormat">
-                                    <h4 style={{ color: "brown" }}>
-                                        <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
-                                        @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
-                                        &nbsp;
-                                        on <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                                        &nbsp;&nbsp;
-                                        <span style={{ color: "blue", fontSize: "16px" }}>{item.model}   </span>
-                                        &nbsp;
-                                        <button onClick={() => {
+                                <div>
+                                    {isLoading && <p> Loading Data...</p>}
+                                    {!isLoading && <div>
+                                        {genaiData.map((item) => (
+                                            <div className="outputDetailsFormat" key={item.createdDateTime}>
+                                                <div className="responseFormat">
+                                                    <h4 style={{ color: "brown" }}>
+                                                        <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
+                                                        @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
+                                                        &nbsp;
+                                                        on <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                                        &nbsp;&nbsp;
+                                                        <span style={{ color: "blue", fontSize: "16px" }}>{item.model}</span>
+                                                        &nbsp;
+                                                        <span style={{ color: "purple", fontSize: "16px" }}>ID: {item.id}</span>
+                                                        &nbsp;
+                                                        <button onClick={() => {
                                             const updatedData = genaiData.map(dataItem => {
                                                 if (dataItem.id === item.id) {
                                                     return { ...dataItem, showRawQuestion: !dataItem.showRawQuestion };

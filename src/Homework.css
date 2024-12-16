@@ -435,7 +435,7 @@ form {
 
 .homework-container {
     padding: 20px;
-    max-width: 1200px;
+    width: 98%; /* Changed from max-width to width */
     margin: 0 auto;
 }
 
@@ -443,20 +443,23 @@ form {
     border: 1px solid #ccc;
     border-radius: 4px;
     overflow: hidden;
+    width: 100%; /* Added to ensure full width */
 }
 
 .grid-header {
     display: grid;
-    grid-template-columns: 75% 25%;  /* Changed from 20% 60% 20% */
+    grid-template-columns: 70% 15% 15%;  /* Changed to 70/15/15 split */
     background-color: #f5f5f5;
     font-weight: bold;
     border-bottom: 2px solid #ccc;
+    width: 100%; /* Added to ensure full width */
 }
 
 .grid-row {
     display: grid;
-    grid-template-columns: 75% 25%;  /* Changed from 20% 60% 20% */
+    grid-template-columns: 70% 15% 15%;  /* Changed to 70/15/15 split */
     border-bottom: 1px solid #eee;
+    width: 100%; /* Added to ensure full width */
 }
 
 .category-col,
@@ -489,5 +492,118 @@ form {
 .grid-row:hover {
     background-color: #f8f8f8;
 }
+
+.user-answer-col {
+    padding: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.user-answer-col input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.user-answer-col input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.homework-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.show-answers-button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pin-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.pin-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.pin-modal-content input {
+    margin: 10px 0;
+    padding: 8px;
+    width: 200px;
+}
+
+.pin-modal-content button {
+    margin: 5px;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pin-modal-content button:last-child {
+    background-color: #f44336;
+}
+
+/* ...existing styles... */
+
+.source-doc-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.source-doc-input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 250px;
+    font-size: 14px;
+}
+
+.source-doc-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.fetch-button {
+    padding: 8px 16px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.fetch-button:hover {
+    background-color: #1976D2;
+}
+
+/* ...existing styles... */
 
 

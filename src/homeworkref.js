@@ -5,7 +5,6 @@ import { auth, db } from './Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FaArrowLeft } from 'react-icons/fa';
 import App from './App';
-import { LevelSuffix } from "docx";
 
 const Homework = () => {
     // Convert markdown content to JSON
@@ -22,7 +21,7 @@ const Homework = () => {
         try {
             const homeworkCollection = collection(db, 'genai', userId, 'homework');
             const q = query(homeworkCollection, where('sourceDocumentID', '==', sourceDocID));
-
+            
             // First check if data already exists
             const snapshot = await getDocs(q);
             if (snapshot.docs.length > 2) {
@@ -84,7 +83,7 @@ const Homework = () => {
             const homeworkCollection = collection(db, 'genai', userId, 'homework');
             const q = query(homeworkCollection, where('sourceDocumentID', '==', sourceDocID));
             const snapshot = await getDocs(q);
-
+            
             if (!snapshot.empty) {
                 const fetchedProblems = snapshot.docs.map(doc => ({
                     id: doc.id,
@@ -106,10 +105,10 @@ const Homework = () => {
         try {
             const docRef = doc(db, 'genai', user.uid, 'MyGenAI', sourceDocID);
             const docSnap = await getDoc(docRef);
-
+            
             if (docSnap.exists()) {
                 const data = docSnap.data().answer;
-                console.log('First fetched data from Firestore:', data);
+                console.log('First fetched data from Firestore:', data);                
                 return data;
             }
             return null;
@@ -136,7 +135,7 @@ const Homework = () => {
 
         // Try to fetch existing questions first
         const existingQuestions = await fetchInitialQuestions(user.uid);
-
+        
         if (!existingQuestions) {
             // If no existing questions, try to fetch from Firestore
             console.log('No existing questions found. Fetching from Firestore...');
@@ -145,23 +144,17 @@ const Homework = () => {
                 console.log('Inside fetched questions from Firestore:', firestoreQuestions);
                 // Initialize homework with Firestore questions
                 const cleanContent = firestoreQuestions.replace(/\r/g, '').trim();
-                let jsonContent = '';
-                if (cleanContent.startsWith('[')) {
-                    jsonContent = cleanContent.trim();
-                }
-                else {
-                    // Extract content between ```json and ``` markers
-                    const jsonMatch = cleanContent.match(/```(?:json|JSON)\s*([\s\S]*?)\s*```/);
-
-                    // Clean and parse the JSON content
-                    jsonContent = jsonMatch[1].trim();
-                }
-
+            
+                // Extract content between ```json and ``` markers
+                const jsonMatch = cleanContent.match(/```json\s*([\s\S]*?)\s*```/);
+        
+                // Clean and parse the JSON content
+                const jsonContent = jsonMatch[1].trim();
                 const questionsJson = JSON.parse(jsonContent);
                 console.log("Parsed JSON:", questionsJson); // Debug log
                 await initializeHomeworkData(questionsJson, user.uid);
                 await fetchInitialQuestions(user.uid);
-            }
+            } 
         }
     };
     useEffect(() => {
@@ -235,14 +228,14 @@ const Homework = () => {
                         onKeyPress={(e) => e.key === 'Enter' && handleSourceDocIDChange(e)}
                         placeholder="Enter Source Document ID"
                     />
-                    <button
+                    <button 
                         className="fetch-button"
                         onClick={() => loadQuestions(sourceDocID)}
                     >
                         Fetch Questions
                     </button>
                 </div>
-                <button
+                <button 
                     className='show-answers-button'
                     onClick={handleShowAnswers}
                 >
