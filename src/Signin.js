@@ -98,28 +98,35 @@ function SigninApp() {
     if (homeworkParam && homeworkParam.length > 5) {
         return (
             <Practice sourceDocumentID={homeworkParam} />
-          );
+        );
     }
     if (user) {
-        if (MainApp === 'GenAIApp') {
+        if (user.uid !== 'bTGBBpeYPmPJonItYpUOCYhdIlr1' && user.uid !== 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3') {
             return (
                 <GenAIApp user={user} />
             );
         }
-        if (MainApp === 'TTSQueueApp') {
-            return (
-                <TTSQueueApp user={user} />
-            );
-        }
-        if (MainApp === 'App') {
-            return (
-                <App user={user} />
-            );
-        }
-        if (MainApp === 'AudioApp') {
-            return (
-                <AudioApp user={user} />
-            );
+        else {
+            if (MainApp === 'GenAIApp') {
+                return (
+                    <GenAIApp user={user} />
+                );
+            }
+            if (MainApp === 'TTSQueueApp') {
+                return (
+                    <TTSQueueApp user={user} />
+                );
+            }
+            if (MainApp === 'App') {
+                return (
+                    <App user={user} />
+                );
+            }
+            if (MainApp === 'AudioApp') {
+                return (
+                    <AudioApp user={user} />
+                );
+            }
         }
 
     }
