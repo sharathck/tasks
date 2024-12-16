@@ -11,6 +11,7 @@ import {
 import App from './App';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
+import Homework from "./Homework";
 import { TbEmpathize } from "react-icons/tb";
 import { MdSettingsInputComponent } from "react-icons/md";
 import { FaK } from "react-icons/fa6";
@@ -204,6 +205,7 @@ const GenAIApp = () => {
     const [isGeneratingDownloadableAudio, setIsGeneratingDownloadableAudio] = useState({});
     // Add new state variable for YouTube audio title button
     const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
+    const [showHomeworkApp, setShowHomeworkApp] = useState(false);
 
     const embedPrompt = async (docId) => {
         try {
@@ -1199,6 +1201,13 @@ const GenAIApp = () => {
         );
     }
 
+    if (showHomeworkApp) {  // Add this block
+        return (
+          <Homework user={user} onBack={() => setShowHomeworkApp(false)} />
+        );
+      }
+    
+
     // Update saveReaction function to include docId
     const saveReaction = async (docId, reaction) => {
         try {
@@ -1843,6 +1852,13 @@ const GenAIApp = () => {
                                             }}
                                         >
                                             Print <FaPrint />
+                                        </button>
+                                        &nbsp; &nbsp;
+                                        <button 
+                                            className="button"
+                                            onClick={() => setShowHomeworkApp(true)}
+                                        >
+                                         HomeWork
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>

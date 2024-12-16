@@ -4,10 +4,9 @@ import { collection, getDocs, addDoc, updateDoc, doc, writeBatch, query, where, 
 import { auth, db } from './Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FaArrowLeft } from 'react-icons/fa';
-import App from './App';
-import { LevelSuffix } from "docx";
+import GenAIApp from './GenAIApp';
 
-const Homework = () => {
+const Homework = ({sourceDocumentID}) => {
     // Convert markdown content to JSON
     const [problems, setProblems] = useState([]);
     const [user, setUser] = useState(null);
@@ -15,7 +14,7 @@ const Homework = () => {
     const [showAnswers, setShowAnswers] = useState(false);
     const [pinInput, setPinInput] = useState('');
     const [showPinModal, setShowPinModal] = useState(false);
-    const [sourceDocID, setSourceDocID] = useState('');
+    const [sourceDocID, setSourceDocID] = useState(sourceDocumentID);
     const CORRECT_PIN = '789251';
 
     const initializeHomeworkData = async (firestoreData, userId) => {
@@ -216,7 +215,7 @@ const Homework = () => {
     };
 
     if (showMainApp) {
-        return <App user={user} />;
+        return <GenAIApp user={user} />;
     }
 
     return (

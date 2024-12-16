@@ -612,11 +612,6 @@ function App() {
     );
   }
 
-  if (showHomeworkApp) {  // Add this block
-    return (
-      <Homework user={user} onBack={() => setShowHomeworkApp(false)} />
-    );
-  }
 
   return (
     <div>
@@ -654,9 +649,6 @@ function App() {
             </button>
             <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
               <FaNewspaper />
-            </button>
-            <button className={showHomeworkApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowHomeworkApp(!showHomeworkApp)}>
-              <FaFileWord />
             </button>
             {showSearchBox && (
               <div> <input
