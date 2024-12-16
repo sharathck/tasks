@@ -106,25 +106,25 @@ const GenAIApp = () => {
     const [temperature, setTemperature] = useState(0.7);
     const [top_p, setTop_p] = useState(0.8);
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
-    const [showTemp, setShowTemp] = useState(true);
-    const [showTop_p, setShowTop_p] = useState(true);
+    const [showTemp, setShowTemp] = useState(false);
+    const [showTop_p, setShowTop_p] = useState(false);
     const [showGpt4Turbo, setShowGpt4Turbo] = useState(false);
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
     const [showGpt4oMini, setShowGpt4oMini] = useState(false);
-    const [showGeminiSearch, setShowGeminiSearch] = useState(true);
+    const [showGeminiSearch, setShowGeminiSearch] = useState(false);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
     const [showPerplexityFast, setShowPerplexityFast] = useState(false);
     const [showPerplexity, setShowPerplexity] = useState(false);
     const [showCodeStral, setShowCodeStral] = useState(false);
-    const [showGemini, setShowGemini] = useState(true);
-    const [showAnthropic, setShowAnthropic] = useState(true);
-    const [showOpenAI, setShowOpenAI] = useState(true);
+    const [showGemini, setShowGemini] = useState(false);
+    const [showAnthropic, setShowAnthropic] = useState(false);
+    const [showOpenAI, setShowOpenAI] = useState(false);
     const [showo1, setShowo1] = useState(false);
     const [showImageDallE3, setShowImageDallE3] = useState(false);
     const [showTTS, setShowTTS] = useState(false);
-    const [showo1Mini, setShowo1Mini] = useState(true);
-    const [showAutoPrompt, setShowAutoPrompt] = useState(true);
+    const [showo1Mini, setShowo1Mini] = useState(false);
+    const [showAutoPrompt, setShowAutoPrompt] = useState(false);
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
     const [modelOpenAI, setModelOpenAI] = useState('gpt-4o');
@@ -151,7 +151,7 @@ const GenAIApp = () => {
     const [isGeneratingClaudeHaiku, setIsGeneratingClaudeHaiku] = useState(false);
 
     // Add showClaudeHaiku state variable
-    const [showClaudeHaiku, setShowClaudeHaiku] = useState(true); // Set to true or false as needed
+    const [showClaudeHaiku, setShowClaudeHaiku] = useState(false); // Set to true or false as needed
 
     // Add new state variables for Sambanova
     const [isSambanova, setIsSambanova] = useState(false);
@@ -195,7 +195,7 @@ const GenAIApp = () => {
     const [showImagesSearchWordsButton, setShowImagesSearchWordsButton] = useState(false);
     const [showYouTubeTitleDescriptionButton, setShowYouTubeTitleDescriptionButton] = useState(false);
     const [isHomeWork, setIsHomeWork] = useState(false);
-    const [showHomeWorkButton, setShowHomeWorkButton] = useState(false);
+    const [showHomeWorkButton, setShowHomeWorkButton] = useState(true);
 
     // Add state variable for AI Search
     const [isAISearch, setIsAISearch] = useState(false);
@@ -207,6 +207,13 @@ const GenAIApp = () => {
     const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
     const [showHomeworkApp, setShowHomeworkApp] = useState(false);
     const [currentDocId, setCurrentDocId] = useState(null);
+
+    // Add new state variables after other state variables
+    const [showGenAIButton, setShowGenAIButton] = useState(false);
+    const [showPromptsDropDown, setShowPromptsDropDown] = useState(false);
+    const [showVoiceSelect, setShowVoiceSelect] = useState(false);
+    const [showEditPromptButton, setShowEditPromptButton] = useState(false);
+    const [showPromptsDropDownAfterSearch, setShowPromptsDropDownAfterSearch] = useState(false);
 
     const embedPrompt = async (docId) => {
         try {
@@ -508,7 +515,7 @@ const GenAIApp = () => {
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
             .replace(/[#:\-*]/g, ' ')
-                        .replace(/[&]/g, ' and ')
+            .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
             .replace(/["]/g, '&quot;')
             .replace(/[']/g, '&apos;')
@@ -914,11 +921,17 @@ const GenAIApp = () => {
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
             const data = await response.json();
-            if (invocationType === 'homeWork' ) {
-                console.log('Homework Response:', data);
-                const baseUrl = window.location.href.split('?')[0];
-                const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
-                window.open(newUrl, '_blank');
+            if (invocationType === 'homeWork') {
+                console.log('Homework Response ID:', data[0].results[0].docID);
+                setCurrentDocId(data[0].results[0].docID);
+                if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+                    const baseUrl = window.location.href.split('?')[0];
+                    const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
+                    window.open(newUrl, '_blank');
+                }
+                else {
+                    setShowHomeworkApp(true);
+                }
             }
 
             console.log('Response:', data);
@@ -1011,8 +1024,8 @@ const GenAIApp = () => {
             .replace(/["]/g, '&quot;')
             .replace(/[']/g, '&apos;')
             .trim();
-            console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
-            console.log('API URL:', apiUrl);
+        console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
+        console.log('API URL:', apiUrl);
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -1215,14 +1228,14 @@ const GenAIApp = () => {
 
     if (showHomeworkApp) {  // Add this block
         return (
-          <Homework 
-            user={user} 
-            onBack={() => setShowHomeworkApp(false)}
-            sourceDocumentID={currentDocId}
-          />
+            <Homework
+                user={user}
+                onBack={() => setShowHomeworkApp(false)}
+                sourceDocumentID={currentDocId}
+            />
         );
-      }
-    
+    }
+
 
     // Update saveReaction function to include docId
     const saveReaction = async (docId, reaction) => {
@@ -1265,16 +1278,57 @@ const GenAIApp = () => {
         let intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
 
         if (intelligentQuestionsPrompt === '') {
-            intelligentQuestionsPrompt = '--------- please generate practice questions based on the topic(s) mentioned above ---------  Text from below is prompt purpose only :::::::::::::::: Rules for practice questions for home work to students ::::* design 20 questions that are tricky, intelligent and brain twister questions    * questions should provoke thinking in student mind * ask questions with more practical and real-life scenarios ### ---------  response should be  markdown table with only two columns1. Category2. Question------------------------';
-            console.error('Intelligent-Questions prompt not found.');
+            try {
+                const genaiCollection = collection(db, 'public');
+                const q = query(genaiCollection, limit(1), where('tag', '==', 'AutoQ'));
+                const genaiSnapshot = await getDocs(q);
+                const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log('AutoQ:', genaiList[0].fullText);
+                intelligentQuestionsPrompt = genaiList[0].fullText;
+            } catch (error) {
+                console.error("Error fetching prompts: ", error);
+            }
+            if (intelligentQuestionsPrompt === '') {
+                intelligentQuestionsPrompt = `--------- please generate practice questions based on the topic(s) mentioned above --------- 
+                Text from below is prompt purpose only ::::::::::::::::
+
+                Rules for practice questions for home work to students ::::
+                * design 20 questions that are tricky, intelligent and brain twister questions    
+                * questions should provoke thinking in student's mind
+                * ask questions with more practical and real-life scenarios
+
+                ### --------- response should be strictly JSON, don't include any other introductory text, I want entire response to be strictly JSON Array data with following fields :::
+                1. Question
+                2. Answer
+
+                ### --- following is JSON reference for strict schema reference:
+                [
+                    {
+                        "Question": "sample question 1",
+                        "Answer": "sample answer 1"
+                    },
+                    {
+                        "Question": "sample question 2", 
+                        "Answer": "sample answer 2"
+                    },
+                    {
+                        "Question": "sample question 3",
+                        "Answer": "sample answer 3"
+                    }
+                ]`;
+            }
         }
 
         // Append the prompt to promptInput
         homeWorkInput = promptInput + intelligentQuestionsPrompt;
-        setIsGeneratingGemini(true);
-        callAPI(modelGemini, 'homeWork');
-        setIsGeneratingo1Mini(true); // Set generating state to true
-        callAPI(modelGpto1Mini, 'homeWork');
+        setIsGeneratingGeminiSearch(true);
+        callAPI(modelGeminiSearch, 'homeWork');
+        if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+            setIsGeneratingo1Mini(true); // Set generating state to true
+            callAPI(modelGpto1Mini, 'homeWork');
+            setIsGeneratingGemini(true);
+            callAPI(modelGemini, 'homeWork');
+        }
     };
 
     // Add handler for AI Search
@@ -1468,11 +1522,13 @@ const GenAIApp = () => {
                             </label>
                         </button>
                     }
-                    <VoiceSelect
-                        selectedVoice={voiceName} // Current selected voice
-                        onVoiceChange={setVoiceName} // Handler to update selected voice
-                    />
-                    {!isTTS && (
+                    {showVoiceSelect && (
+                        <VoiceSelect
+                            selectedVoice={voiceName} // Current selected voice
+                            onVoiceChange={setVoiceName} // Handler to update selected voice
+                        />
+                    )}
+                    {!isTTS && showPromptsDropDown && (
                         <select className="promptDropdownInput" id="promptSelect"
                             onChange={(e) => {
                                 handlePromptChange(e.target.value);
@@ -1487,7 +1543,7 @@ const GenAIApp = () => {
                             ))}
                         </select>
                     )}
-                    {!isTTS && (
+                    {!isTTS && showEditPromptButton && (
                         <button
                             className="signonpagebutton"
                             onClick={() => handleEditPrompt()}
@@ -1501,7 +1557,7 @@ const GenAIApp = () => {
                             AutoPrompt
                         </button>
                     )}
-                    {!isAISearch && !isHomeWork && (
+                    {!isAISearch && !isHomeWork && showGenAIButton && (
                         <button
                             onClick={handleGenerate}
                             className="generateButton"
@@ -1625,7 +1681,7 @@ const GenAIApp = () => {
                     placeholder="Keyword Search"
                 />
 
-                <select
+                {showPromptsDropDownAfterSearch && (<select
                     className="modelInput"
                     value={searchModel}
                     onChange={(e) => handleModelChange(e.target.value)}
@@ -1653,6 +1709,7 @@ const GenAIApp = () => {
                     <option value="groq-mixtral">Groq</option>
                     <option value="nova">Nova</option>
                 </select>
+                )}
                 {showEditPopup && (
                     <div className="modal-overlay">
                         <div className="modal-content">
@@ -1683,23 +1740,23 @@ const GenAIApp = () => {
                     </div>
                 )}
 
-                                <div>
-                                    {isLoading && <p> Loading Data...</p>}
-                                    {!isLoading && <div>
-                                        {genaiData.map((item) => (
-                                            <div className="outputDetailsFormat" key={item.createdDateTime}>
-                                                <div className="responseFormat">
-                                                    <h4 style={{ color: "brown" }}>
-                                                        <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
-                                                        @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
-                                                        &nbsp;
-                                                        on <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                                                        &nbsp;&nbsp;
-                                                        <span style={{ color: "blue", fontSize: "16px" }}>{item.model}</span>
-                                                        &nbsp;
-                                                        <span style={{ color: "purple", fontSize: "16px" }}>ID: {item.id}</span>
-                                                        &nbsp;
-                                                        <button onClick={() => {
+                <div>
+                    {isLoading && <p> Loading Data...</p>}
+                    {!isLoading && <div>
+                        {genaiData.map((item) => (
+                            <div className="outputDetailsFormat" key={item.createdDateTime}>
+                                <div className="responseFormat">
+                                    <h4 style={{ color: "brown" }}>
+                                        <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
+                                        @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
+                                        &nbsp;
+                                        on <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                        &nbsp;&nbsp;
+                                        <span style={{ color: "blue", fontSize: "16px" }}>{item.model}</span>
+                                        &nbsp;
+                                        <span style={{ color: "purple", fontSize: "16px" }}>ID: {item.id}</span>
+                                        &nbsp;
+                                        <button onClick={() => {
                                             const updatedData = genaiData.map(dataItem => {
                                                 if (dataItem.id === item.id) {
                                                     return { ...dataItem, showRawQuestion: !dataItem.showRawQuestion };
@@ -1870,7 +1927,7 @@ const GenAIApp = () => {
                                             Print <FaPrint />
                                         </button>
                                         &nbsp; &nbsp;
-                                        <button 
+                                        <button
                                             className="button"
                                             onClick={() => {
                                                 const baseUrl = window.location.href.split('?')[0];
@@ -1878,7 +1935,7 @@ const GenAIApp = () => {
                                                 window.open(newUrl, '_blank');
                                             }}
                                         >
-                                         Answer Online
+                                            Answer Online
                                         </button>
                                     </div>
                                     <div style={{ fontSize: '16px' }}>
@@ -1888,10 +1945,10 @@ const GenAIApp = () => {
                                                 renderHTML={text => mdParser.render(text || '')} // Add default empty string
                                                 readOnly={true}
                                                 config={{
-                                                    view: { 
+                                                    view: {
                                                         menu: false,
                                                         md: false,
-                                                        html: true 
+                                                        html: true
                                                     },
                                                     canView: {
                                                         menu: false,
@@ -1931,9 +1988,15 @@ const GenAIApp = () => {
                                 </div>
                             </div>
                         ))}
-                        <button className="fetchButton" onClick={fetchMoreData} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}>
-                            Show more information
-                        </button>
+                        {genaiData.some(item => item.question && item.answer) && (
+                            <button
+                                className="fetchButton"
+                                onClick={fetchMoreData}
+                                style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}
+                            >
+                                Show more information
+                            </button>
+                        )}
                     </div>}
                 </div>
             </div>
