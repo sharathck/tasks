@@ -15,6 +15,7 @@ const Homework = ({sourceDocumentID}) => {
     const [pinInput, setPinInput] = useState('');
     const [showPinModal, setShowPinModal] = useState(false);
     const [sourceDocID, setSourceDocID] = useState(sourceDocumentID);
+    const [showMainAppButton, setShowMainAppButton] = useState(false);
     const CORRECT_PIN = '789251';
 
     const initializeHomeworkData = async (firestoreData, userId) => {
@@ -164,6 +165,14 @@ const Homework = ({sourceDocumentID}) => {
         }
     };
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const homeworkParam = urlParams.get('h');
+        if (homeworkParam && homeworkParam.length > 5) {
+            setShowMainAppButton(false);
+        }
+        else {
+            setShowMainAppButton(true);
+        }
         loadQuestions();
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -221,9 +230,11 @@ const Homework = ({sourceDocumentID}) => {
     return (
         <div className="homework-container">
             <div className="homework-header">
-                <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                    <FaArrowLeft />
-                </button>
+                {showMainAppButton && (
+                    <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                        <FaArrowLeft />
+                    </button>
+                )}
                 <div className="source-doc-container">
                     <input
                         type="text"

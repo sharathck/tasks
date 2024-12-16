@@ -73,6 +73,7 @@ function App() {
   const [showArticlesApp, setShowArticlesApp] = useState(false);
   const [showLiveTTS, setShowLiveTTS] = useState(false);
   const [showHomeworkApp, setShowHomeworkApp] = useState(false);  // Add this line
+  const [currentDocId, setCurrentDocId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -90,6 +91,11 @@ function App() {
       }
       const tasksCollection = collection(db, fireBaseTasksCollection);
       const urlParams = new URLSearchParams(window.location.search);
+      const homeworkParam = urlParams.get('h');
+      if (homeworkParam && homeworkParam.length > 5) {
+        setCurrentDocId(homeworkParam);
+        setShowHomeworkApp(true);
+      }
       const limitParam = urlParams.get('limit');
       const showCurrentLimitValue = limitParam ? parseInt(limitParam) : tasksLimit;
       const currentDate = new Date();
@@ -612,6 +618,11 @@ function App() {
     );
   }
 
+  if (showHomeworkApp) {  // Add this block
+    return (
+      <Homework user={user} sourceDocumentID={currentDocId} onBack={() => setShowHomeworkApp(false)} />
+    );
+  }
 
   return (
     <div>
@@ -649,6 +660,9 @@ function App() {
             </button>
             <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
               <FaNewspaper />
+            </button>
+            <button className={showHomeworkApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowHomeworkApp(!showHomeworkApp)}>
+              <FaFileWord />
             </button>
             {showSearchBox && (
               <div> <input
