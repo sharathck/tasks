@@ -315,7 +315,8 @@ const Homework = ({sourceDocumentID}) => {
                 {problems.map((problem, index) => (
                     <div key={index} className="grid-row">
                         <div className="question-col">{problem.question}</div>
-                        {showAnswers && <div className="answer-col">{problem.correctAnswer}</div>}
+                        {showAnswers && problem.userAnswer && 
+                            <div className="answer-col">{problem.correctAnswer}</div>}
                         <div className="user-answer-col">
                             <input
                                 type="text"
