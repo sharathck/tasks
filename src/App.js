@@ -13,6 +13,7 @@ import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 import Notes from './Notes';
 import Articles from './Articles';
+import Homework from './Homework';
 
 const fireBaseTasksCollection = process.env.REACT_APP_FIREBASE_TASKS_COLLECTION;
 console.log('Firebase tasks collection:', fireBaseTasksCollection);
@@ -71,6 +72,7 @@ function App() {
   const [showNotesApp, setShowNotesApp] = useState(false);
   const [showArticlesApp, setShowArticlesApp] = useState(false);
   const [showLiveTTS, setShowLiveTTS] = useState(false);
+  const [showHomeworkApp, setShowHomeworkApp] = useState(false);  // Add this line
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -503,7 +505,7 @@ function App() {
         const q = query(tasksCollection, where('userId', '==', user.uid), where('status', '==', true), orderBy('createdDate', 'desc'), startAfter(lastVisible), limit(limitValue));
         const tasksSnapshot = await getDocs(q);
         const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); // Fixed: using tasksSnapshot instead of snapshot
         if (tasksList.length == fetchMoreTasksLimit) {
           setShowMoreCompletedButton(true);
         } else {
@@ -531,7 +533,7 @@ function App() {
         const tasksSnapshot = await getDocs(q);
         const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setTasks(prevData => [...prevData, ...tasksList]);
-        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]);
+        setLastVisible(tasksSnapshot.docs[tasksSnapshot.docs.length - 1]); // Fixed: using tasksSnapshot instead of snapshot
         if (tasksList.length == fetchMoreTasksLimit) {
           setShowMoreButton(true);
         } else {
@@ -610,6 +612,12 @@ function App() {
     );
   }
 
+  if (showHomeworkApp) {  // Add this block
+    return (
+      <Homework user={user} onBack={() => setShowHomeworkApp(false)} />
+    );
+  }
+
   return (
     <div>
       <div>
@@ -646,6 +654,9 @@ function App() {
             </button>
             <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
               <FaNewspaper />
+            </button>
+            <button className={showHomeworkApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowHomeworkApp(!showHomeworkApp)}>
+              <FaFileWord />
             </button>
             {showSearchBox && (
               <div> <input
