@@ -1635,13 +1635,8 @@ const GenAIApp = () => {
                         </button>
                     )}
                     &nbsp; &nbsp;
-                    {!GenAIParameter ? (
-                        <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                            <FaArrowLeft />
-                        </button>
-                    ) : (
-                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
-                    )}
+
+                    <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button
@@ -1930,9 +1925,8 @@ const GenAIApp = () => {
                                         <button
                                             className="button"
                                             onClick={() => {
-                                                const baseUrl = window.location.href.split('?')[0];
-                                                const newUrl = `${baseUrl}?g=${item.id}`;
-                                                window.open(newUrl, '_blank');
+                                                setCurrentDocId(item.id);
+                                                setShowHomeworkApp(true);
                                             }}
                                         >
                                             Answer Online
