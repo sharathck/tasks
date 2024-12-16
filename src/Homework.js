@@ -186,6 +186,7 @@ const Homework = ({sourceDocumentID}) => {
         else {
             setShowMainAppButton(true);
         }
+        console.log('Source Document ID:', sourceDocumentID);
         loadQuestions();
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -249,21 +250,6 @@ const Homework = ({sourceDocumentID}) => {
                     </button>
                 )}
                 <div className="source-doc-container">
-                    <input
-                        type="text"
-                        className="source-doc-input"
-                        value={sourceDocID}
-                        onChange={(e) => setSourceDocID(e.target.value)}
-                        onBlur={handleSourceDocIDChange}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSourceDocIDChange(e)}
-                        placeholder="Enter Source Document ID"
-                    />
-                    <button
-                        className="fetch-button"
-                        onClick={() => loadQuestions(sourceDocID)}
-                    >
-                        Fetch Questions
-                    </button>
                     <button 
                             className="button"
                             onClick={() => {
@@ -319,10 +305,9 @@ const Homework = ({sourceDocumentID}) => {
                 {problems.map((problem, index) => (
                     <div key={index} className="grid-row">
                         <div className="question-col">{problem.question}</div>
-                        {showAnswers && problem.userAnswer && 
-                            <div className="answer-col">{problem.correctAnswer}</div>}
-                        {showAnswers && !problem.userAnswer && 
-                            <div className="answer-col">Complete your answer</div>}
+                        {showAnswers && (
+                            <div className="answer-col">{problem.correctAnswer}</div>
+                        )}
                         <div className="user-answer-col">
                             <input
                                 type="text"
@@ -334,6 +319,25 @@ const Homework = ({sourceDocumentID}) => {
                     </div>
                 ))}
             </div>
+            {showAnswers && (
+                    <input
+                        type="text"
+                        className="source-doc-input"
+                        value={sourceDocID}
+                        onChange={(e) => setSourceDocID(e.target.value)}
+                        onBlur={handleSourceDocIDChange}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSourceDocIDChange(e)}
+                        placeholder="Enter Source Document ID"
+                    />
+                )}
+                {showAnswers && (
+                        <button
+                        className="fetch-button"
+                        onClick={() => loadQuestions(sourceDocID)}
+                    >
+                        Fetch Questions
+                    </button>
+                )}
         </div>
     );
 };

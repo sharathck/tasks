@@ -65,6 +65,7 @@ const Practice = ({sourceDocumentID}) => {
         else {
             setShowMainAppButton(true);
         }
+        console.log('Source Document ID:', sourceDocumentID);
         loadQuestions();
     }, [sourceDocumentID]);
 
@@ -121,23 +122,6 @@ const Practice = ({sourceDocumentID}) => {
                         <FaArrowLeft />
                     </button>
                 )}
-                <div className="source-doc-container">
-                    <input
-                        type="text"
-                        className="source-doc-input"
-                        value={sourceDocID}
-                        onChange={(e) => setSourceDocID(e.target.value)}
-                        onBlur={handleSourceDocIDChange}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSourceDocIDChange(e)}
-                        placeholder="Enter Source Document ID"
-                    />
-                    <button
-                        className="fetch-button"
-                        onClick={() => loadQuestions(sourceDocID)}
-                    >
-                        Fetch Questions
-                    </button>
-                </div>
                 <button
                     className='show-answers-button'
                     onClick={handleShowAnswers}
