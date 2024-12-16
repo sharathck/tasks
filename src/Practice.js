@@ -182,6 +182,8 @@ const Practice = ({sourceDocumentID}) => {
                         <div className="question-col">{problem.question}</div>
                         {showAnswers && problem.userAnswer && 
                             <div className="answer-col">{problem.correctAnswer}</div>}
+                        {showAnswers && !problem.userAnswer && 
+                            <div className="answer-col">Complete your answer</div>}
                         <div className="user-answer-col">
                             <input
                                 type="text"
