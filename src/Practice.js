@@ -122,30 +122,8 @@ const Practice = ({sourceDocumentID}) => {
                         <FaArrowLeft />
                     </button>
                 )}
-                <button
-                    className='show-answers-button'
-                    onClick={handleShowAnswers}
-                >
-                    {showAnswers ? 'Hide Answers' : 'Show Answers'}
-                </button>
+
             </div>
-
-            {showPinModal && (
-                <div className="pin-modal">
-                    <div className="pin-modal-content">
-                        <h3>Enter PIN to view answers</h3>
-                        <input
-                            type="password"
-                            value={pinInput}
-                            onChange={(e) => setPinInput(e.target.value)}
-                            placeholder="Enter PIN"
-                        />
-                        <button onClick={handlePinSubmit}>Submit</button>
-                        <button onClick={() => setShowPinModal(false)}>Cancel</button>
-                    </div>
-                </div>
-            )}
-
             <div className="homework-grid">
                 <div className="grid-header">
                     <div className="question-col">Question</div>
@@ -170,6 +148,27 @@ const Practice = ({sourceDocumentID}) => {
                     </div>
                 ))}
             </div>
+            <button
+                    className='show-answers-button'
+                    onClick={handleShowAnswers}
+                >
+                    {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                </button>
+            {showPinModal && (
+                <div className="pin-modal">
+                    <div className="pin-modal-content">
+                        <h3>Enter PIN to view answers</h3>
+                        <input
+                            type="password"
+                            value={pinInput}
+                            onChange={(e) => setPinInput(e.target.value)}
+                            placeholder="Enter PIN"
+                        />
+                        <button onClick={handlePinSubmit}>Submit</button>
+                        <button onClick={() => setShowPinModal(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

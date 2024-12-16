@@ -607,3 +607,13 @@ form {
 /* ...existing styles... */
 
 
+@media (max-width: 600px) {
+  .grid-row {
+      display: flex;
+      flex-direction: column;
+  }
+  .grid-header {
+      display: none; /* Hide headers on mobile for better readability */
+  }
+}
+
