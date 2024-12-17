@@ -2038,7 +2038,7 @@ const GenAIApp = () => {
                         fontSize: '14px',
                         color: '#666',
                     }}>
-                       {noteText}
+                       <ReactMarkdown>{noteText}</ReactMarkdown>
                     </div>
                 </div>
 
@@ -2153,8 +2153,9 @@ const GenAIApp = () => {
                                         </button>
                                         )}
                                         &nbsp; &nbsp;
-                                        <span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span><span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
-                                        </span>
+                                        {showPrint && (<span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span>
+                                     )}                                     {showPrint && (<span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
+                                        </span>)}
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
                                         {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{getQuestionSubstring(item.question)}</ReactMarkdown>)}
