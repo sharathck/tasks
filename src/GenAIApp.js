@@ -1940,8 +1940,7 @@ const GenAIApp = () => {
                     {(showHomeWorkButton && !isAISearch &&
                         <button
                             onClick={handleHomeWork}
-                            className="generateButton"
-                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: 'brown' }}
+                            className="practiceButton"
                         >
                             {isHomeWork
                                 ? (

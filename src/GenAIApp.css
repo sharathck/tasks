@@ -124,6 +124,18 @@
   font-size: 24px; /* make the button text extremely small */
 }
 
+.practiceButton
+{
+  background-color: rgb(10, 128, 81);
+  border: 2px solid rgb(55, 6, 6);
+  color: #fff;
+  cursor: pointer;
+  margin-left: 24px;
+  box-shadow: 6px 6px 8px rgba(169, 148, 148, 0.8);
+  padding: 8px 8px;
+  font-size: 16px; /* make the button text extremely small */
+}
+
 .signuppagebutton {
   background-color: rgb(148, 118, 9);
   border: none;
