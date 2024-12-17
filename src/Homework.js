@@ -16,7 +16,7 @@ const Homework = ({ sourceDocumentID }) => {
     const [showPinModal, setShowPinModal] = useState(false);
     const [sourceDocID, setSourceDocID] = useState(sourceDocumentID);
     const [showMainAppButton, setShowMainAppButton] = useState(false);
-    const CORRECT_PIN = '789251';
+    const CORRECT_PIN = '463859';
 
     const initializeHomeworkData = async (firestoreData, userId) => {
         try {
