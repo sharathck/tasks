@@ -1609,7 +1609,7 @@ const GenAIApp = () => {
                 console.error("Error fetching prompts: ", error);
             }
             if (intelligentQuestionsPrompt === '') {
-                intelligentQuestionsPrompt = `--------- please generate practice questions based on the topic(s) mentioned above --------- 
+                intelligentQuestionsPrompt = `### ------ please generate practice questions based on the topic(s) mentioned above --------- 
                 Text from below is prompt purpose only ::::::::::::::::
 
                 Rules for practice questions for home work to students ::::
@@ -2111,13 +2111,14 @@ const GenAIApp = () => {
                                     <div style={{ fontSize: '16px' }}>
                                         {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{getQuestionSubstring(item.question)}</ReactMarkdown>)}
                                     </div>
-                                    <button onClick={() => {
+                                    { showPrint && (<button onClick={() => {
                                         setShowFullQuestion(prev => ({
                                             ...prev,
                                             [item.id]: !prev[item.id]
                                         }));
                                     }}>            {showFullQuestion[item.id] ? 'Less' : 'More'}
                                     </button>
+                                    )}
 
                                 </div>
                                 <div style={{ border: "1px solid black" }}>
