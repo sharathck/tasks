@@ -598,7 +598,9 @@ const GenAIApp = () => {
                 if (data.showTop_p !== undefined) {
                     setShowTop_p(data.showTop_p);
                 }
-
+                if (data.showPrint !== undefined) {
+                    setShowPrint(data.showPrint);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
