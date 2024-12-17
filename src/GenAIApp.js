@@ -950,11 +950,14 @@ const GenAIApp = () => {
             }
 
         }
-
         if (isNova && showNova) {
             setIsGeneratingNova(true); // Set generating state to true
             callAPI(modelNova);
         }
+        updateConfiguration();
+    };
+
+    const updateConfiguration = async () => {
 
         try {
             const configurationCollection = collection(db, 'genai', user.uid, 'configuration');
@@ -962,6 +965,95 @@ const GenAIApp = () => {
             const configSnapshot = await getDocs(q);
             if (configSnapshot.empty) {
                 console.log('No configuration found');
+                // addDoc
+                await addDoc(configurationCollection, {
+                    setup: 'genai',
+                    isOpenAI,
+                    isAnthropic,
+                    isGemini,
+                    isGpto1Mini,
+                    isLlama,
+                    isMistral,
+                    isGpt4Turbo,
+                    isGeminiSearch,
+                    isGeminiFlash,
+                    isPerplexityFast,
+                    isPerplexity,
+                    isCodestral,
+                    isClaudeHaiku,
+                    iso1,
+                    isSambanova, // Add this line
+                    isGroq,
+                    isNova,
+                    isTTS,
+                    isImage_Dall_e_3,
+                    temperature,
+                    top_p,
+                    dataLimit,
+                    autoPrompt,
+                    lastUpdated: new Date(),
+                    autoPromptLimit,
+                    voiceName,
+                    chunk_size,
+                    silence_break,
+                    isGpt4oMini,
+                    isAISearch,
+                    showGroq,
+                    showAnthropic,
+                    showGemini,
+                    showOpenAI,
+                    showGpt4Turbo,
+                    showGpt4oMini,
+                    showo1,
+                    showo1Mini,
+                    showImageDallE3,
+                    showTTS,
+                    showLlama,
+                    showMistral,
+                    showGeminiSearch,
+                    showGeminiFlash,
+                    showPerplexityFast,
+                    showPerplexity,
+                    showCodeStral,
+                    showClaudeHaiku,
+                    showSambanova,
+                    showNova,
+                    showYouTubeButton,
+                    showImagesSearchWordsButton,
+                    showYouTubeTitleDescriptionButton,
+                    showHomeWorkButton,
+                    showAISearchButton,
+                    showGenAIButton,
+                    showPromptsDropDown,
+                    showVoiceSelect,
+                    showEditPromptButton,
+                    showPromptsDropDownAfterSearch,
+                    showSaveButton,
+                    showSourceDocument,
+                    showBackToAppButton,
+                    showAutoPrompt,
+                    showTemp,
+                    showTop_p,
+                    // Model labels
+                    labelGroq,
+                    labelOpenAI,
+                    labelAnthropic,
+                    labelGemini,
+                    labelGpto1Mini,
+                    labelLlama,
+                    labelMistral,
+                    labelGpt4Turbo,
+                    labelGeminiSearch,
+                    labelGeminiFlash,
+                    labelGpt4oMini,
+                    labelo1,
+                    labelPerplexityFast,
+                    labelPerplexity,
+                    labelCodestral,
+                    labelClaudeHaiku,
+                    labelSambanova,
+                    labelNova
+                });
                 return;
             }
             configSnapshot.forEach(async (doc) => {
@@ -1550,6 +1642,7 @@ const GenAIApp = () => {
             setIsGeneratingGemini(true);
             callAPI(modelGemini, 'homeWork');
         }
+        updateConfiguration();
     };
 
     // Add handler for AI Search
@@ -1576,6 +1669,7 @@ const GenAIApp = () => {
         setIsGeneratingGeminiSearch(true);
         // Call the API with gemini-search model
         await callAPI(modelGeminiSearch, 'google-search');
+        updateConfiguration();
     };
 
     return (
