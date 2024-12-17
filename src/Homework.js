@@ -7,6 +7,11 @@ import { FaArrowLeft } from 'react-icons/fa';
 import GenAIApp from './GenAIApp';
 
 const Homework = ({ sourceDocumentID }) => {
+    // Add new state variables for labels
+    const [copyUrlButtonLabel, setCopyUrlButtonLabel] = useState('Copy URL to Share');
+    const [printGridButtonLabel, setPrintGridButtonLabel] = useState('Print');
+    const [practiceNote, setPracticeNote] = useState('The student URL copied above does not require App Login. Students can access from any device without signing up.');
+
     // Convert markdown content to JSON
     const [problems, setProblems] = useState([]);
     const [user, setUser] = useState(null);
@@ -177,6 +182,36 @@ const Homework = ({ sourceDocumentID }) => {
             }
         }
     };
+
+    // Add function to fetch text labels
+    const fetchTexts = async () => {
+        try {
+            const q = query(
+                collection(db, 'public'),
+                where('tag', 'in', ['copy-url-to-share', 'print-grid', 'practice-note'])
+            );
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                switch (data.tag) {
+                    case 'copy-url-to-share':
+                        setCopyUrlButtonLabel(data.fullText);
+                        break;
+                    case 'print-grid':
+                        setPrintGridButtonLabel(data.fullText);
+                        break;
+                    case 'practice-note':
+                        setPracticeNote(data.fullText);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        } catch (error) {
+            console.error("Error fetching texts: ", error);
+        }
+    };
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const homeworkParam = urlParams.get('g');
@@ -188,6 +223,7 @@ const Homework = ({ sourceDocumentID }) => {
         }
         console.log('Source Document ID:', sourceDocumentID);
         loadQuestions();
+        fetchTexts(); // Add this line
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
         });
@@ -289,7 +325,7 @@ const Homework = ({ sourceDocumentID }) => {
                             printWindow.print();
                         }}
                     >
-                        Print Grid
+                        {printGridButtonLabel}
                     </button>
                     <button
                         className="button"
@@ -310,7 +346,7 @@ const Homework = ({ sourceDocumentID }) => {
                                 });
                         }}
                     >
-                        Copy URL for student
+                        {copyUrlButtonLabel}
                     </button>
                 </div>
                 <button
@@ -325,7 +361,7 @@ const Homework = ({ sourceDocumentID }) => {
                 color: '#666',
                 marginTop: '5px',
             }}>
-                <strong>Note:</strong> The student URL copied above does not require App Login. Students can access from any device without signing up.
+                {practiceNote}
             </div>
             {showPinModal && (
                 <div className="pin-modal">

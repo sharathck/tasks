@@ -216,6 +216,14 @@ const GenAIApp = () => {
     const [showPromptsDropDownAfterSearch, setShowPromptsDropDownAfterSearch] = useState(false);
     const [showBackToAppButton, setShowBackToAppButton] = useState(false);
 
+    /* Add new state variables for fetched texts */
+    const [practiceButtonLabel, setPracticeButtonLabel] = useState('');
+    const [noteText, setNoteText] = useState('');
+    const [placeholderText, setPlaceholderText] = useState('');
+    const [semanticSearchPlaceholder, setSemanticSearchPlaceholder] = useState('');
+    const [keywordSearchPlaceholder, setKeywordSearchPlaceholder] = useState('');
+    const [practicePageButtonLabel, setPracticePageButtonLabel] = useState('');
+
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
 
@@ -341,6 +349,7 @@ const GenAIApp = () => {
                 fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
                 await fetchGenAIParameters(currentUser.uid);
+                await fetchTexts();
             }
             else {
                 console.log('No user is signed in');
@@ -1679,6 +1688,45 @@ const GenAIApp = () => {
         updateConfiguration();
     };
 
+    const fetchTexts = async () => {
+        try {
+            const q = query(
+                collection(db, 'public'),
+                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level'])
+            );
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                console.log('Data:', data.fullText);
+                switch (data.tag) {
+                    case 'practice-button-label':
+                        setPracticeButtonLabel(data.fullText);
+                        break;
+                    case 'Note':
+                        setNoteText(data.fullText);
+                        break;
+                    case 'placeholder':
+                        setPlaceholderText(data.fullText);
+                        break;
+                    case 'placeholder-semantic-search':
+                        setSemanticSearchPlaceholder(data.fullText);
+                        break;
+                    case 'placeholder-keyword-search':
+                        setKeywordSearchPlaceholder(data.fullText);
+                        break;
+                    case 'practice-questions-page-button-level':
+                        setPracticePageButtonLabel(data.fullText);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        } catch (error) {
+            console.error("Error fetching texts: ", error);
+        }
+    };
+
+
     return (
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
@@ -1690,7 +1738,7 @@ const GenAIApp = () => {
                         className="promptInput"
                         value={promptInput}
                         onChange={(e) => setPromptInput(e.target.value)}
-                        placeholder="Enter your topics here..."
+                        placeholder={placeholderText || 'Enter your topics here...'}
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
@@ -1946,7 +1994,7 @@ const GenAIApp = () => {
                                 ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
-                                    'Gen AI - Practice Questions'
+                                    practiceButtonLabel || 'Practice'
                                 )}
                         </button>
                     )}
@@ -1990,7 +2038,7 @@ const GenAIApp = () => {
                         fontSize: '14px',
                         color: '#666',
                     }}>
-                        <strong>Note:</strong> Please add topics in above text area and click on the 'Gen AI - Practice Questions' button. It works for any topic, any subject, any grade (from PreK until PhD level). You cound enter as many topics as you wish in natual english language. For example: "add, subtract, multiple, divide - fractions and decimals".
+                       {noteText}
                     </div>
                 </div>
 
@@ -2009,13 +2057,13 @@ const GenAIApp = () => {
                     className="searchInput"
                     type="text"
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleVectorSearchChange(event)}
-                    placeholder="Semantic or Vector Search"
+                    placeholder={semanticSearchPlaceholder || "Semantic or Vector Search"}
                 />
                 <input
                     className="searchInput"
                     type="text"
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
-                    placeholder="Keyword Search"
+                    placeholder={keywordSearchPlaceholder || "Keyword Search"}
                 />
 
                 {showPromptsDropDownAfterSearch && (<select
@@ -2111,7 +2159,7 @@ const GenAIApp = () => {
                                     <div style={{ fontSize: '16px' }}>
                                         {item.showRawQuestion ? item.question : (showFullQuestion[item.id] ? <ReactMarkdown>{item.question}</ReactMarkdown> : <ReactMarkdown>{getQuestionSubstring(item.question)}</ReactMarkdown>)}
                                     </div>
-                                    { showPrint && (<button onClick={() => {
+                                    {showPrint && (<button onClick={() => {
                                         setShowFullQuestion(prev => ({
                                             ...prev,
                                             [item.id]: !prev[item.id]
@@ -2278,33 +2326,33 @@ const GenAIApp = () => {
                                                 setShowHomeworkApp(true);
                                             }}
                                         >
-                                            Go to Practice Questions Page
+                                            {practicePageButtonLabel || 'Go to Practice Questions Page'}
                                         </button>
                                     </div>
                                     {showPrint && (
-                                    <div style={{ fontSize: '16px' }}>
-                                        {item.showRawAnswer ? item.answer : (
-                                            <MdEditor
-                                                value={item.answer || ''} // Add default empty string
-                                                renderHTML={text => mdParser.render(text || '')} // Add default empty string
-                                                readOnly={true}
-                                                config={{
-                                                    view: {
-                                                        menu: false,
-                                                        md: false,
-                                                        html: true
-                                                    },
-                                                    canView: {
-                                                        menu: false,
-                                                        md: false,
-                                                        html: true,
-                                                        fullScreen: false,
-                                                        hideMenu: true
-                                                    }
-                                                }}
-                                            />
-                                        )}
-                                    </div>
+                                        <div style={{ fontSize: '16px' }}>
+                                            {item.showRawAnswer ? item.answer : (
+                                                <MdEditor
+                                                    value={item.answer || ''} // Add default empty string
+                                                    renderHTML={text => mdParser.render(text || '')} // Add default empty string
+                                                    readOnly={true}
+                                                    config={{
+                                                        view: {
+                                                            menu: false,
+                                                            md: false,
+                                                            html: true
+                                                        },
+                                                        canView: {
+                                                            menu: false,
+                                                            md: false,
+                                                            html: true,
+                                                            fullScreen: false,
+                                                            hideMenu: true
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
                                     )}
                                     <br />
                                     <br />
