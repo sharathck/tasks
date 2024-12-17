@@ -332,6 +332,8 @@ const GenAIApp = () => {
                 // Set visibility of back button based on admin status
                 setShowBackToAppButton(currentUser.uid === ADMIN_USER_ID);
                 console.log('User is signed in:', currentUser.uid);
+                console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
+            
                 // Fetch data for the authenticated user
                 fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
@@ -556,9 +558,6 @@ const GenAIApp = () => {
                 }
                 if (data.silence_break !== undefined) {
                     silence_break = data.silence_break;
-                }
-                if (data.isAISearch !== undefined) {
-                    setIsAISearch(data.isAISearch);
                 }
                 if (data.showAISearchButton !== undefined) {
                     setShowAISearchButton(data.showAISearchButton);
@@ -997,7 +996,6 @@ const GenAIApp = () => {
                     chunk_size,
                     silence_break,
                     isGpt4oMini,
-                    isAISearch,
                     showGroq,
                     showAnthropic,
                     showGemini,
@@ -1089,7 +1087,6 @@ const GenAIApp = () => {
                         chunk_size,
                         silence_break,
                         isGpt4oMini,
-                        isAISearch,
                         showGroq,
                         showAnthropic,
                         showGemini,
@@ -1318,6 +1315,7 @@ const GenAIApp = () => {
             if (selectedModel === modelNova) {
                 setIsGeneratingNova(false);
             }
+            console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
         }
     };
 
@@ -1636,7 +1634,6 @@ const GenAIApp = () => {
 
         // Append the prompt to promptInput
         homeWorkInput = promptInput + intelligentQuestionsPrompt;
-        setIsGeneratingGeminiSearch(true);
         callAPI(modelGeminiSearch, 'homeWork');
         if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
             setIsGeneratingo1Mini(true); // Set generating state to true

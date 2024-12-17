@@ -250,6 +250,47 @@ const Homework = ({sourceDocumentID}) => {
                     </button>
                 )}
                 <div className="source-doc-container">
+                    <button
+                        className="button"
+                        onClick={() => {
+                            const printWindow = window.open('', '', 'height=500,width=800');
+                            printWindow.document.write('<html><head><title>Homework</title>');
+                            printWindow.document.write('<style>');
+                            printWindow.document.write(`
+                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                .grid { width: 100%; border-collapse: collapse; }
+                                .grid th, .grid td { 
+                                    border: 1px solid #ccc;
+                                    padding: 8px;
+                                    text-align: left;
+                                }
+                                .grid th { background-color: #f2f2f2; }
+                            `);
+                            printWindow.document.write('</style></head><body>');
+
+                            let tableHtml = '<table class="grid"><tr><th>Question</th>';
+                            if (showAnswers) {
+                                tableHtml += '<th>Correct Answer</th>';
+                            }
+                            tableHtml += '<th>Student Answer</th></tr>';
+
+                            problems.forEach(problem => {
+                                tableHtml += `<tr><td>${problem.question}</td>`;
+                                if (showAnswers) {
+                                    tableHtml += `<td>${problem.correctAnswer}</td>`;
+                                }
+                                tableHtml += `<td>${problem.userAnswer}</td></tr>`;
+                            });
+                            tableHtml += '</table>';
+
+                            printWindow.document.write(tableHtml);
+                            printWindow.document.write('</body></html>');
+                            printWindow.document.close();
+                            printWindow.print();
+                        }}
+                    >
+                        Print Grid
+                    </button>
                     <button 
                             className="button"
                             onClick={() => {
@@ -296,7 +337,7 @@ const Homework = ({sourceDocumentID}) => {
                 </div>
             )}
 
-            <div className="homework-grid">
+<div className="homework-grid">
                 <div className="grid-header">
                     <div className="question-col">Question</div>
                     {showAnswers && <div className="answer-col">Correct Answer</div>}
