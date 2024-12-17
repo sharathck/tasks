@@ -1634,6 +1634,7 @@ const GenAIApp = () => {
 
         // Append the prompt to promptInput
         homeWorkInput = promptInput + intelligentQuestionsPrompt;
+        setIsGeneratingGeminiSearch(true);
         callAPI(modelGeminiSearch, 'homeWork');
         if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
             setIsGeneratingo1Mini(true); // Set generating state to true
