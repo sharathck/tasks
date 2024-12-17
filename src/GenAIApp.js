@@ -1947,7 +1947,7 @@ const GenAIApp = () => {
                                 ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
-                                    'HomeWork'
+                                    'Gen AI - Practice Questions'
                                 )}
                         </button>
                     )}
@@ -1988,10 +1988,10 @@ const GenAIApp = () => {
                     <br />
                     <br />
                     <div className="info-text" style={{
-                        fontSize: '12px',
+                        fontSize: '14px',
                         color: '#666',
                     }}>
-                        <strong>Note:</strong> Please add topics in above text area and click on Homework button. It works for any topic, any subject, any grade (from PreK until PhD level). You cound enter as many topics as you wish in natual english language. For example: "add, subtract, multiple, divide - fractions and decimals".
+                        <strong>Note:</strong> Please add topics in above text area and click on the button. It works for any topic, any subject, any grade (from PreK until PhD level). You cound enter as many topics as you wish in natual english language. For example: "add, subtract, multiple, divide - fractions and decimals".
                     </div>
                 </div>
 
