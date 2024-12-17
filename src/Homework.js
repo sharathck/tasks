@@ -6,7 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { FaArrowLeft } from 'react-icons/fa';
 import GenAIApp from './GenAIApp';
 
-const Homework = ({sourceDocumentID}) => {
+const Homework = ({ sourceDocumentID }) => {
     // Convert markdown content to JSON
     const [problems, setProblems] = useState([]);
     const [user, setUser] = useState(null);
@@ -291,27 +291,27 @@ const Homework = ({sourceDocumentID}) => {
                     >
                         Print Grid
                     </button>
-                    <button 
-                            className="button"
-                            onClick={() => {
-                                const baseUrl = window.location.href.split('?')[0];
-                                const newUrl = `${baseUrl}?h=${sourceDocID}`;
-                                navigator.clipboard.writeText(newUrl)
-                                    .then(() => {
-                                        const notification = document.createElement('div');
-                                        notification.textContent = 'URL copied';
-                                        notification.style.cssText = 'position: fixed; right: 20px; top: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 4px; animation: fadeOut 2s forwards;';
-                                        document.body.appendChild(notification);
-                                        setTimeout(() => notification.remove(), 2000);
-                                    })
-                                    .catch(err => {
-                                        console.error('Failed to copy URL:', err);
-                                        alert('Failed to copy URL');
-                                    });
-                            }}
-                        >
-                            Copy URL for student
-                        </button>
+                    <button
+                        className="button"
+                        onClick={() => {
+                            const baseUrl = window.location.href.split('?')[0];
+                            const newUrl = `${baseUrl}?h=${sourceDocID}`;
+                            navigator.clipboard.writeText(newUrl)
+                                .then(() => {
+                                    const notification = document.createElement('div');
+                                    notification.textContent = 'URL copied';
+                                    notification.style.cssText = 'position: fixed; right: 20px; top: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 4px; animation: fadeOut 2s forwards;';
+                                    document.body.appendChild(notification);
+                                    setTimeout(() => notification.remove(), 2000);
+                                })
+                                .catch(err => {
+                                    console.error('Failed to copy URL:', err);
+                                    alert('Failed to copy URL');
+                                });
+                        }}
+                    >
+                        Copy URL for student
+                    </button>
                 </div>
                 <button
                     className='show-answers-button'
@@ -320,7 +320,13 @@ const Homework = ({sourceDocumentID}) => {
                     {showAnswers ? 'Hide Answers' : 'Show Answers'}
                 </button>
             </div>
-
+            <div className="info-text" style={{
+                fontSize: '12px',
+                color: '#666',
+                marginTop: '5px',
+            }}>
+                <strong>Note:</strong> The student URL copied above does not require App Login. Students can access from any device without signing up.
+            </div>
             {showPinModal && (
                 <div className="pin-modal">
                     <div className="pin-modal-content">
@@ -337,7 +343,7 @@ const Homework = ({sourceDocumentID}) => {
                 </div>
             )}
 
-<div className="homework-grid">
+            <div className="homework-grid">
                 <div className="grid-header">
                     <div className="question-col">Question</div>
                     {showAnswers && <div className="answer-col">Correct Answer</div>}
@@ -346,9 +352,9 @@ const Homework = ({sourceDocumentID}) => {
                 {problems.map((problem, index) => (
                     <div key={index} className="grid-row">
                         <div className="question-col">{problem.question}</div>
-                        {showAnswers && problem.userAnswer && 
+                        {showAnswers && problem.userAnswer &&
                             <div className="answer-col">{problem.correctAnswer}</div>}
-                        {showAnswers && !problem.userAnswer && 
+                        {showAnswers && !problem.userAnswer &&
                             <div className="answer-col">Complete your answer</div>}
                         <div className="user-answer-col">
                             <input
@@ -362,24 +368,24 @@ const Homework = ({sourceDocumentID}) => {
                 ))}
             </div>
             {showAnswers && (
-                    <input
-                        type="text"
-                        className="source-doc-input"
-                        value={sourceDocID}
-                        onChange={(e) => setSourceDocID(e.target.value)}
-                        onBlur={handleSourceDocIDChange}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSourceDocIDChange(e)}
-                        placeholder="Enter Source Document ID"
-                    />
-                )}
-                {showAnswers && (
-                        <button
-                        className="fetch-button"
-                        onClick={() => loadQuestions(sourceDocID)}
-                    >
-                        Fetch Questions
-                    </button>
-                )}
+                <input
+                    type="text"
+                    className="source-doc-input"
+                    value={sourceDocID}
+                    onChange={(e) => setSourceDocID(e.target.value)}
+                    onBlur={handleSourceDocIDChange}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSourceDocIDChange(e)}
+                    placeholder="Enter Source Document ID"
+                />
+            )}
+            {showAnswers && (
+                <button
+                    className="fetch-button"
+                    onClick={() => loadQuestions(sourceDocID)}
+                >
+                    Fetch Questions
+                </button>
+            )}
         </div>
     );
 };

@@ -199,7 +199,7 @@ const GenAIApp = () => {
 
     // Add state variable for AI Search
     const [isAISearch, setIsAISearch] = useState(false);
-    const [showAISearchButton, setShowAISearchButton] = useState(true); // or set based on configuration
+    const [showAISearchButton, setShowAISearchButton] = useState(false); // or set based on configuration
     // Add these state variables near other state declarations
     const [isLiveAudioPlaying, setIsLiveAudioPlaying] = useState({});
     const [isGeneratingDownloadableAudio, setIsGeneratingDownloadableAudio] = useState({});
@@ -215,6 +215,9 @@ const GenAIApp = () => {
     const [showEditPromptButton, setShowEditPromptButton] = useState(false);
     const [showPromptsDropDownAfterSearch, setShowPromptsDropDownAfterSearch] = useState(false);
     const [showBackToAppButton, setShowBackToAppButton] = useState(false);
+
+    // Add new show state variables
+    const [showPrint, setShowPrint] = useState(false);
 
     const embedPrompt = async (docId) => {
         try {
@@ -333,7 +336,7 @@ const GenAIApp = () => {
                 setShowBackToAppButton(currentUser.uid === ADMIN_USER_ID);
                 console.log('User is signed in:', currentUser.uid);
                 console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
-            
+
                 // Fetch data for the authenticated user
                 fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
@@ -1683,7 +1686,7 @@ const GenAIApp = () => {
                         className="promptInput"
                         value={promptInput}
                         onChange={(e) => setPromptInput(e.target.value)}
-                        placeholder="Enter your prompt here..."
+                        placeholder="Enter your topics here..."
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
@@ -1977,7 +1980,16 @@ const GenAIApp = () => {
                             </button>
                         </div>
                     )}
+                    <br />
+                    <br />
+                    <div className="info-text" style={{
+                        fontSize: '12px',
+                        color: '#666',
+                    }}>
+                        <strong>Note:</strong> Please add topics in above text area and click on Homework button. It works for any topic, any subject, any grade (from PreK until PhD level). You cound enter as many topics as you wish in natual english language. For example: "add, subtract, multiple, divide - fractions and decimals".
+                    </div>
                 </div>
+
                 <label>
                     Limit:
                     <input
@@ -2073,11 +2085,10 @@ const GenAIApp = () => {
                                         &nbsp;
                                         on <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                         &nbsp;&nbsp;
-                                        <span style={{ color: "blue", fontSize: "16px" }}>{item.model}</span>
+                                        {showPrint && (<span style={{ color: "blue", fontSize: "16px" }}>{item.model}</span>
+                                        )}
                                         &nbsp;
-                                        <span style={{ color: "purple", fontSize: "16px" }}>ID: {item.id}</span>
-                                        &nbsp;
-                                        <button onClick={() => {
+                                        {showPrint && (<button onClick={() => {
                                             const updatedData = genaiData.map(dataItem => {
                                                 if (dataItem.id === item.id) {
                                                     return { ...dataItem, showRawQuestion: !dataItem.showRawQuestion };
@@ -2088,6 +2099,7 @@ const GenAIApp = () => {
                                         }}>
                                             {item.showRawQuestion ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
+                                        )}
                                         &nbsp; &nbsp;
                                         <span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span><span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
                                         </span>
@@ -2147,7 +2159,7 @@ const GenAIApp = () => {
                                                 </button>
                                                 )}
 
-                                                {(!isiPhone &&
+                                                {(!isiPhone && showPrint &&
                                                     <button
                                                         className={isLiveAudioPlaying[item.id] ? 'button_selected' : 'button'}
                                                         onClick={async () => {
@@ -2168,7 +2180,7 @@ const GenAIApp = () => {
                                                     </button>
                                                 )}
 
-                                                <button
+                                                {showPrint && (<button
                                                     className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'}
                                                     onClick={() => {
                                                         setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
@@ -2180,11 +2192,11 @@ const GenAIApp = () => {
                                                         <FaCloudDownloadAlt /> Audio
                                                     </label>
                                                 </button>
-
+                                                )}
                                             </>
                                         )}
                                         &nbsp; &nbsp; &nbsp;
-                                        <button onClick={() => {
+                                        {showPrint && (<button onClick={() => {
                                             const updatedData = genaiData.map(dataItem => {
                                                 if (dataItem.id === item.id) {
                                                     return { ...dataItem, showRawAnswer: !dataItem.showRawAnswer };
@@ -2195,20 +2207,25 @@ const GenAIApp = () => {
                                         }}>
                                             {item.showRawAnswer ? <FaMarkdown /> : <FaEnvelopeOpenText />}
                                         </button>
+                                        )}
                                         &nbsp; &nbsp;
-                                        <span style={{ color: "black", fontSize: "12px" }}> #Char(Ans):</span>
-                                        <span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
+
+                                        {showPrint && (<span style={{ color: "black", fontSize: "12px" }}> #Char(Ans):</span>
+                                        )}
+                                        {showPrint && (<span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
+                                        )}
                                         &nbsp; &nbsp;
-                                        <button
-                                            edge="end"
-                                            aria-label="print answer"
-                                            className="button"
-                                            onClick={() => {
-                                                const printWindow = window.open('', '', 'height=500,width=800');
-                                                const htmlContent = mdParser.render(item.answer);
-                                                printWindow.document.write('<html><head><title>Print</title>');
-                                                printWindow.document.write('<style>');
-                                                printWindow.document.write(`
+                                        {showPrint && (
+                                            <button
+                                                edge="end"
+                                                aria-label="print answer"
+                                                className="button"
+                                                onClick={() => {
+                                                    const printWindow = window.open('', '', 'height=500,width=800');
+                                                    const htmlContent = mdParser.render(item.answer);
+                                                    printWindow.document.write('<html><head><title>Print</title>');
+                                                    printWindow.document.write('<style>');
+                                                    printWindow.document.write(`
                                                     body {
                                                         font-family: Arial, sans-serif;
                                                         margin: 20px;
@@ -2238,16 +2255,17 @@ const GenAIApp = () => {
                                                         padding: 2px 4px;
                                                     }
                                                 `);
-                                                printWindow.document.write('</style></head><body>');
-                                                printWindow.document.write(htmlContent);
-                                                printWindow.document.write('</body></html>');
-                                                printWindow.document.close();
-                                                printWindow.print();
-                                            }}
-                                        >
-                                            Print <FaPrint />
-                                        </button>
-                                        &nbsp; &nbsp;
+                                                    printWindow.document.write('</style></head><body>');
+                                                    printWindow.document.write(htmlContent);
+                                                    printWindow.document.write('</body></html>');
+                                                    printWindow.document.close();
+                                                    printWindow.print();
+                                                }}
+                                            >
+                                                Print <FaPrint />
+                                            </button>
+                                        )}
+                                        &nbsp; &nbsp; &nbsp;
                                         <button
                                             className="button"
                                             onClick={() => {
@@ -2255,9 +2273,10 @@ const GenAIApp = () => {
                                                 setShowHomeworkApp(true);
                                             }}
                                         >
-                                            Answer Online
+                                            Go to Practice Questions Page
                                         </button>
                                     </div>
+                                    {showPrint && (
                                     <div style={{ fontSize: '16px' }}>
                                         {item.showRawAnswer ? item.answer : (
                                             <MdEditor
@@ -2281,7 +2300,7 @@ const GenAIApp = () => {
                                             />
                                         )}
                                     </div>
-
+                                    )}
                                     <br />
                                     <br />
                                     {/* Add reaction buttons JSX */}
