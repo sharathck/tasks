@@ -409,6 +409,12 @@ const GenAIApp = () => {
                 if (data.isImage_Dall_e_3 !== undefined) {
                     setIsImage_Dall_e_3(data.isImage_Dall_e_3);
                 }
+                if (data.showImageDallE3 !== undefined) {
+                    setShowImageDallE3(data.showImageDallE3);
+                }
+                if (data.showTTS !== undefined) {
+                    setShowTTS(data.showTTS);
+                }
                 if (data.isTTS !== undefined) {
                     setIsTTS(data.isTTS);
                 }
