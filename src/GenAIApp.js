@@ -195,6 +195,7 @@ const GenAIApp = () => {
     const [showImagesSearchWordsButton, setShowImagesSearchWordsButton] = useState(false);
     const [showYouTubeTitleDescriptionButton, setShowYouTubeTitleDescriptionButton] = useState(false);
     const [isHomeWork, setIsHomeWork] = useState(false);
+    const [isQuiz, setIsQuiz] = useState(false);
     const [showHomeWorkButton, setShowHomeWorkButton] = useState(true);
 
     // Add state variable for AI Search
@@ -223,6 +224,7 @@ const GenAIApp = () => {
     const [semanticSearchPlaceholder, setSemanticSearchPlaceholder] = useState('');
     const [keywordSearchPlaceholder, setKeywordSearchPlaceholder] = useState('');
     const [practicePageButtonLabel, setPracticePageButtonLabel] = useState('');
+    const [quizButtonLabel, setQuizButtonLabel] = useState('');
 
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
@@ -1266,6 +1268,7 @@ const GenAIApp = () => {
             youtubeSelected = false;
             imageSelected = false;
             setIsHomeWork(false);
+            setIsQuiz(false);
             setIsYouTubeTitle(false);
             setIsImagesSearch(false);
             setIsGeneratingGeminiSearch(false);
@@ -1657,6 +1660,42 @@ const GenAIApp = () => {
         updateConfiguration();
     };
 
+    // Add handleQuiz function after handleHomeWork
+    const handleQuiz = async () => {
+        if (!promptInput.trim()) {
+            alert('Please enter a prompt.');
+            return;
+        }
+        setIsQuiz(true);
+
+        // Ensure genaiPrompts is populated
+        if (genaiPrompts.length === 0) {
+            await fetchPrompts(uid);
+        }
+
+        // Get quiz prompt template
+        const prompt = genaiPrompts.find(prompt => prompt.tag === 'quiz');
+        let quizPrompt = prompt ? prompt.fullText : '';
+
+        if (quizPrompt === '') {
+            try {
+                const genaiCollection = collection(db, 'public');
+                const q = query(genaiCollection, limit(1), where('tag', '==', 'quiz'));
+                const genaiSnapshot = await getDocs(q);
+                const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                quizPrompt = genaiList[0]?.fullText || '';
+            } catch (error) {
+                console.error("Error fetching quiz prompt: ", error);
+            }
+        }
+
+        // Append the prompt to promptInput
+        homeWorkInput = promptInput + quizPrompt;
+        setIsGeneratingGemini(true);
+        callAPI(modelGemini, 'homeWork');
+        updateConfiguration();
+    };
+
     // Add handler for AI Search
     const handleAISearch = async () => {
         if (!promptInput.trim()) {
@@ -1688,7 +1727,7 @@ const GenAIApp = () => {
         try {
             const q = query(
                 collection(db, 'public'),
-                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level'])
+                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level', 'quiz-button-label'])
             );
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
@@ -1712,6 +1751,9 @@ const GenAIApp = () => {
                         break;
                     case 'practice-questions-page-button-level':
                         setPracticePageButtonLabel(data.fullText);
+                        break;
+                    case 'quiz-button-label':
+                        setQuizButtonLabel(data.fullText);
                         break;
                     default:
                         break;
@@ -1927,7 +1969,7 @@ const GenAIApp = () => {
                             AutoPrompt
                         </button>
                     )}
-                    {!isAISearch && !isHomeWork && showGenAIButton && (
+                    {!isAISearch && !isHomeWork && !isQuiz && showGenAIButton && (
                         <button
                             onClick={handleGenerate}
                             className="generateButton"
@@ -1982,19 +2024,27 @@ const GenAIApp = () => {
                         </button>
                     )}
                     {(showHomeWorkButton && !isAISearch &&
-                        <button
-                            onClick={handleHomeWork}
-                            className="practiceButton"
-                        >
-                            {isHomeWork
-                                ? (
-                                    <FaSpinner className="spinning" />
-                                ) : (
-                                    practiceButtonLabel || 'Practice'
-                                )}
-                        </button>
+                        <>
+                            <button
+                                onClick={handleHomeWork}
+                                className="practiceButton"
+                            >
+                                {isHomeWork
+                                    ? (<FaSpinner className="spinning" />)
+                                    : (practiceButtonLabel || 'Practice')}
+                            </button>
+                            <button
+                                onClick={handleQuiz}
+                                className="practiceButton"
+                                style={{backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
+                            >
+                                {isQuiz
+                                    ? (<FaSpinner className="spinning" />)
+                                    : (quizButtonLabel || 'Trivia/Quiz')}
+                            </button>
+                        </>
                     )}
-                    {showAISearchButton && !isHomeWork && (
+                    {showAISearchButton && !isHomeWork && !isQuiz && (
                         <button
                             onClick={handleAISearch}
                             className="generateButton"
