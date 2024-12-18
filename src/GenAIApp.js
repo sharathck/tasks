@@ -140,8 +140,8 @@ const GenAIApp = () => {
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
-    const [autoPrompt, setAutoPrompt] = useState(true);
-    const [showSaveButton, setShowSaveButton] = useState(false);
+    const [autoPrompt, setAutoPrompt] = useState(false);
+    const [showSaveButton, setShowSaveButton] = useState(true);
     const [showSourceDocument, setShowSourceDocument] = useState(false);
     const [showYouTubeButton, setShowYouTubeButton] = useState(false);
     const mdParser = new MarkdownIt(/* Markdown-it options */);
@@ -1651,8 +1651,8 @@ const GenAIApp = () => {
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
         if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
-            setIsGeneratingo1Mini(true); // Set generating state to true
-            callAPI(modelGpto1Mini, 'homeWork');
+            setIsGeneratingo1(true); // Set generating state to true
+            callAPI(modelo1, 'homeWork');
         }
         updateConfiguration();
     };
