@@ -1247,13 +1247,11 @@ const GenAIApp = () => {
             if (invocationType === 'homeWork') {
                 console.log('Homework Response ID:', data[0].results[0].docID);
                 setCurrentDocId(data[0].results[0].docID);
+                setShowHomeworkApp(true);
                 if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
-                    const baseUrl = window.location.href.split('?')[0];
-                    const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
-                    window.open(newUrl, '_blank');
-                }
-                else {
-                    setShowHomeworkApp(true);
+                    //const baseUrl = window.location.href.split('?')[0];
+                    //const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
+                    //window.open(newUrl, '_blank');
                 }
             }
 
@@ -1650,13 +1648,11 @@ const GenAIApp = () => {
 
         // Append the prompt to promptInput
         homeWorkInput = promptInput + intelligentQuestionsPrompt;
-        setIsGeneratingGeminiSearch(true);
-        callAPI(modelGeminiSearch, 'homeWork');
+        setIsGeneratingGemini(true);
+        callAPI(modelGemini, 'homeWork');
         if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
             setIsGeneratingo1Mini(true); // Set generating state to true
             callAPI(modelGpto1Mini, 'homeWork');
-            setIsGeneratingGemini(true);
-            callAPI(modelGemini, 'homeWork');
         }
         updateConfiguration();
     };
