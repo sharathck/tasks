@@ -1530,8 +1530,8 @@ const GenAIApp = () => {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `audio_${new Date().toISOString().slice(0,19).replace(/[-:]/g,'_').replace('T','__')}.mp3`;
-
+            const extension = mp3FileUrl[0].substring(mp3FileUrl[0].lastIndexOf('.'));
+            link.download = `${new Date().toISOString().slice(0, 19).replace(/[-:]/g, '_').replace('T', '__')}${extension}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -2370,6 +2370,26 @@ const GenAIApp = () => {
                                     </div>
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
+                                            {(item.model === 'dall-e-3' || item.model === 'azure-tts') && (
+                                                <button
+                                                    className="button"
+                                                    onClick={() => handleDownload(item.answer)}
+                                                    style={{
+                                                        padding: '12px 24px',
+                                                        fontSize: '22px',
+                                                        backgroundColor: '#4CAF50',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        cursor: 'pointer',
+                                                        transition: 'background-color 0.3s'
+                                                    }}
+                                                    onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                                    onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+                                                >
+                                                    Download  <FaCloudDownloadAlt size={28} />
+                                                </button>
+                                            )}
                                             {item.showRawAnswer ? item.answer : (
                                                 <MdEditor
                                                     value={item.answer || ''} // Add default empty string
@@ -2390,14 +2410,6 @@ const GenAIApp = () => {
                                                         }
                                                     }}
                                                 />
-                                            )}
-                                            {(item.model === 'azure-tts') && (
-                                                <button
-                                                    className="button"
-                                                    onClick={() => handleDownload(item.answer)}
-                                                >
-                                                    Download Audio
-                                                </button>
                                             )}
                                         </div>
 
