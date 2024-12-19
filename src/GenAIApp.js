@@ -1520,6 +1520,26 @@ const GenAIApp = () => {
         );
     }
 
+    const handleDownload = async (mp3UrlText) => {
+        try {
+            const mp3FileUrl = mp3UrlText?.match(/\(([^)]+)\)/g)?.map(url => url.slice(1, -1));
+            const proxyUrl = `https://genaiapp-892085575649.us-central1.run.app/proxy-download?url=${encodeURIComponent(mp3FileUrl)}`;
+            const response = await fetch(proxyUrl);
+            const blob = await response.blob();
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `audio_${new Date().toISOString().slice(0,19).replace(/[-:]/g,'_').replace('T','__')}.mp3`;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+        }
+    };
 
     // Update saveReaction function to include docId
     const saveReaction = async (docId, reaction) => {
@@ -2337,42 +2357,14 @@ const GenAIApp = () => {
                                                 Print <FaPrint />
                                             </button>
                                         )}
-                                        {showPrint && (
+                                        {(showPrint) && (
                                             <button
                                                 className="button"
-                                                onClick={async () => {
-                                                    // Extract text between parentheses using regex
-                                                    const mp3FileUrl = item.answer?.match(/\(([^)]+)\)/g)?.map(mp3FileUrl => mp3FileUrl.slice(1, -1));
-
-                                                    fetch(mp3FileUrl, { mode: 'no-cors' })
-                                                        .then(response => response.blob())
-                                                        .then(blob => {
-                                                            // Create a local URL for the Blob
-                                                            const url = window.URL.createObjectURL(blob);
-
-                                                            // Create a temporary anchor element
-                                                            const link = document.createElement('a');
-                                                            link.href = url;
-                                                            link.setAttribute('download', 'audio.mp3');
-
-                                                            // Append the anchor to the document and trigger a click
-                                                            document.body.appendChild(link);
-                                                            link.click();
-
-                                                            // Clean up
-                                                            document.body.removeChild(link);
-                                                            window.URL.revokeObjectURL(url);
-                                                        })
-                                                        .catch(error => {
-                                                            console.error('Error downloading the file:', error);
-                                                        });
-
-                                                }}
-
+                                                onClick={() => handleDownload(item.answer)}
                                             >
                                                 Download Audio
                                             </button>
-                                        )};
+                                        )}
 
 
                                         &nbsp; &nbsp; &nbsp;
@@ -2409,7 +2401,16 @@ const GenAIApp = () => {
                                                     }}
                                                 />
                                             )}
+                                            {(item.model === 'azure-tts') && (
+                                                <button
+                                                    className="button"
+                                                    onClick={() => handleDownload(item.answer)}
+                                                >
+                                                    Download Audio
+                                                </button>
+                                            )}
                                         </div>
+
                                     )}
                                     <br />
                                     <br />
