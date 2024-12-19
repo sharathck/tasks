@@ -229,6 +229,13 @@ const GenAIApp = () => {
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
 
+    // Add new state variables after other model state variables
+    const [isCerebras, setIsCerebras] = useState(false);
+    const [isGeneratingCerebras, setIsGeneratingCerebras] = useState(false);
+    const [showCerebras, setShowCerebras] = useState(false);
+    const [modelCerebras, setModelCerebras] = useState('llama-c');
+    const [labelCerebras, setLabelCerebras] = useState('Llama-C');
+
     const embedPrompt = async (docId) => {
         try {
             console.log('Embedding prompt:', docId);
@@ -618,6 +625,15 @@ const GenAIApp = () => {
                 if (data.showPrint !== undefined) {
                     setShowPrint(data.showPrint);
                 }
+                if (data.isCerebras !== undefined) {
+                    setIsCerebras(data.isCerebras);
+                }
+                if (data.showCerebras !== undefined) {
+                    setShowCerebras(data.showCerebras);
+                }
+                if (data.labelCerebras !== undefined) {
+                    setLabelCerebras(data.labelCerebras);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -684,7 +700,7 @@ const GenAIApp = () => {
     // Helper function to split messages into chunks
     const splitMessage = (msg, chunkSize = 4000) => {
         const chunks = [];
-        for (let i = 0; i < msg.length; i += chunkSize) {
+        for (let i = 0; msg.length; i += chunkSize) {
             chunks.push(msg.substring(i, i + chunkSize));
         }
         return chunks;
@@ -858,7 +874,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras) {
             alert('Please select at least one model.');
             return;
         }
@@ -975,6 +991,10 @@ const GenAIApp = () => {
             setIsGeneratingNova(true); // Set generating state to true
             callAPI(modelNova);
         }
+        if (isCerebras && showCerebras) {
+            setIsGeneratingCerebras(true); // Set generating state to true
+            callAPI(modelCerebras);
+        }
         updateConfiguration();
     };
 
@@ -1035,7 +1055,9 @@ const GenAIApp = () => {
                     labelCodestral,
                     labelClaudeHaiku,
                     labelSambanova,
-                    labelNova
+                    labelNova,
+                    isCerebras,
+                    labelCerebras
                 });
                 return;
             }
@@ -1090,6 +1112,8 @@ const GenAIApp = () => {
                         labelClaudeHaiku,
                         labelSambanova,
                         labelNova,
+                        isCerebras,
+                        labelCerebras
                     }, { merge: true });
                 });
             }
@@ -1262,6 +1286,9 @@ const GenAIApp = () => {
             if (selectedModel === modelNova) {
                 setIsGeneratingNova(false);
             }
+            if (selectedModel === modelCerebras) {
+                setIsGeneratingCerebras(false);
+            }
             console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
         }
     };
@@ -1366,6 +1393,7 @@ const GenAIApp = () => {
         setIsSambanova(status);
         setIsGroq(status);
         setIsNova(status);
+        setIsCerebras(status);
 
         // Set all "show" states to false/true
         setShowOpenAI(status);
@@ -1386,6 +1414,7 @@ const GenAIApp = () => {
         setShowSambanova(status);
         setShowGroq(status);
         setShowNova(status);
+        setShowCerebras(status);
         setShowTemp(status);
         setShowTop_p(status);
         setShowAutoPrompt(status);
@@ -1820,6 +1849,16 @@ const GenAIApp = () => {
                             <label className={isGeneratingNova ? 'flashing' : ''}>{labelNova}</label>
                         </button>
                     )}
+                    {showCerebras && (
+                        <button 
+                            className={isCerebras ? 'button_selected' : 'button'} 
+                            onClick={() => handleLLMChange(setIsCerebras, !isCerebras)}
+                        >
+                            <label className={isGeneratingCerebras ? 'flashing' : ''}>
+                                {labelCerebras}
+                            </label>
+                        </button>
+                    )}
                     {showTemp && (
                         <label style={{ marginLeft: '8px' }}>
                             Temp:
@@ -1924,7 +1963,8 @@ const GenAIApp = () => {
                                 isGeneratingClaudeHaiku ||
                                 isGeneratingSambanova ||
                                 isGeneratingGroq ||
-                                isGeneratingNova
+                                isGeneratingNova ||
+                                isGeneratingCerebras
                             }
                         >
                             {isGenerating ||
@@ -1946,7 +1986,8 @@ const GenAIApp = () => {
                                 isGeneratingClaudeHaiku ||
                                 isGeneratingSambanova ||
                                 isGeneratingGroq ||
-                                isGeneratingNova ? (
+                                isGeneratingNova ||
+                                isGeneratingCerebras ? (
                                 <FaSpinner className="spinning" />
                             ) : (
                                 'GenAI'
@@ -2069,6 +2110,7 @@ const GenAIApp = () => {
                     <option value="sambanova-1">Sambanova</option>
                     <option value="groq-mixtral">Groq</option>
                     <option value="nova">Nova</option>
+                    <option value="cerebras">Cerebras</option>
                 </select>
                 )}
                 {showEditPopup && (
