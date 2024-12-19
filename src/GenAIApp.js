@@ -52,6 +52,7 @@ let silence_break = 900;
 const GenAIApp = () => {
     // **State Variables**
     const [genaiData, setGenaiData] = useState([]);
+    const [isDownloading, setIsDownloading] = useState();
     const [isLoading, setIsLoading] = useState(false);
     const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
     const [language, setLanguage] = useState("en");
@@ -1520,24 +1521,28 @@ const GenAIApp = () => {
         );
     }
 
-    const handleDownload = async (mp3UrlText) => {
+    const handleDownload = async (mp3UrlText, modelName) => {
+        setIsDownloading(true);
         try {
             const mp3FileUrl = mp3UrlText?.match(/\(([^)]+)\)/g)?.map(url => url.slice(1, -1));
             const proxyUrl = `https://genaiapp-892085575649.us-central1.run.app/proxy-download?url=${encodeURIComponent(mp3FileUrl)}`;
             const response = await fetch(proxyUrl);
             const blob = await response.blob();
-
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
+            const prefix = modelName === 'azure-tts' ? 'Audio_' : 'Image_';
             const extension = mp3FileUrl[0].substring(mp3FileUrl[0].lastIndexOf('.'));
-            link.download = `${new Date().toISOString().slice(0, 19).replace(/[-:]/g, '_').replace('T', '__')}${extension}`;
+            link.download = `${prefix}_${new Date().toISOString().slice(0, 19).replace(/[-:]/g, '_').replace('T', '__')}${extension}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Download failed:', error);
+        }
+        finally {
+            setIsDownloading(false);
         }
     };
 
@@ -2373,7 +2378,7 @@ const GenAIApp = () => {
                                             {(item.model === 'dall-e-3' || item.model === 'azure-tts') && (
                                                 <button
                                                     className="button"
-                                                    onClick={() => handleDownload(item.answer)}
+                                                    onClick={() => handleDownload(item.answer, item.model)}
                                                     style={{
                                                         padding: '12px 24px',
                                                         fontSize: '22px',
@@ -2387,7 +2392,11 @@ const GenAIApp = () => {
                                                     onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                                                     onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                                 >
-                                                    Download  <FaCloudDownloadAlt size={28} />
+                                                    {isDownloading ? (
+                                                        <FaSpinner className="spinning" />
+                                                    ) : (
+                                                        <>Download <FaCloudDownloadAlt size={28} /></>
+                                                    )}
                                                 </button>
                                             )}
                                             {item.showRawAnswer ? item.answer : (
