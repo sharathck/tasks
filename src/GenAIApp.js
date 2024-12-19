@@ -2338,14 +2338,13 @@ const GenAIApp = () => {
                                             </button>
                                         )}
                                         {showPrint && (
-
                                             <button
                                                 className="button"
                                                 onClick={async () => {
                                                     // Extract text between parentheses using regex
                                                     const mp3FileUrl = item.answer?.match(/\(([^)]+)\)/g)?.map(mp3FileUrl => mp3FileUrl.slice(1, -1));
 
-                                                    fetch(mp3FileUrl, { mode: 'cors' })
+                                                    fetch(mp3FileUrl, { mode: 'no-cors' })
                                                         .then(response => response.blob())
                                                         .then(blob => {
                                                             // Create a local URL for the Blob
