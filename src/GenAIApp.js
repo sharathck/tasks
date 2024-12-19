@@ -2357,17 +2357,7 @@ const GenAIApp = () => {
                                                 Print <FaPrint />
                                             </button>
                                         )}
-                                        {(showPrint) && (
-                                            <button
-                                                className="button"
-                                                onClick={() => handleDownload(item.answer)}
-                                            >
-                                                Download Audio
-                                            </button>
-                                        )}
-
-
-                                        &nbsp; &nbsp; &nbsp;
+                                        &nbsp; &nbsp;
                                         <button
                                             className="button"
                                             onClick={() => {
