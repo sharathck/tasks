@@ -1850,8 +1850,8 @@ const GenAIApp = () => {
                         </button>
                     )}
                     {showCerebras && (
-                        <button 
-                            className={isCerebras ? 'button_selected' : 'button'} 
+                        <button
+                            className={isCerebras ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsCerebras, !isCerebras)}
                         >
                             <label className={isGeneratingCerebras ? 'flashing' : ''}>
@@ -2007,7 +2007,7 @@ const GenAIApp = () => {
                             <button
                                 onClick={handleQuiz}
                                 className="practiceButton"
-                                style={{backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
+                                style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
                             >
                                 {isQuiz
                                     ? (<FaSpinner className="spinning" />)
@@ -2055,7 +2055,7 @@ const GenAIApp = () => {
                         fontSize: '14px',
                         color: '#666',
                     }}>
-                       <ReactMarkdown>{noteText}</ReactMarkdown>
+                        <ReactMarkdown>{noteText}</ReactMarkdown>
                     </div>
                 </div>
 
@@ -2172,7 +2172,7 @@ const GenAIApp = () => {
                                         )}
                                         &nbsp; &nbsp;
                                         {showPrint && (<span style={{ color: "black", fontSize: "12px" }}>  #Char(Q): </span>
-                                     )}                                     {showPrint && (<span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
+                                        )}                                     {showPrint && (<span style={{ color: "darkblue", fontSize: "16px" }}> {item.question?.length || 0}
                                         </span>)}
                                     </h4>
                                     <div style={{ fontSize: '16px' }}>
@@ -2337,6 +2337,45 @@ const GenAIApp = () => {
                                                 Print <FaPrint />
                                             </button>
                                         )}
+                                        {showPrint && (
+
+                                            <button
+                                                className="button"
+                                                onClick={async () => {
+                                                    // Extract text between parentheses using regex
+                                                    const mp3FileUrl = item.answer?.match(/\(([^)]+)\)/g)?.map(mp3FileUrl => mp3FileUrl.slice(1, -1));
+
+                                                    fetch(mp3FileUrl, { mode: 'cors' })
+                                                        .then(response => response.blob())
+                                                        .then(blob => {
+                                                            // Create a local URL for the Blob
+                                                            const url = window.URL.createObjectURL(blob);
+
+                                                            // Create a temporary anchor element
+                                                            const link = document.createElement('a');
+                                                            link.href = url;
+                                                            link.setAttribute('download', 'audio.mp3');
+
+                                                            // Append the anchor to the document and trigger a click
+                                                            document.body.appendChild(link);
+                                                            link.click();
+
+                                                            // Clean up
+                                                            document.body.removeChild(link);
+                                                            window.URL.revokeObjectURL(url);
+                                                        })
+                                                        .catch(error => {
+                                                            console.error('Error downloading the file:', error);
+                                                        });
+
+                                                }}
+
+                                            >
+                                                Download Audio
+                                            </button>
+                                        )};
+
+
                                         &nbsp; &nbsp; &nbsp;
                                         <button
                                             className="button"
