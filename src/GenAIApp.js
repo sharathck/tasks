@@ -1709,7 +1709,7 @@ const GenAIApp = () => {
         try {
             const q = query(
                 collection(db, 'public'),
-                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level', 'quiz-button-label', 'YouTube_title', 'YouTube_description'])
+                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level', 'quiz-button-label', 'YouTube_title', 'YouTube_description','imagesSearchPrompt','autoPromptSeparator'])
             );
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
@@ -1742,6 +1742,12 @@ const GenAIApp = () => {
                         break;
                     case 'YouTube_description':
                         setYoutubeDescriptionPrompt(data.fullText);
+                        break;
+                    case 'imagesSearchPrompt':
+                        imagesSearchPrompt = data.fullText;
+                        break;
+                    case 'autoPromptSeparator':
+                        autoPromptSeparator = data.fullText;
                         break;
                     default:
                         break;
