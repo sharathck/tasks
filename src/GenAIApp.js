@@ -56,6 +56,8 @@ const GenAIApp = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
     const [language, setLanguage] = useState("en");
+    const [isLiveAudioPlayingPrompt, setIsLiveAudioPlayingPrompt] = useState(false);
+    const [isGeneratingYouTubeAudioTitlePrompt, setIsGeneratingYouTubeAudioTitlePrompt] = useState(false);
     // Authentication state
     const [user, setUser] = useState(null);
     const [email, setEmail] = useState('');
@@ -703,7 +705,9 @@ const GenAIApp = () => {
     // Helper function to split messages into chunks
     const splitMessage = (msg, chunkSize = 4000) => {
         const chunks = [];
-        for (let i = 0; msg.length; i += chunkSize) {
+        console.log('Before Splitting message:', msg);
+        for (let i = 0; i < msg.length; i += chunkSize) {
+            console.log('Part ', i , '  message:', msg.substring(i, i + chunkSize));
             chunks.push(msg.substring(i, i + chunkSize));
         }
         return chunks;
@@ -730,6 +734,7 @@ const GenAIApp = () => {
         }
         try {
             try {
+                console.log('Synthesizing speech...' + cleanedArticles);
                 const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
                 speechConfig.speechSynthesisVoiceName = voiceName;
                 if (language === "Spanish") {
@@ -2092,6 +2097,68 @@ const GenAIApp = () => {
                         </div>
                     )}
                     <br />
+
+                    {showPrint && (
+                                    <button
+                                        className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
+                                        onClick={async () => {
+                                            try {
+                                                setIsLiveAudioPlayingPrompt(true);
+                                                await synthesizeSpeech(promptInput,  "English");
+                                            } catch (error) {
+                                                console.error('Error playing audio:', error);
+                                            }
+                                            finally {
+                                                setIsLiveAudioPlayingPrompt(false);
+                                            }
+                                        }}
+                                    >
+                                        <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
+                                            <FaPlay /> Speak Prompt
+                                        </label>
+                                    </button>
+                                )
+                            }
+                            {
+                                (showPrint && showYouTubeButton && <button
+                                    className={
+                                        (isGeneratingYouTubeAudioTitlePrompt) ?
+                                            'button_selected' : 'button'
+                                    }
+                                    onClick={() => {
+                                        setIsGeneratingYouTubeAudioTitlePrompt(true);
+                                        setIsGeneratingTTS(true);
+                                        callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
+
+                                        // Execute YouTube Title/Description
+                                        youtubePromptInput = promptInput + youtubeTitlePrompt;
+                                        youtubeSelected = true;
+                                        setIsYouTubeTitle(true);
+                                        setIsGemini(true);
+                                        setIsGeneratingGemini(true);
+                                        callAPI(modelGemini, 'youtubeTitle');
+                                        youtubeDescriptionPromptInput = promptInput + youtubeDescriptionPrompt;
+                                        callAPI(modelo1, 'youtubeDescription');
+                                        // Execute Image Search
+                                        imagePromptInput = imagesSearchPrompt + promptInput;
+                                        imageSelected = true;
+                                        setIsImagesSearch(true);
+                                        setIso1(true);
+                                        setIsGeneratingo1(true);
+                                        callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitlePrompt(false));
+                                    }}>
+                                    <label className={
+                                        (isGeneratingYouTubeAudioTitlePrompt) ?
+                                            'flashing' : ''
+                                    }>
+                                        YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
+                                        / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
+                                        / Image Search Words
+                                        <img src={imageIcon} alt="" height="22px" style={{ marginRight: '4px' }} />
+                                    </label>
+                                </button>
+                                )
+                            }
                     <br />
                     <div className="info-text" style={{
                         fontSize: '14px',
@@ -2231,7 +2298,7 @@ const GenAIApp = () => {
 
                                 </div>
                                 <div style={{ border: "1px solid black" }}>
-                                    <div style={{ color: "green", fontWeight: "bold" }}> 
+                                    <div style={{ color: "green", fontWeight: "bold" }}>
                                         {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
                                             <>
 
@@ -2240,7 +2307,7 @@ const GenAIApp = () => {
                                                         (isGeneratingYouTubeAudioTitle[item.id]) ?
                                                             'button_selected' : 'button'
                                                     }
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                         setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: true }));
                                                         setIsGeneratingTTS(true);
                                                         callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL);
@@ -2260,7 +2327,7 @@ const GenAIApp = () => {
                                                         setIsImagesSearch(true);
                                                         setIso1(true);
                                                         setIsGeneratingo1(true);
-                                                        callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: false })));;
+                                                        await callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: false })));;
                                                     }}>
                                                     <label className={
                                                         (isGeneratingYouTubeAudioTitle[item.id]) ?
@@ -2280,10 +2347,8 @@ const GenAIApp = () => {
                                                         onClick={async () => {
                                                             try {
                                                                 setIsLiveAudioPlaying(prev => ({ ...prev, [item.id]: true }));
-                                                                const result = await synthesizeSpeech(item.answer, item.language || "English");
-                                                                if (!result) {
-                                                                    throw new Error('Speech synthesis failed');
-                                                                }
+                                                                await synthesizeSpeech(item.answer, item.language || "English");
+                                                                
                                                             } catch (error) {
                                                                 console.error('Error playing audio:', error);
                                                             }
