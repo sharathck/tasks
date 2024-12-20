@@ -163,6 +163,12 @@ const Practice = ({sourceDocumentID}) => {
                     >
                         Print Grid
                     </button>
+                    <button
+                        className='show-answers-button'
+                        onClick={handleShowAnswers}
+                    >
+                        {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                    </button>
             </div>
             <div className="homework-grid">
                 <div className="grid-header">
@@ -173,8 +179,8 @@ const Practice = ({sourceDocumentID}) => {
                 {problems.map((problem, index) => (
                     <div key={index} className="grid-row">
                         <div className="question-col">{problem.question}</div>
-                        {showAnswers && problem.userAnswer && 
-                            <div className="answer-col">{problem.correctAnswer}</div>}
+                        {showAnswers && problem.userAnswer &&
+                            <div className="answer-col correct-answer">{problem.correctAnswer}</div>}
                         {showAnswers && !problem.userAnswer && 
                             <div className="answer-col">Complete your answer</div>}
                         <div className="user-answer-col">
@@ -188,12 +194,6 @@ const Practice = ({sourceDocumentID}) => {
                     </div>
                 ))}
             </div>
-            <button
-                    className='show-answers-button'
-                    onClick={handleShowAnswers}
-                >
-                    {showAnswers ? 'Hide Answers' : 'Show Answers'}
-                </button>
             {showPinModal && (
                 <div className="pin-modal">
                     <div className="pin-modal-content">

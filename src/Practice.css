@@ -606,6 +606,9 @@ form {
 
 /* ...existing styles... */
 
+.correct-answer {
+    background-color: #d4edda; /* Light green background */
+}
 
 @media (max-width: 600px) {
   .grid-row {
