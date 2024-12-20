@@ -707,7 +707,7 @@ const GenAIApp = () => {
         const chunks = [];
         console.log('Before Splitting message:', msg);
         for (let i = 0; i < msg.length; i += chunkSize) {
-            console.log('Part ', i , '  message:', msg.substring(i, i + chunkSize));
+            console.log('Part ', i, '  message:', msg.substring(i, i + chunkSize));
             chunks.push(msg.substring(i, i + chunkSize));
         }
         return chunks;
@@ -972,29 +972,6 @@ const GenAIApp = () => {
             callAPI(modelCodestralApi);
         }
 
-        // **Handle DALL·E 3 Selection**
-        if (isImage_Dall_e_3 && showImageDallE3) {
-            setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
-            callAPI(modelImageDallE3);
-        }
-
-        // **Handle TTS Selection**
-        if (isTTS && showTTS) {
-            // if promptInput is > 9000 characters, then split it into chunks and call TTS API for each chunk
-            //
-
-            if (promptInput.length > 2) {
-                /* const chunks = [];
-                 for (let i = 0; promptInput.length; i += 3999) {
-                   chunks.push(promptInput.substring(i, i + 3999));
-                 }
-                 for (const chunk of chunks) {
-                   callTTSAPI(chunk);
-                 }*/
-                callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
-            }
-
-        }
         if (isNova && showNova) {
             setIsGeneratingNova(true); // Set generating state to true
             callAPI(modelNova);
@@ -1355,6 +1332,8 @@ const GenAIApp = () => {
     };
     // Handler for DALL·E 3 Checkbox Change
     const handleDall_e_3Change = async (checked) => {
+        setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
+        callAPI(modelImageDallE3);
         if (checked) {
             // Turn off TTS if it's on
             setIsTTS(false);
@@ -1373,6 +1352,8 @@ const GenAIApp = () => {
 
     // Handler for TTS Checkbox Change
     const handleTTSChange = async (checked) => {
+        setIsGeneratingTTS(true);
+        callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
         if (checked) {
             // Turn off Image if it's on
             setIsImage_Dall_e_3(false);
@@ -1440,6 +1421,7 @@ const GenAIApp = () => {
     // Add this helper function to handle LLM model selection
     const handleLLMChange = (setter, value) => {
         setter(value);
+        handleGenerate();
         if (value) {
             // Turn off TTS and Image
             setIsTTS(false);
@@ -1787,7 +1769,7 @@ const GenAIApp = () => {
                 </div>
                 <div style={{ marginBottom: '20px' }}>
                     {showGroq && (
-                        <button className={isGroq ? 'button_selected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
+                        <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
                             <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
                         </button>
                     )}
@@ -1934,22 +1916,6 @@ const GenAIApp = () => {
                             />
                         </label>
                     )}
-                    {showImageDallE3 &&
-                        <button className={isImage_Dall_e_3 ? 'button_selected' : 'button'}
-                            onClick={() => handleDall_e_3Change(!isImage_Dall_e_3)}>
-                            <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
-                                Image    <img src={imageIcon} alt="image" style={{ width: '16px', verticalAlign: 'middle', marginLeft: '4px' }} />
-                            </label>
-                        </button>
-                    }
-                    {showTTS &&
-                        <button className={isTTS ? 'button_selected' : 'button'}
-                            onClick={() => handleTTSChange(!isTTS)}>
-                            <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                Audio    <img src={speakerIcon} alt="speaker" height="16px" />
-                            </label>
-                        </button>
-                    }
                     {showVoiceSelect && (
                         <VoiceSelect
                             selectedVoice={voiceName} // Current selected voice
@@ -2044,7 +2010,7 @@ const GenAIApp = () => {
                     {(showHomeWorkButton && !isAISearch &&
                         <>
                             <button
-                                onClick={handleHomeWork(promptInput)}
+                                onClick={() => handleHomeWork(promptInput)}
                                 className="practiceButton"
                             >
                                 {isHomeWork
@@ -2052,7 +2018,7 @@ const GenAIApp = () => {
                                     : (practiceButtonLabel || 'Practice')}
                             </button>
                             <button
-                                onClick={handleQuiz(promptInput)}
+                                onClick={() => handleQuiz(promptInput)}
                                 className="practiceButton"
                                 style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
                             >
@@ -2071,6 +2037,23 @@ const GenAIApp = () => {
                             {isAISearch ? (<FaSpinner className="spinning" />) : ('GoogleSearch + GenAI')}
                         </button>
                     )}
+                    {showImageDallE3 &&
+                        <button className="imageButton"
+                            onClick={() => handleDall_e_3Change(!isImage_Dall_e_3)}>
+                            <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
+                                GenAI Image
+                            </label>
+                        </button>
+                    }
+                    {showTTS &&
+                        <button className="audioButton"
+                            onClick={() => handleTTSChange(!isTTS)}
+                        >
+                            <label className={isGeneratingTTS ? 'flashing' : ''}>
+                                GenAI Audio
+                            </label>
+                        </button>
+                    }
                     &nbsp; &nbsp;
                     {!GenAIParameter ? (
                         showBackToAppButton && (
@@ -2099,66 +2082,66 @@ const GenAIApp = () => {
                     <br />
 
                     {showPrint && (
-                                    <button
-                                        className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
-                                        onClick={async () => {
-                                            try {
-                                                setIsLiveAudioPlayingPrompt(true);
-                                                await synthesizeSpeech(promptInput,  "English");
-                                            } catch (error) {
-                                                console.error('Error playing audio:', error);
-                                            }
-                                            finally {
-                                                setIsLiveAudioPlayingPrompt(false);
-                                            }
-                                        }}
-                                    >
-                                        <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
-                                            <FaPlay /> Speak Prompt
-                                        </label>
-                                    </button>
-                                )
+                        <button
+                            className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
+                            onClick={async () => {
+                                try {
+                                    setIsLiveAudioPlayingPrompt(true);
+                                    await synthesizeSpeech(promptInput, "English");
+                                } catch (error) {
+                                    console.error('Error playing audio:', error);
+                                }
+                                finally {
+                                    setIsLiveAudioPlayingPrompt(false);
+                                }
+                            }}
+                        >
+                            <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
+                                <FaPlay /> Speak Prompt
+                            </label>
+                        </button>
+                    )
+                    }
+                    {
+                        (showPrint && showYouTubeButton && <button
+                            className={
+                                (isGeneratingYouTubeAudioTitlePrompt) ?
+                                    'button_selected' : 'button'
                             }
-                            {
-                                (showPrint && showYouTubeButton && <button
-                                    className={
-                                        (isGeneratingYouTubeAudioTitlePrompt) ?
-                                            'button_selected' : 'button'
-                                    }
-                                    onClick={() => {
-                                        setIsGeneratingYouTubeAudioTitlePrompt(true);
-                                        setIsGeneratingTTS(true);
-                                        callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
+                            onClick={() => {
+                                setIsGeneratingYouTubeAudioTitlePrompt(true);
+                                setIsGeneratingTTS(true);
+                                callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
 
-                                        // Execute YouTube Title/Description
-                                        youtubePromptInput = promptInput + youtubeTitlePrompt;
-                                        youtubeSelected = true;
-                                        setIsYouTubeTitle(true);
-                                        setIsGemini(true);
-                                        setIsGeneratingGemini(true);
-                                        callAPI(modelGemini, 'youtubeTitle');
-                                        youtubeDescriptionPromptInput = promptInput + youtubeDescriptionPrompt;
-                                        callAPI(modelo1, 'youtubeDescription');
-                                        // Execute Image Search
-                                        imagePromptInput = imagesSearchPrompt + promptInput;
-                                        imageSelected = true;
-                                        setIsImagesSearch(true);
-                                        setIso1(true);
-                                        setIsGeneratingo1(true);
-                                        callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitlePrompt(false));
-                                    }}>
-                                    <label className={
-                                        (isGeneratingYouTubeAudioTitlePrompt) ?
-                                            'flashing' : ''
-                                    }>
-                                        YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
-                                        / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
-                                        / Image Search Words
-                                        <img src={imageIcon} alt="" height="22px" style={{ marginRight: '4px' }} />
-                                    </label>
-                                </button>
-                                )
-                            }
+                                // Execute YouTube Title/Description
+                                youtubePromptInput = promptInput + youtubeTitlePrompt;
+                                youtubeSelected = true;
+                                setIsYouTubeTitle(true);
+                                setIsGemini(true);
+                                setIsGeneratingGemini(true);
+                                callAPI(modelGemini, 'youtubeTitle');
+                                youtubeDescriptionPromptInput = promptInput + youtubeDescriptionPrompt;
+                                callAPI(modelo1, 'youtubeDescription');
+                                // Execute Image Search
+                                imagePromptInput = imagesSearchPrompt + promptInput;
+                                imageSelected = true;
+                                setIsImagesSearch(true);
+                                setIso1(true);
+                                setIsGeneratingo1(true);
+                                callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitlePrompt(false));
+                            }}>
+                            <label className={
+                                (isGeneratingYouTubeAudioTitlePrompt) ?
+                                    'flashing' : ''
+                            }>
+                                YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
+                                / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
+                                / Image Search Words
+                                <img src={imageIcon} alt="" height="22px" style={{ marginRight: '4px' }} />
+                            </label>
+                        </button>
+                        )
+                    }
                     <br />
                     <div className="info-text" style={{
                         fontSize: '14px',
@@ -2348,7 +2331,7 @@ const GenAIApp = () => {
                                                             try {
                                                                 setIsLiveAudioPlaying(prev => ({ ...prev, [item.id]: true }));
                                                                 await synthesizeSpeech(item.answer, item.language || "English");
-                                                                
+
                                                             } catch (error) {
                                                                 console.error('Error playing audio:', error);
                                                             }
@@ -2454,8 +2437,27 @@ const GenAIApp = () => {
                                         >
                                             {practicePageButtonLabel || 'Go to Practice Questions Page'}
                                         </button>
+                                        {showPrint && (
+                                            <button
+                                                className="button"
+                                                onClick={() => handleHomeWork(item.answer)}
+                                            >
+                                                {isHomeWork
+                                                    ? (<FaSpinner className="spinning" />)
+                                                    : (practiceButtonLabel || 'Practice')}
+                                            </button>)}
+                                        {showPrint && (
+                                            <button
+                                                className="button"
+                                                onClick={() => handleQuiz(item.answer)}
+                                            >
+                                                {isQuiz
+                                                    ? (<FaSpinner className="spinning" />)
+                                                    : (quizButtonLabel || 'Trivia/Quiz')}
+                                            </button>)}
                                     </div>
                                     <br />
+
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
                                             {(item.model === 'dall-e-3' || item.model === 'azure-tts') && (
