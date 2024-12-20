@@ -607,7 +607,7 @@ form {
 /* ...existing styles... */
 
 .correct-answer {
-    background-color: #d4edda; /* Light green background */
+    background-color: #dcf6e2; /* Light green background */
 }
 
 @media (max-width: 600px) {
