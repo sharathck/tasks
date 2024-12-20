@@ -34,9 +34,9 @@ let dataLimit = 11;
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let youtubePromptInput = '';
+let youtubeDescriptionPromptInput = '';
 let googleSearchPromptInput = '';
 let youtubeSelected = false;
-let youtubeTitlePrompt = 'Generate a catchy, clickable and search engine optimized YouTube title, description for the content below  ::::  ';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -236,6 +236,8 @@ const GenAIApp = () => {
     const [showCerebras, setShowCerebras] = useState(false);
     const [modelCerebras, setModelCerebras] = useState('llama-c');
     const [labelCerebras, setLabelCerebras] = useState('Llama-C');
+    const [youtubeTitlePrompt, setYoutubeTitlePrompt] = useState(`::::::::::::::::Give me the best YouTube Title for the above content, I need exactly one response and don't include any other text or URLs in the response::::::::: ----- Text from below is only prompt purpose --- YouTube Title should be captivating, exciting, trendy, catchy, YouTube search engine optimized and SEO friendly, it can contain special characters, icons, emojis, and numbers to make it more appealing and expressive.`);
+    const [youtubeDescriptionPrompt, setYoutubeDescriptionPrompt] = useState(`::::::::::::::::Give me the best YouTube description for the above content, I need exactly one response and don't include any other text or URLs in the response::::::::: ----- Text from below is only prompt purpose --- YouTube description should be engaging, detailed, informative, and YouTube search engine optimized and SEO friendly, it can contain special characters, emojis, and numbers to make it more appealing and expressive. Please use the emojis, icons to make it more visually appealing.   Use relevant tags to improve the visibility and reach of your video in Youtube video Description.   Use bullet points, numbered points, lists, and paragraphs to organize Youtube video description.  Bold, italicize, underline, and highlight important information in Youtube video description.   Also, please request users to subscribe and click on bell icon for latest content at the end. `);
 
     const embedPrompt = async (docId) => {
         try {
@@ -1125,17 +1127,26 @@ const GenAIApp = () => {
     };
 
     const callAPI = async (selectedModel, invocationType = '') => {
-        console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput);
+        console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput, '  youtubeDescriptionPromptInput : ', youtubeDescriptionPromptInput);
         try {
             let response;
             switch (invocationType) {
-                case 'youtubeTitleDescription':
+                case 'youtubeTitle':
                     response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ prompt: youtubePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
+                case 'youtubeDescription':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: youtubeDescriptionPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                     });
                     break;
                 case 'imagesSearchWords':
@@ -1711,7 +1722,7 @@ const GenAIApp = () => {
         try {
             const q = query(
                 collection(db, 'public'),
-                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level', 'quiz-button-label'])
+                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level', 'quiz-button-label', 'YouTube_title', 'YouTube_description'])
             );
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
@@ -1738,6 +1749,12 @@ const GenAIApp = () => {
                         break;
                     case 'quiz-button-label':
                         setQuizButtonLabel(data.fullText);
+                        break;
+                    case 'YouTube_title':
+                        setYoutubeTitlePrompt(data.fullText);
+                        break;
+                    case 'YouTube_description':
+                        setYoutubeDescriptionPrompt(data.fullText);
                         break;
                     default:
                         break;
@@ -2214,7 +2231,7 @@ const GenAIApp = () => {
 
                                 </div>
                                 <div style={{ border: "1px solid black" }}>
-                                    <div style={{ color: "green", fontWeight: "bold" }}>---- Response ----
+                                    <div style={{ color: "green", fontWeight: "bold" }}> 
                                         {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
                                             <>
 
@@ -2229,13 +2246,14 @@ const GenAIApp = () => {
                                                         callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL);
 
                                                         // Execute YouTube Title/Description
-                                                        youtubePromptInput = youtubeTitlePrompt + item.answer;
+                                                        youtubePromptInput = item.answer + youtubeTitlePrompt;
                                                         youtubeSelected = true;
                                                         setIsYouTubeTitle(true);
                                                         setIsGemini(true);
                                                         setIsGeneratingGemini(true);
-                                                        callAPI(modelGemini, 'youtubeTitleDescription');
-
+                                                        callAPI(modelGemini, 'youtubeTitle');
+                                                        youtubeDescriptionPromptInput = item.answer + youtubeDescriptionPrompt;
+                                                        callAPI(modelo1, 'youtubeDescription');
                                                         // Execute Image Search
                                                         imagePromptInput = imagesSearchPrompt + item.answer;
                                                         imageSelected = true;
@@ -2306,7 +2324,6 @@ const GenAIApp = () => {
                                         </button>
                                         )}
                                         &nbsp; &nbsp;
-
                                         {showPrint && (<span style={{ color: "black", fontSize: "12px" }}> #Char(Ans):</span>
                                         )}
                                         {showPrint && (<span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
@@ -2373,6 +2390,7 @@ const GenAIApp = () => {
                                             {practicePageButtonLabel || 'Go to Practice Questions Page'}
                                         </button>
                                     </div>
+                                    <br />
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
                                             {(item.model === 'dall-e-3' || item.model === 'azure-tts') && (
@@ -2380,8 +2398,8 @@ const GenAIApp = () => {
                                                     className="button"
                                                     onClick={() => handleDownload(item.answer, item.model)}
                                                     style={{
-                                                        padding: '12px 24px',
-                                                        fontSize: '22px',
+                                                        padding: '6px 6px',
+                                                        fontSize: '20px',
                                                         backgroundColor: '#4CAF50',
                                                         color: 'white',
                                                         border: 'none',
@@ -2398,6 +2416,37 @@ const GenAIApp = () => {
                                                         <>Download <FaCloudDownloadAlt size={28} /></>
                                                     )}
                                                 </button>
+                                            )}
+                                            {(item.model !== 'dall-e-3' && item.model !== 'azure-tts') && (<button
+                                                onClick={() => {
+                                                    const plainText = (item.answer || '')
+                                                        .replace(/[#*~`>-]/g, '')
+                                                        .replace(/\r?\n/g, '\r\n');
+                                                    const blob = new Blob([plainText], { type: 'text/plain' });
+                                                    const link = document.createElement('a');
+                                                    link.href = URL.createObjectURL(blob);
+                                                    if (plainText.length > 105) {
+                                                        link.download = 'description.txt';
+                                                    } else {
+                                                        link.download = 'title.txt';
+                                                    }
+                                                    link.click();
+                                                }}
+                                                style={{
+                                                    padding: '3px 3px',
+                                                    fontSize: '18px',
+                                                    backgroundColor: '#4CAF50',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    transition: 'background-color 0.3s'
+                                                }}
+                                                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+                                            >
+                                                Download Text
+                                            </button>
                                             )}
                                             {item.showRawAnswer ? item.answer : (
                                                 <MdEditor
