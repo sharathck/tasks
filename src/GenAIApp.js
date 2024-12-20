@@ -1591,8 +1591,8 @@ const GenAIApp = () => {
         }, 1000);
     };
 
-    const handleHomeWork = async () => {
-        if (!promptInput.trim()) {
+    const handleHomeWork = async (message) => {
+        if (!message.trim()) {
             alert('Please enter a prompt.');
             return;
         }
@@ -1650,7 +1650,7 @@ const GenAIApp = () => {
         }
 
         // Append the prompt to promptInput
-        homeWorkInput = promptInput + intelligentQuestionsPrompt;
+        homeWorkInput = message + intelligentQuestionsPrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
         if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
@@ -1661,8 +1661,8 @@ const GenAIApp = () => {
     };
 
     // Add handleQuiz function after handleHomeWork
-    const handleQuiz = async () => {
-        if (!promptInput.trim()) {
+    const handleQuiz = async (message) => {
+        if (!message.trim()) {
             alert('Please enter a prompt.');
             return;
         }
@@ -1690,7 +1690,7 @@ const GenAIApp = () => {
         }
 
         // Append the prompt to promptInput
-        homeWorkInput = promptInput + quizPrompt;
+        homeWorkInput = message + quizPrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
         updateConfiguration();
@@ -2044,7 +2044,7 @@ const GenAIApp = () => {
                     {(showHomeWorkButton && !isAISearch &&
                         <>
                             <button
-                                onClick={handleHomeWork}
+                                onClick={handleHomeWork(promptInput)}
                                 className="practiceButton"
                             >
                                 {isHomeWork
@@ -2052,7 +2052,7 @@ const GenAIApp = () => {
                                     : (practiceButtonLabel || 'Practice')}
                             </button>
                             <button
-                                onClick={handleQuiz}
+                                onClick={handleQuiz(promptInput)}
                                 className="practiceButton"
                                 style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
                             >
