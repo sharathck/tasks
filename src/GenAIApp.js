@@ -1448,30 +1448,6 @@ const GenAIApp = () => {
         setIsGroq(status);
         setIsNova(status);
         setIsCerebras(status);
-
-        // Set all "show" states to false/true
-        setShowOpenAI(status);
-        setShowAnthropic(status);
-        setShowGemini(status);
-        setShowo1Mini(status);
-        setShowo1(status);
-        setShowLlama(status);
-        setShowMistral(status);
-        setShowGpt4Turbo(status);
-        setShowGpt4oMini(status);
-        setShowGeminiSearch(status);
-        setShowGeminiFlash(status);
-        setShowPerplexityFast(status);
-        setShowPerplexity(status);
-        setShowCodeStral(status);
-        setShowClaudeHaiku(status);
-        setShowSambanova(status);
-        setShowGroq(status);
-        setShowNova(status);
-        setShowCerebras(status);
-        setShowTemp(status);
-        setShowTop_p(status);
-        setShowAutoPrompt(status);
     };
 
     // Add this helper function to handle LLM model selection
@@ -1725,6 +1701,7 @@ const GenAIApp = () => {
         homeWorkInput = message + quizPrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
+        callAPI(modelo1, 'homeWork');
         updateConfiguration();
     };
 
