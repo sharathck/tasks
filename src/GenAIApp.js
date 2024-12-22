@@ -86,8 +86,6 @@ const GenAIApp = () => {
     const [isGeneratingGeminiSearch, setIsGeneratingGeminiSearch] = useState(false);
     const [isGeneratingGeminiFlash, setIsGeneratingGeminiFlash] = useState(false);
     const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
-    const [isImage_Dall_e_3, setIsImage_Dall_e_3] = useState(false);
-    const [isTTS, setIsTTS] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
     const [isGeneratingo1, setIsGeneratingo1] = useState(false);
@@ -418,17 +416,11 @@ const GenAIApp = () => {
                 if (data.iso1 !== undefined) {
                     setIso1(data.iso1);
                 }
-                if (data.isImage_Dall_e_3 !== undefined) {
-                    setIsImage_Dall_e_3(data.isImage_Dall_e_3);
-                }
                 if (data.showImageDallE3 !== undefined) {
                     setShowImageDallE3(data.showImageDallE3);
                 }
                 if (data.showTTS !== undefined) {
                     setShowTTS(data.showTTS);
-                }
-                if (data.isTTS !== undefined) {
-                    setIsTTS(data.isTTS);
                 }
                 if (data.isLlama !== undefined) {
                     setIsLlama(data.isLlama);
@@ -882,7 +874,7 @@ const GenAIApp = () => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isImage_Dall_e_3 && !isTTS && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras) {
             alert('Please select at least one model.');
             return;
         }
@@ -1011,8 +1003,6 @@ const GenAIApp = () => {
                     isSambanova, // Add this line
                     isGroq,
                     isNova,
-                    isTTS,
-                    isImage_Dall_e_3,
                     temperature,
                     top_p,
                     dataLimit,
@@ -1067,8 +1057,6 @@ const GenAIApp = () => {
                         isSambanova, // Add this line
                         isGroq,
                         isNova,
-                        isTTS,
-                        isImage_Dall_e_3,
                         temperature,
                         top_p,
                         dataLimit,
@@ -1336,7 +1324,6 @@ const GenAIApp = () => {
         callAPI(modelImageDallE3);
         if (checked) {
             // Turn off TTS if it's on
-            setIsTTS(false);
             setShowTTS(false);
             // Turn off all text models
             setVisibilityOfTextModels(false);
@@ -1347,7 +1334,6 @@ const GenAIApp = () => {
             setShowTop_p(true);
             setShowAutoPrompt(true);
         }
-        setIsImage_Dall_e_3(checked);
     };
 
     // Handler for TTS Checkbox Change
@@ -1356,7 +1342,6 @@ const GenAIApp = () => {
         callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
         if (checked) {
             // Turn off Image if it's on
-            setIsImage_Dall_e_3(false);
             setShowImageDallE3(false);
             // Turn off all text models
             setVisibilityOfTextModels(false);
@@ -1367,7 +1352,6 @@ const GenAIApp = () => {
             setShowTop_p(true);
             setShowAutoPrompt(true);
         }
-        setIsTTS(checked);
     };
 
     // Add this helper function to manage text model visibility
@@ -1421,12 +1405,6 @@ const GenAIApp = () => {
     // Add this helper function to handle LLM model selection
     const handleLLMChange = (setter, value) => {
         setter(value);
-        handleGenerate();
-        if (value) {
-            // Turn off TTS and Image
-            setIsTTS(false);
-            setIsImage_Dall_e_3(false);
-        }
     };
 
     const handleEditPrompt = () => {
@@ -1928,7 +1906,7 @@ const GenAIApp = () => {
                             onVoiceChange={setVoiceName} // Handler to update selected voice
                         />
                     )}
-                    {!isTTS && showPromptsDropDown && (
+                    {showPromptsDropDown && (
                         <select className="promptDropdownInput" id="promptSelect"
                             onChange={(e) => {
                                 handlePromptChange(e.target.value);
@@ -1943,7 +1921,7 @@ const GenAIApp = () => {
                             ))}
                         </select>
                     )}
-                    {!isTTS && showEditPromptButton && (
+                    {showEditPromptButton && (
                         <button
                             className="signonpagebutton"
                             onClick={() => handleEditPrompt()}
@@ -2045,7 +2023,7 @@ const GenAIApp = () => {
                     )}
                     {showImageDallE3 &&
                         <button className="imageButton"
-                            onClick={() => handleDall_e_3Change(!isImage_Dall_e_3)}>
+                            onClick={() => handleDall_e_3Change()}>
                             <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
                                 GenAI Image
                             </label>
@@ -2053,7 +2031,7 @@ const GenAIApp = () => {
                     }
                     {showTTS &&
                         <button className="audioButton"
-                            onClick={() => handleTTSChange(!isTTS)}
+                            onClick={() => handleTTSChange()}
                         >
                             <label className={isGeneratingTTS ? 'flashing' : ''}>
                                 GenAI Audio
