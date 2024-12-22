@@ -2049,6 +2049,9 @@ const GenAIApp = () => {
                         <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     )}
                     <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    {user && <span style={{ marginLeft: '5px' }}> {user.email}
+                        </span>
+                    }
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button
