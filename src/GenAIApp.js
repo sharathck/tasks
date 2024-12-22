@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint } from 'react-icons/fa';
 import './GenAIApp.css';
-import { collection, doc, where, addDoc, getDocs, query, orderBy, startAfter, limit, updateDoc } from 'firebase/firestore';
+import { collection, doc, where, addDoc, getDocs, getDoc, query, orderBy, startAfter, limit, updateDoc } from 'firebase/firestore';
 import {
     onAuthStateChanged,
     signOut,
@@ -31,6 +31,8 @@ const ADMIN_USER_ID = 'bTGBBpeYPmPJonItYpUOCYhdIlr1';
 let searchQuery = '';
 let searchModel = 'All';
 let dataLimit = 11;
+let youtubeContentInput = '';
+let generatedDocID = '';
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let youtubePromptInput = '';
@@ -47,6 +49,9 @@ let imageSelected = false;
 let homeWorkInput = '';
 let chunk_size = 4000;
 let silence_break = 900;
+let YouTubePrompt = '';
+let intelligentQuestionsPrompt = '';
+let quizPrompt = '';
 
 
 const GenAIApp = () => {
@@ -1098,9 +1103,19 @@ const GenAIApp = () => {
 
     const callAPI = async (selectedModel, invocationType = '') => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput, '  youtubeDescriptionPromptInput : ', youtubeDescriptionPromptInput);
+        console.log('youtube Content Input prompt:', youtubeContentInput);
         try {
             let response;
             switch (invocationType) {
+                case 'youtube':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: youtubeContentInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
                 case 'youtubeTitle':
                     response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                         method: 'POST',
@@ -1182,9 +1197,10 @@ const GenAIApp = () => {
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
             const data = await response.json();
+            console.log('Generated Doc ID:', data[0].results[0].docID);
+            generatedDocID  = data[0].results[0].docID;
+            setCurrentDocId(data[0].results[0].docID);            
             if (invocationType === 'homeWork') {
-                console.log('Homework Response ID:', data[0].results[0].docID);
-                setCurrentDocId(data[0].results[0].docID);
                 setShowHomeworkApp(true);
                 if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
                     //const baseUrl = window.location.href.split('?')[0];
@@ -1192,8 +1208,8 @@ const GenAIApp = () => {
                     //window.open(newUrl, '_blank');
                 }
             }
-
-            console.log('Response:', data);
+            console.log('currenDocID:', currentDocId);
+            //console.log('Response:', data);
         } catch (error) {
             console.error('Error generating content:', error);
             alert(`Error: ${error.message}`);
@@ -1687,12 +1703,13 @@ const GenAIApp = () => {
         try {
             const q = query(
                 collection(db, 'public'),
-                where('tag', 'in', ['practice-button-label', 'Note', 'placeholder', 'placeholder-semantic-search', 'placeholder-keyword-search', 'practice-questions-page-button-level', 'quiz-button-label', 'YouTube_title', 'YouTube_description','imagesSearchPrompt','autoPromptSeparator'])
+                where('tag', '>', ''),
+                where('fullText', '>', '')
             );
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                console.log('Data:', data.fullText);
+                //console.log('Data:', data.fullText);
                 switch (data.tag) {
                     case 'practice-button-label':
                         setPracticeButtonLabel(data.fullText);
@@ -1726,6 +1743,9 @@ const GenAIApp = () => {
                         break;
                     case 'autoPromptSeparator':
                         autoPromptSeparator = data.fullText;
+                        break;
+                    case 'YouTube':
+                        YouTubePrompt = data.fullText;
                         break;
                     default:
                         break;
@@ -2095,11 +2115,10 @@ const GenAIApp = () => {
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'button_selected' : 'button'
                             }
-                            onClick={() => {
+                            onClick={async () => {
                                 setIsGeneratingYouTubeAudioTitlePrompt(true);
                                 setIsGeneratingTTS(true);
                                 callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
-
                                 // Execute YouTube Title/Description
                                 youtubePromptInput = promptInput + youtubeTitlePrompt;
                                 youtubeSelected = true;
@@ -2129,6 +2148,76 @@ const GenAIApp = () => {
                         </button>
                         )
                     }
+                                  {
+                        (showPrint && showYouTubeButton && <button
+                            className={
+                                (isGeneratingYouTubeAudioTitlePrompt) ?
+                                    'button_selected' : 'button'
+                            }
+                            onClick={async () => {
+
+                                setIsGeneratingYouTubeAudioTitlePrompt(true);
+                                console.log('youtube prompt:', YouTubePrompt);
+                                if (YouTubePrompt === undefined || YouTubePrompt.length < 5) {
+                                    alert('ERROR: YouTubePrompt is blank.');
+                                    return;
+                                }
+                                youtubeContentInput = promptInput + YouTubePrompt;
+                                await callAPI(modelo1, 'youtube');
+                                console.log (' generatedDocID' , generatedDocID);
+                                            if (!generatedDocID || generatedDocID.length < 5) {
+                                                alert('ERROR: generatedDocID is not set.');
+                                                return;
+                                            }
+                                            try {
+                                                const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                                const docSnap = await getDoc(docRef);
+                                    
+                                                if (docSnap.exists()) {
+                                                    const firestoreResponseData = docSnap.data().answer;
+                                                    console.log('First fetched data from Firestore:', firestoreResponseData);
+                                                    console.log('firestoreResponseData:', firestoreResponseData);
+                                                    if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+                                                        alert('ERROR: Prompt response is not generated.');
+                                                        return;
+                                                    }
+                                                    setIsGeneratingTTS(true);
+                                                    callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
+                                                    // Execute YouTube Title/Description
+                                                    youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
+                                                    youtubeSelected = true;
+                                                    setIsYouTubeTitle(true);
+                                                    setIsGemini(true);
+                                                    setIsGeneratingGemini(true);
+                                                    callAPI(modelGemini, 'youtubeTitle');
+                                                    youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
+                                                    callAPI(modelo1, 'youtubeDescription');
+                                                    // Execute Image Search
+                                                    imagePromptInput = imagesSearchPrompt + firestoreResponseData;
+                                                    imageSelected = true;
+                                                    setIsImagesSearch(true);
+                                                    setIso1(true);
+                                                    setIsGeneratingo1(true);
+                                                    callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitlePrompt(false));
+                                                }
+                                                return null;
+                                            } 
+                                            catch (error) {
+                                                console.error("Error fetching questions from Firestore:", error);
+                                                return null;
+                                            }
+
+                            }}>
+                            <label className={
+                                (isGeneratingYouTubeAudioTitlePrompt) ?
+                                    'flashing' : ''
+                            }>
+                                YouTube <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
+                            </label>
+                        </button>
+                        )
+                    }
+                    
                     <br />
                     <div className="info-text" style={{
                         fontSize: '14px',
