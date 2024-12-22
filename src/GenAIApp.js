@@ -22,6 +22,7 @@ import 'react-markdown-editor-lite/lib/index.css';
 import speakerIcon from './speak.png';
 import imageIcon from './image.png';
 import youtubeIcon from './youtube.png';
+import { call } from "@mdxeditor/editor";
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -33,12 +34,15 @@ let searchModel = 'All';
 let dataLimit = 11;
 let youtubeContentInput = '';
 let generatedDocID = '';
+let imageGenerationPrompt = '';
+let imagePromptsGenerationInput = '';
 let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let youtubePromptInput = '';
 let youtubeDescriptionPromptInput = '';
 let googleSearchPromptInput = '';
 let youtubeSelected = false;
+let imageGenerationPromptInput = '';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -1104,9 +1108,29 @@ const GenAIApp = () => {
     const callAPI = async (selectedModel, invocationType = '') => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput, '  youtubeDescriptionPromptInput : ', youtubeDescriptionPromptInput);
         console.log('youtube Content Input prompt:', youtubeContentInput);
+        console.log('imageGenerationPromptInput :', imageGenerationPromptInput);
+        console.log('imagePromptsGenerationInput:', imagePromptsGenerationInput);
         try {
             let response;
             switch (invocationType) {
+                case 'imageGeneration':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: imagePromptsGenerationInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
+                case 'image':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: imageGenerationPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                    });
+                    break;
                 case 'youtube':
                     response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                         method: 'POST',
@@ -1196,19 +1220,19 @@ const GenAIApp = () => {
                 alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
-            const data = await response.json();
-            console.log('Generated Doc ID:', data[0].results[0].docID);
-            generatedDocID  = data[0].results[0].docID;
-            setCurrentDocId(data[0].results[0].docID);            
-            if (invocationType === 'homeWork') {
-                setShowHomeworkApp(true);
-                if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
+            if (invocationType === 'homeWork' || invocationType === 'youtube' || invocationType === 'imageGeneration') {
+                const data = await response.json();
+                generatedDocID = data[0].results[0].docID;
+                console.log('Generated Doc ID:', generatedDocID);
+                if (invocationType === 'homeWork') {
+                    setCurrentDocId(data[0].results[0].docID);
+                    console.log('currenDocID:', currentDocId);
+                    setShowHomeworkApp(true);
                     //const baseUrl = window.location.href.split('?')[0];
                     //const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
                     //window.open(newUrl, '_blank');
                 }
             }
-            console.log('currenDocID:', currentDocId);
             //console.log('Response:', data);
         } catch (error) {
             console.error('Error generating content:', error);
@@ -1291,6 +1315,38 @@ const GenAIApp = () => {
         }
     };
 
+    const callImageAPI = async (selectedModel, imageDescription = '') => {
+        console.log('Calling API with model:', selectedModel);
+        console.log('imageDescription:', imageDescription);
+        try {
+            let response;
+            response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: imageDescription, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert(errorData.error + 'Failed to generate content');
+                throw new Error(errorData.error || 'Failed to generate content.');
+            }
+            const data = await response.json();
+            console.log('Generated Doc ID:', data[0].results[0].docID);
+            generatedDocID = data[0].results[0].docID;
+            //console.log('Response:', data);
+        } catch (error) {
+            console.error('Error generating content:', error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            setIsImagesSearch(false);
+            setIsAISearch(false);
+            if (selectedModel === modelImageDallE3) {
+                setIsGeneratingImage_Dall_e_3(false);
+            }
+        }
+    };
     // Function to call the TTS API
     const callTTSAPI = async (message, apiUrl) => {
 
@@ -1747,6 +1803,9 @@ const GenAIApp = () => {
                     case 'YouTube':
                         YouTubePrompt = data.fullText;
                         break;
+                    case 'imageGenerationPrompt':
+                        imageGenerationPrompt = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2070,7 +2129,7 @@ const GenAIApp = () => {
                     )}
                     <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     {user && <span style={{ marginLeft: '5px' }}> {user.email}
-                        </span>
+                    </span>
                     }
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
@@ -2133,22 +2192,40 @@ const GenAIApp = () => {
                                 imageSelected = true;
                                 setIsImagesSearch(true);
                                 setIso1(true);
-                                setIsGeneratingo1(true);
-                                callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitlePrompt(false));
+                                setIsGeneratingGemini(true);
+                                callAPI(modelGemini, 'imagesSearchWords');
+                                imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
+                                await callAPI(modelGemini, 'imageGeneration');
+                                console.log(' generatedDocID', generatedDocID);
+                                const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                const idocSnap = await getDoc(idocRef);
+                                if (idocSnap.exists()) {
+                                    const ifirestoreResponseData = idocSnap.data().answer;
+                                    console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+                                    if (ifirestoreResponseData) {
+                                        const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                                        for (const part of parts) {
+                                            console.log('image prompt part:', part);
+                                            imageGenerationPromptInput = part;
+                                            setIsGeneratingImage_Dall_e_3(true);
+                                            await callAPI(modelImageDallE3, 'image');
+                                        }
+                                        setIsGeneratingYouTubeAudioTitlePrompt(false);
+                                    } else {
+                                        console.error('ifirestoreResponseData is null or undefined');
+                                    }
+                                }
                             }}>
                             <label className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
-                                / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
-                                / Image Search Words
-                                <img src={imageIcon} alt="" height="22px" style={{ marginRight: '4px' }} />
+                                YouTube Audio - Title - Description - Image Search
                             </label>
                         </button>
                         )
                     }
-                                  {
+                    {
                         (showPrint && showYouTubeButton && <button
                             className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
@@ -2164,60 +2241,81 @@ const GenAIApp = () => {
                                 }
                                 youtubeContentInput = promptInput + YouTubePrompt;
                                 await callAPI(modelo1, 'youtube');
-                                console.log (' generatedDocID' , generatedDocID);
-                                            if (!generatedDocID || generatedDocID.length < 5) {
-                                                alert('ERROR: generatedDocID is not set.');
-                                                return;
-                                            }
-                                            try {
-                                                const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                                const docSnap = await getDoc(docRef);
-                                    
-                                                if (docSnap.exists()) {
-                                                    const firestoreResponseData = docSnap.data().answer;
-                                                    console.log('First fetched data from Firestore:', firestoreResponseData);
-                                                    console.log('firestoreResponseData:', firestoreResponseData);
-                                                    if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
-                                                        alert('ERROR: Prompt response is not generated.');
-                                                        return;
-                                                    }
-                                                    setIsGeneratingTTS(true);
-                                                    callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
-                                                    // Execute YouTube Title/Description
-                                                    youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
-                                                    youtubeSelected = true;
-                                                    setIsYouTubeTitle(true);
-                                                    setIsGemini(true);
-                                                    setIsGeneratingGemini(true);
-                                                    callAPI(modelGemini, 'youtubeTitle');
-                                                    youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
-                                                    callAPI(modelo1, 'youtubeDescription');
-                                                    // Execute Image Search
-                                                    imagePromptInput = imagesSearchPrompt + firestoreResponseData;
-                                                    imageSelected = true;
-                                                    setIsImagesSearch(true);
-                                                    setIso1(true);
-                                                    setIsGeneratingo1(true);
-                                                    callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitlePrompt(false));
+                                console.log(' generatedDocID', generatedDocID);
+                                if (!generatedDocID || generatedDocID.length < 5) {
+                                    alert('ERROR: generatedDocID is not set.');
+                                    return;
+                                }
+                                try {
+                                    const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                    const docSnap = await getDoc(docRef);
+
+                                    if (docSnap.exists()) {
+                                        const firestoreResponseData = docSnap.data().answer;
+                                        console.log('First fetched data from Firestore:', firestoreResponseData);
+                                        console.log('firestoreResponseData:', firestoreResponseData);
+                                        if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+                                            alert('ERROR: Prompt response is not generated.');
+                                            return;
+                                        }
+                                        setIsGeneratingTTS(true);
+                                        callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
+                                        // Execute YouTube Title/Description
+                                        youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
+                                        youtubeSelected = true;
+                                        setIsYouTubeTitle(true);
+                                        setIsGemini(true);
+                                        setIsGeneratingGemini(true);
+                                        callAPI(modelGemini, 'youtubeTitle');
+                                        youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
+                                        callAPI(modelo1, 'youtubeDescription');
+                                        // Execute Image Search
+                                        imagePromptInput = imagesSearchPrompt + firestoreResponseData;
+                                        imageSelected = true;
+                                        setIsImagesSearch(true);
+                                        setIso1(true);
+                                        setIsGeneratingGemini(true);
+                                        callAPI(modelGemini, 'imagesSearchWords');
+                                        imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
+                                        await callAPI(modelGemini, 'imageGeneration');
+                                        console.log(' generatedDocID', generatedDocID);
+                                        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                        const idocSnap = await getDoc(idocRef);
+                                        if (idocSnap.exists()) {
+                                            const ifirestoreResponseData = idocSnap.data().answer;
+                                            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+                                            if (ifirestoreResponseData) {
+                                                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                                                for (const part of parts) {
+                                                    console.log('image prompt part:', part);
+                                                    imageGenerationPromptInput = part;
+                                                    setIsGeneratingImage_Dall_e_3(true);
+                                                    await callAPI(modelImageDallE3, 'image');
                                                 }
-                                                return null;
-                                            } 
-                                            catch (error) {
-                                                console.error("Error fetching questions from Firestore:", error);
-                                                return null;
+                                                setIsGeneratingYouTubeAudioTitlePrompt(false);
+                                            } else {
+                                                console.error('ifirestoreResponseData is null or undefined');
                                             }
+                                        }
+                                    }
+                                    return null;
+                                }
+                                catch (error) {
+                                    console.error("Error fetching questions from Firestore:", error);
+                                    return null;
+                                }
 
                             }}>
                             <label className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                YouTube <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
+                                                               YouTube Content - Audio - Title - Description - Image Search - AI Generated Images <img src={youtubeIcon} alt="youtube" height="26px" style={{ marginRight: '4px' }} />
                             </label>
                         </button>
                         )
                     }
-                    
+
                     <br />
                     <div className="info-text" style={{
                         fontSize: '14px',
@@ -2591,6 +2689,7 @@ const GenAIApp = () => {
                                                 Download Text
                                             </button>
                                             )}
+                                            {item.showRawAnswer ? item.id : ''}
                                             {item.showRawAnswer ? item.answer : (
                                                 <MdEditor
                                                     value={item.answer || ''} // Add default empty string
