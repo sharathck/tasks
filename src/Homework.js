@@ -170,14 +170,10 @@ const Homework = ({ sourceDocumentID }) => {
                 else {
                     // Extract content between ```json and ``` markers
                     const jsonMatch = cleanContent.match(/```(?:json|JSON)\s*([\s\S]*?)\s*```/);
-
                     // Clean and parse the JSON content
                     jsonContent = jsonMatch[1].trim();
                 }
-
-                const questionsJson = JSON.parse(jsonContent.replace(/\\n/g, '\n'));
-                console.log("Parsed JSON:", questionsJson); // Debug log
-                await initializeHomeworkData(questionsJson, user.uid);
+                await initializeHomeworkData(jsonContent, user.uid);
                 await fetchInitialQuestions(user.uid);
             }
         }
