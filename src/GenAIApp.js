@@ -61,7 +61,7 @@ let practicePrompt = '';
 let quizMultipleChoicesPrompt = '';
 
 
-const GenAIApp = ({sourceImageInformation}) => {
+const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
@@ -384,6 +384,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                 if (sourceImageParameter && sourceImageParameter.length > 0) {
                     console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
                     imageGenerationPromptInput = sourceImageParameter;
+                    setPromptInput(sourceImageParameter);
                     setIsGeneratingImage_Dall_e_3(true);
                     callAPI(modelImageDallE3, 'image');
                 }
@@ -1135,7 +1136,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ prompt: imagePromptsGenerationInput, model: selectedModel, uid: userID})
+                        body: JSON.stringify({ prompt: imagePromptsGenerationInput, model: selectedModel, uid: userID })
                     });
                     break;
                 case 'image':
@@ -1210,12 +1211,12 @@ const GenAIApp = ({sourceImageInformation}) => {
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ 
-                            prompt: homeWorkInput, 
-                            model: selectedModel, 
-                            uid: uid, 
-                            temperature: temperature, 
-                            top_p: top_p 
+                        body: JSON.stringify({
+                            prompt: homeWorkInput,
+                            model: selectedModel,
+                            uid: uid,
+                            temperature: temperature,
+                            top_p: top_p
                         })
                     });
                     break;
@@ -1251,10 +1252,11 @@ const GenAIApp = ({sourceImageInformation}) => {
                 alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
-            if (invocationType === 'homeWork' || invocationType === 'youtube' || invocationType === 'image' || invocationType === 'imageGeneration') {
-                const data = await response.json();
-                generatedDocID = data[0].results[0].docID;
-                console.log('Generated Doc ID:', generatedDocID);
+            const data = await response.json();
+            generatedDocID = data[0].results[0].docID;
+            console.log('Generated Doc ID:', generatedDocID);
+
+            if (invocationType === 'homeWork' || invocationType === 'youtube' || invocationType === 'imageGeneration') {
                 if (invocationType === 'homeWork') {
                     setCurrentDocId(data[0].results[0].docID);
                     console.log('currenDocID:', currentDocId);
@@ -2230,15 +2232,33 @@ const GenAIApp = ({sourceImageInformation}) => {
                                 youtubeDescriptionPromptInput = promptInput + youtubeDescriptionPrompt;
                                 callAPI(modelo1, 'youtubeDescription');
                                 // Execute Image Search
-                                imagePromptInput = imagesSearchPrompt + promptInput;
+                                imagePromptInput = promptInput + imagesSearchPrompt;
                                 imageSelected = true;
                                 setIsImagesSearch(true);
                                 setIso1(true);
                                 setIsGeneratingGemini(true);
-                                callAPI(modelGemini, 'imagesSearchWords');
+                                await callAPI(modelGemini, 'imagesSearchWords');
+                                console.log('Image Search generatedDocID', generatedDocID);
+                                const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                const imageSearchdocSnap = await getDoc(imageSearchdocRef);
+                                if (imageSearchdocSnap.exists()) {
+                                    const ifirestoreResponseData = imageSearchdocSnap.data().answer;
+                                    console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+                                    if (ifirestoreResponseData) {
+                                        const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                                        for (const part of parts) {
+                                            console.log('image prompt part:', part);
+                                            imageGenerationPromptInput = part;
+                                            const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                                            window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
+                                        }
+                                    } else {
+                                        console.error('imageSearchfirestoreResponseData is null or undefined');
+                                    }
+                                }
                                 imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
                                 await callAPI(modelGemini, 'imageGeneration');
-                                console.log(' generatedDocID', generatedDocID);
+                                console.log('Image Generation generatedDocID', generatedDocID);
                                 const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
                                 const idocSnap = await getDoc(idocRef);
                                 if (idocSnap.exists()) {
@@ -2250,9 +2270,11 @@ const GenAIApp = ({sourceImageInformation}) => {
                                             console.log('image prompt part:', part);
                                             imageGenerationPromptInput = part;
                                             setIsGeneratingImage_Dall_e_3(true);
-                                            await callAPI(modelImageDallE3, 'image');
+                                            const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                                            window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
                                         }
                                         setIsGeneratingYouTubeAudioTitlePrompt(false);
+                                        setIsGeneratingImage_Dall_e_3(false);
                                     } else {
                                         console.error('ifirestoreResponseData is null or undefined');
                                     }
@@ -2312,15 +2334,33 @@ const GenAIApp = ({sourceImageInformation}) => {
                                         youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
                                         callAPI(modelo1, 'youtubeDescription');
                                         // Execute Image Search
-                                        imagePromptInput = imagesSearchPrompt + firestoreResponseData;
+                                        imagePromptInput = promptInput + imagesSearchPrompt;
                                         imageSelected = true;
                                         setIsImagesSearch(true);
                                         setIso1(true);
                                         setIsGeneratingGemini(true);
-                                        callAPI(modelGemini, 'imagesSearchWords');
-                                        imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
+                                        await callAPI(modelGemini, 'imagesSearchWords');
+                                        console.log('Image Search generatedDocID', generatedDocID);
+                                        const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                        const imageSearchdocSnap = await getDoc(imageSearchdocRef);
+                                        if (imageSearchdocSnap.exists()) {
+                                            const ifirestoreResponseData = imageSearchdocSnap.data().answer;
+                                            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+                                            if (ifirestoreResponseData) {
+                                                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                                                for (const part of parts) {
+                                                    console.log('image prompt part:', part);
+                                                    imageGenerationPromptInput = part;
+                                                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                                                    window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
+                                                }
+                                            } else {
+                                                console.error('imageSearchfirestoreResponseData is null or undefined');
+                                            }
+                                        }
+                                        imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
                                         await callAPI(modelGemini, 'imageGeneration');
-                                        console.log(' generatedDocID', generatedDocID);
+                                        console.log('Image Generation generatedDocID', generatedDocID);
                                         const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
                                         const idocSnap = await getDoc(idocRef);
                                         if (idocSnap.exists()) {
@@ -2332,9 +2372,11 @@ const GenAIApp = ({sourceImageInformation}) => {
                                                     console.log('image prompt part:', part);
                                                     imageGenerationPromptInput = part;
                                                     setIsGeneratingImage_Dall_e_3(true);
-                                                    await callAPI(modelImageDallE3, 'image');
+                                                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                                                    window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
                                                 }
                                                 setIsGeneratingYouTubeAudioTitlePrompt(false);
+                                                setIsGeneratingImage_Dall_e_3(false);
                                             } else {
                                                 console.error('ifirestoreResponseData is null or undefined');
                                             }
@@ -2352,7 +2394,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                                               YouTube Content - Audio - Title - Description - Image Search - AI Generated Images <img src={youtubeIcon} alt="youtube" height="26px" style={{ marginRight: '4px' }} />
+                                YouTube Content - Audio - Title - Description - Image Search - AI Generated Images <img src={youtubeIcon} alt="youtube" height="26px" style={{ marginRight: '4px' }} />
                             </label>
                         </button>
                         )
@@ -2691,29 +2733,29 @@ const GenAIApp = ({sourceImageInformation}) => {
                                                     )}
                                                 </button>
                                             )}
-                                                                                    {  ( ((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
-                                            className="button"
-                                            onClick={() => {
-                                                setCurrentDocId(item.id);
-                                                setShowHomeworkApp(true);
-                                            }}
-                                            style={{
-                                                padding: '3px 3px',
-                                                fontSize: '18px',
-                                                backgroundColor: '#278cab',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                cursor: 'pointer',
-                                                transition: 'background-color 0.3s'
-                                            }}
-                                            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                            onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
-                                        >
-                                            {practicePageButtonLabel || 'Go to Practice Questions Page'}
-                                        </button>
-                                        )}
-                                        &nbsp; &nbsp;
+                                            {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
+                                                className="button"
+                                                onClick={() => {
+                                                    setCurrentDocId(item.id);
+                                                    setShowHomeworkApp(true);
+                                                }}
+                                                style={{
+                                                    padding: '3px 3px',
+                                                    fontSize: '18px',
+                                                    backgroundColor: '#278cab',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    transition: 'background-color 0.3s'
+                                                }}
+                                                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                                onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
+                                            >
+                                                {practicePageButtonLabel || 'Go to Practice Questions Page'}
+                                            </button>
+                                            )}
+                                            &nbsp; &nbsp;
                                             {(item.model !== 'dall-e-3' && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
@@ -2746,8 +2788,8 @@ const GenAIApp = ({sourceImageInformation}) => {
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
-                              
-                                             {item.showRawAnswer ? ( ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && item.answer) : (
+
+                                            {item.showRawAnswer ? (((item.answer.slice(0, 7)).toLowerCase() !== '```json') && item.answer) : (
                                                 item.answer && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
@@ -2770,7 +2812,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                                                     />
                                                 )
                                             )}
-                                            
+
                                         </div>
 
                                     )}
