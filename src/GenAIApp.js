@@ -1697,7 +1697,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
         setIsGeneratingGemini(true);
-        callAPI(modelGemini, 'homeWork');
+        await callAPI(modelGemini, 'homeWork');
         setIsGeneratingo1(true); // Set generating state to true
         callAPI(modelo1, 'homeWork');
         updateConfiguration();
@@ -1734,7 +1734,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         // Append the prompt to promptInput
         homeWorkInput = message + quizPrompt;
         setIsGeneratingGemini(true);
-        callAPI(modelGemini, 'homeWork');
+        await callAPI(modelGemini, 'homeWork');
         setIsGeneratingo1(true); // Set generating state to true
         callAPI(modelo1, 'homeWork');
         updateConfiguration();
@@ -1850,7 +1850,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         // Append the prompt to promptInput
         homeWorkInput = message + multipleChoicePrompt;
         setIsGeneratingGemini(true);
-        callAPI(modelGemini, 'homeWork');
+        await callAPI(modelGemini, 'homeWork');
         setIsGeneratingo1(true); // Set generating state to true
         callAPI(modelo1, 'homeWork');
         updateConfiguration();
