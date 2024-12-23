@@ -1260,7 +1260,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (invocationType === 'homeWork') {
                     setCurrentDocId(data[0].results[0].docID);
                     console.log('currenDocID:', currentDocId);
-                    if (selectedModel === modelGemini) {
+                    if (selectedModel === modelo1) {
                         setShowHomeworkApp(true);
                     }
                     else {
@@ -1698,11 +1698,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
         homeWorkInput = message + intelligentQuestionsPrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
+        setIsGeneratingo1(true); // Set generating state to true
         callAPI(modelo1, 'homeWork');
-        if (user.uid === 'bTGBBpeYPmPJonItYpUOCYhdIlr1') {
-            setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1, 'homeWork');
-        }
         updateConfiguration();
     };
 
@@ -1738,6 +1735,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         homeWorkInput = message + quizPrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
+        setIsGeneratingo1(true); // Set generating state to true
         callAPI(modelo1, 'homeWork');
         updateConfiguration();
     };
@@ -1853,6 +1851,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         homeWorkInput = message + multipleChoicePrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
+        setIsGeneratingo1(true); // Set generating state to true
         callAPI(modelo1, 'homeWork');
         updateConfiguration();
     };
