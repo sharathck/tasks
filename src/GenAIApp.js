@@ -31,7 +31,7 @@ console.log(isiPhone);
 const ADMIN_USER_ID = 'bTGBBpeYPmPJonItYpUOCYhdIlr1';
 let searchQuery = '';
 let searchModel = 'All';
-let dataLimit = 11;
+let dataLimit = 21;
 let youtubeContentInput = '';
 let generatedDocID = '';
 let imageGenerationPrompt = '';
@@ -60,8 +60,9 @@ let practicePrompt = '';
 let quizMultipleChoicesPrompt = '';
 
 
-const GenAIApp = () => {
+const GenAIApp = ({sourceImageInformation}) => {
     // **State Variables**
+    const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
     const [isDownloading, setIsDownloading] = useState();
     const [isLoading, setIsLoading] = useState(false);
@@ -356,6 +357,12 @@ const GenAIApp = () => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
+                if (sourceImageParameter && sourceImageParameter.length > 0) {
+                    console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
+                    imageGenerationPromptInput = sourceImageParameter;
+                    setIsGeneratingImage_Dall_e_3(true);
+                    callAPI(modelImageDallE3, 'image');
+                }
                 const urlParams = new URLSearchParams(window.location.search);
                 const genaiParam = urlParams.get('genai');
                 if (genaiParam) {
@@ -1836,6 +1843,7 @@ const GenAIApp = () => {
         callAPI(modelGemini, 'homeWork');
         updateConfiguration();
     };
+
 
     return (
         <div>

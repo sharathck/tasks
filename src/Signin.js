@@ -95,6 +95,14 @@ function SigninApp() {
     };
     const urlParams = new URLSearchParams(window.location.search);
     const homeworkParam = urlParams.get('h');
+    const imageParam = urlParams.get('i');
+    if (imageParam && imageParam.length > 5) {
+        return (
+            <div>
+                <GenAIApp sourceImageParameter={imageParam} />
+            </div>
+        );
+    }
     if (homeworkParam && homeworkParam.length > 5) {
         return (
             <Practice sourceDocumentID={homeworkParam} />
