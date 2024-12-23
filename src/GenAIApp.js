@@ -31,6 +31,7 @@ console.log(isiPhone);
 const ADMIN_USER_ID = 'bTGBBpeYPmPJonItYpUOCYhdIlr1';
 let searchQuery = '';
 let searchModel = 'All';
+let userID = '';
 let dataLimit = 21;
 let youtubeContentInput = '';
 let generatedDocID = '';
@@ -251,8 +252,8 @@ const GenAIApp = ({sourceImageInformation}) => {
     const [showCerebras, setShowCerebras] = useState(false);
     const [modelCerebras, setModelCerebras] = useState('llama-c');
     const [labelCerebras, setLabelCerebras] = useState('Llama-C');
-    const [youtubeTitlePrompt, setYoutubeTitlePrompt] = useState(`::::::::::::::::Give me the best YouTube Title for the above content, I need exactly one response and don't include any other text or URLs in the response::::::::: ----- Text from below is only prompt purpose --- YouTube Title should be captivating, exciting, trendy, catchy, YouTube search engine optimized and SEO friendly, it can contain special characters, icons, emojis, and numbers to make it more appealing and expressive.`);
-    const [youtubeDescriptionPrompt, setYoutubeDescriptionPrompt] = useState(`::::::::::::::::Give me the best YouTube description for the above content, I need exactly one response and don't include any other text or URLs in the response::::::::: ----- Text from below is only prompt purpose --- YouTube description should be engaging, detailed, informative, and YouTube search engine optimized and SEO friendly, it can contain special characters, emojis, and numbers to make it more appealing and expressive. Please use the emojis, icons to make it more visually appealing.   Use relevant tags to improve the visibility and reach of your video in Youtube video Description.   Use bullet points, numbered points, lists, and paragraphs to organize Youtube video description.  Bold, italicize, underline, and highlight important information in Youtube video description.   Also, please request users to subscribe and click on bell icon for latest content at the end. `);
+    const [youtubeTitlePrompt, setYoutubeTitlePrompt] = useState(`### Give me the best YouTube Title for the above content`);
+    const [youtubeDescriptionPrompt, setYoutubeDescriptionPrompt] = useState(`#### Give me the best YouTube description for the above content, I need exactly one response and don't include any other text or URLs in the response. ----- Text from below is only prompt purpose --- YouTube description should be engaging, detailed, informative, and YouTube search engine optimized and SEO friendly, it can contain special characters, emojis, and numbers to make it more appealing and expressive. Please use the emojis, icons to make it more visually appealing.   Use relevant tags to improve the visibility and reach of your video in Youtube video Description.   Use bullet points, numbered points, lists, and paragraphs to organize Youtube video description.  Bold, italicize, underline, and highlight important information in Youtube video description.   Also, please request users to subscribe and click on bell icon for latest content at the end. `);
 
     const embedPrompt = async (docId) => {
         try {
@@ -357,14 +358,8 @@ const GenAIApp = ({sourceImageInformation}) => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
+                userID = currentUser.uid;
                 console.log('User is signed in:', currentUser.uid);
-                console.log('source Image Parameter:', sourceImageParameter);
-                if (sourceImageParameter && sourceImageParameter.length > 0) {
-                    console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
-                    imageGenerationPromptInput = sourceImageParameter;
-                    setIsGeneratingImage_Dall_e_3(true);
-                    callAPI(modelImageDallE3, 'image');
-                }
                 const urlParams = new URLSearchParams(window.location.search);
                 const genaiParam = urlParams.get('genai');
                 if (genaiParam) {
@@ -385,6 +380,14 @@ const GenAIApp = ({sourceImageInformation}) => {
                 fetchPrompts(currentUser.uid);
                 await fetchGenAIParameters(currentUser.uid);
                 await fetchTexts();
+                console.log('source Image Parameter:', sourceImageParameter);
+                if (sourceImageParameter && sourceImageParameter.length > 0) {
+                    console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
+                    imageGenerationPromptInput = sourceImageParameter;
+                    setPromptInput(sourceImageParameter);
+                    setIsGeneratingImage_Dall_e_3(true);
+                    callAPI(modelImageDallE3, 'image');
+                }
             }
             else {
                 console.log('No user is signed in');
@@ -1133,7 +1136,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ prompt: imagePromptsGenerationInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                        body: JSON.stringify({ prompt: imagePromptsGenerationInput, model: selectedModel, uid: userID})
                     });
                     break;
                 case 'image':
@@ -1142,7 +1145,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ prompt: imageGenerationPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
+                        body: JSON.stringify({ prompt: imageGenerationPromptInput, model: selectedModel, uid: userID })
                     });
                     break;
                 case 'youtube':
@@ -1249,7 +1252,7 @@ const GenAIApp = ({sourceImageInformation}) => {
                 alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
-            if (invocationType === 'homeWork' || invocationType === 'youtube' || invocationType === 'imageGeneration') {
+            if (invocationType === 'homeWork' || invocationType === 'youtube' || invocationType === 'image' || invocationType === 'imageGeneration') {
                 const data = await response.json();
                 generatedDocID = data[0].results[0].docID;
                 console.log('Generated Doc ID:', generatedDocID);
@@ -1279,7 +1282,9 @@ const GenAIApp = ({sourceImageInformation}) => {
             setIsGeneratingGeminiSearch(false);
             setIsAISearch(false);
             console.log('Fetching data after generating content');
+            if (sourceImageParameter.length < 5) {
             fetchData(uid);
+            }
             if (selectedModel === modelOpenAI) {
                 setIsGenerating(false);
             }
