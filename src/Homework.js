@@ -175,7 +175,7 @@ const Homework = ({ sourceDocumentID }) => {
                     jsonContent = jsonMatch[1].trim();
                 }
 
-                const questionsJson = JSON.parse(jsonContent);
+                const questionsJson = JSON.parse(jsonContent.replace(/\\n/g, '\n'));
                 console.log("Parsed JSON:", questionsJson); // Debug log
                 await initializeHomeworkData(questionsJson, user.uid);
                 await fetchInitialQuestions(user.uid);

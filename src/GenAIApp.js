@@ -228,6 +228,9 @@ const GenAIApp = () => {
     const [showEditPromptButton, setShowEditPromptButton] = useState(false);
     const [showPromptsDropDownAfterSearch, setShowPromptsDropDownAfterSearch] = useState(false);
     const [showBackToAppButton, setShowBackToAppButton] = useState(false);
+    // Add new states for Quiz-Multiple Choices
+    const [isQuizMultipleChoice, setIsQuizMultipleChoice] = useState(false);
+    const [showQuizMultipleChoiceButton, setShowQuizMultipleChoiceButton] = useState(true);
 
     /* Add new state variables for fetched texts */
     const [practiceButtonLabel, setPracticeButtonLabel] = useState('');
@@ -1190,6 +1193,21 @@ const GenAIApp = () => {
                         body: JSON.stringify({ prompt: googleSearchPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
                     });
                     break;
+                case 'multipleChoiceQuiz':
+                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            prompt: homeWorkInput, 
+                            model: selectedModel, 
+                            uid: uid, 
+                            temperature: temperature, 
+                            top_p: top_p 
+                        })
+                    });
+                    break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
@@ -1676,12 +1694,7 @@ const GenAIApp = () => {
             alert('Please enter a message.');
             return;
         }
-        if (!prompt.trim()) {
-            alert('Please enter a prompt.');
-            return;
-        }
         setIsQuiz(true);
-
         // Ensure genaiPrompts is populated
         if (genaiPrompts.length === 0) {
             await fetchPrompts(uid);
@@ -1707,7 +1720,6 @@ const GenAIApp = () => {
         homeWorkInput = message + quizPrompt;
         setIsGeneratingGemini(true);
         callAPI(modelGemini, 'homeWork');
-        callAPI(modelo1, 'homeWork');
         updateConfiguration();
     };
 
@@ -1789,6 +1801,9 @@ const GenAIApp = () => {
                     case 'imageGenerationPrompt':
                         imageGenerationPrompt = data.fullText;
                         break;
+                    case 'quiz-multiple-choices':
+                        quizMultipleChoicesPrompt = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -1798,6 +1813,29 @@ const GenAIApp = () => {
         }
     };
 
+    // Add the handler function for multiple choice quiz
+    const handleMultipleChoiceQuiz = async (message) => {
+        if (!message.trim()) {
+            alert('Please enter a message.');
+            return;
+        }
+        setIsQuizMultipleChoice(true);
+
+        // Ensure genaiPrompts is populated
+        if (genaiPrompts.length === 0) {
+            await fetchPrompts(uid);
+        }
+
+        // Get quiz prompt template
+        const prompt = genaiPrompts.find(prompt => prompt.tag === 'quiz-multiple-choices');
+        let multipleChoicePrompt = prompt ? prompt.fullText : quizMultipleChoicesPrompt;
+
+        // Append the prompt to promptInput
+        homeWorkInput = message + multipleChoicePrompt;
+        setIsGeneratingGemini(true);
+        callAPI(modelGemini, 'homeWork');
+        updateConfiguration();
+    };
 
     return (
         <div>
@@ -2071,6 +2109,15 @@ const GenAIApp = () => {
                                 {isQuiz
                                     ? (<FaSpinner className="spinning" />)
                                     : (quizButtonLabel || 'Trivia/Quiz')}
+                            </button>
+                            <button
+                                onClick={() => handleMultipleChoiceQuiz(promptInput)}
+                                className="practiceButton"
+                                style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                            >
+                                {isQuizMultipleChoice
+                                    ? (<FaSpinner className="spinning" />)
+                                    : ('Quiz-Choices')}
                             </button>
                         </>
                     )}
@@ -2672,7 +2719,7 @@ const GenAIApp = () => {
                                                 Download Text
                                             </button>
                                             )}
-                                            {item.showRawAnswer ? item.id : item.answer.slice(0, 9)}
+                                            {item.showRawAnswer ? item.id : ''}
                               
                                              {item.showRawAnswer ? ( ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && item.answer) : (
                                                 item.answer && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (
