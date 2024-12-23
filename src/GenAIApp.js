@@ -56,6 +56,8 @@ let silence_break = 900;
 let YouTubePrompt = '';
 let intelligentQuestionsPrompt = '';
 let quizPrompt = '';
+let practicePrompt = '';
+let quizMultipleChoicesPrompt = '';
 
 
 const GenAIApp = () => {
@@ -1671,6 +1673,10 @@ const GenAIApp = () => {
     // Add handleQuiz function after handleHomeWork
     const handleQuiz = async (message) => {
         if (!message.trim()) {
+            alert('Please enter a message.');
+            return;
+        }
+        if (!prompt.trim()) {
             alert('Please enter a prompt.');
             return;
         }
@@ -2666,28 +2672,32 @@ const GenAIApp = () => {
                                                 Download Text
                                             </button>
                                             )}
-                                            {item.showRawAnswer ? item.id : ''}
-                                            {item.showRawAnswer ? item.answer : (
-                                                <MdEditor
-                                                    value={item.answer || ''} // Add default empty string
-                                                    renderHTML={text => mdParser.render(text || '')} // Add default empty string
-                                                    readOnly={true}
-                                                    config={{
-                                                        view: {
-                                                            menu: false,
-                                                            md: false,
-                                                            html: true
-                                                        },
-                                                        canView: {
-                                                            menu: false,
-                                                            md: false,
-                                                            html: true,
-                                                            fullScreen: false,
-                                                            hideMenu: true
-                                                        }
-                                                    }}
-                                                />
+                                            {item.showRawAnswer ? item.id : item.answer.slice(0, 9)}
+                              
+                                             {item.showRawAnswer ? ( ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && item.answer) : (
+                                                item.answer && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (
+                                                    <MdEditor
+                                                        value={item.answer || ''} // Add default empty string
+                                                        renderHTML={text => mdParser.render(text || '')} // Add default empty string
+                                                        readOnly={true}
+                                                        config={{
+                                                            view: {
+                                                                menu: false,
+                                                                md: false,
+                                                                html: true
+                                                            },
+                                                            canView: {
+                                                                menu: false,
+                                                                md: false,
+                                                                html: true,
+                                                                fullScreen: false,
+                                                                hideMenu: true
+                                                            }
+                                                        }}
+                                                    />
+                                                )
                                             )}
+                                            
                                         </div>
 
                                     )}
