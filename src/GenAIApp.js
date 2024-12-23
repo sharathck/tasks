@@ -384,7 +384,6 @@ const GenAIApp = ({sourceImageInformation}) => {
                 if (sourceImageParameter && sourceImageParameter.length > 0) {
                     console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
                     imageGenerationPromptInput = sourceImageParameter;
-                    setPromptInput(sourceImageParameter);
                     setIsGeneratingImage_Dall_e_3(true);
                     callAPI(modelImageDallE3, 'image');
                 }
@@ -1282,9 +1281,7 @@ const GenAIApp = ({sourceImageInformation}) => {
             setIsGeneratingGeminiSearch(false);
             setIsAISearch(false);
             console.log('Fetching data after generating content');
-            if (sourceImageParameter.length < 5) {
-            fetchData(uid);
-            }
+            fetchData(userID);
             if (selectedModel === modelOpenAI) {
                 setIsGenerating(false);
             }
