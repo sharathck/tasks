@@ -99,7 +99,7 @@ function SigninApp() {
     if (imageParam && imageParam.length > 5) {
         return (
             <div>
-                <GenAIApp sourceImageParameter={imageParam} />
+                <GenAIApp sourceImageInformation={imageParam} />
             </div>
         );
     }

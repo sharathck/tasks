@@ -357,6 +357,8 @@ const GenAIApp = ({sourceImageInformation}) => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
+                console.log('User is signed in:', currentUser.uid);
+                console.log('source Image Parameter:', sourceImageParameter);
                 if (sourceImageParameter && sourceImageParameter.length > 0) {
                     console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
                     imageGenerationPromptInput = sourceImageParameter;
@@ -2640,15 +2642,6 @@ const GenAIApp = ({sourceImageInformation}) => {
                                             </button>
                                         )}
                                         &nbsp; &nbsp;
-                                        <button
-                                            className="button"
-                                            onClick={() => {
-                                                setCurrentDocId(item.id);
-                                                setShowHomeworkApp(true);
-                                            }}
-                                        >
-                                            {practicePageButtonLabel || 'Go to Practice Questions Page'}
-                                        </button>
                                         {showPrint && (
                                             <button
                                                 className="button"
@@ -2696,7 +2689,30 @@ const GenAIApp = ({sourceImageInformation}) => {
                                                     )}
                                                 </button>
                                             )}
-                                            {(item.model !== 'dall-e-3' && item.model !== 'azure-tts') && (<button
+                                                                                    {  ( ((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
+                                            className="button"
+                                            onClick={() => {
+                                                setCurrentDocId(item.id);
+                                                setShowHomeworkApp(true);
+                                            }}
+                                            style={{
+                                                padding: '3px 3px',
+                                                fontSize: '18px',
+                                                backgroundColor: '#278cab',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                transition: 'background-color 0.3s'
+                                            }}
+                                            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                            onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
+                                        >
+                                            {practicePageButtonLabel || 'Go to Practice Questions Page'}
+                                        </button>
+                                        )}
+                                        &nbsp; &nbsp;
+                                            {(item.model !== 'dall-e-3' && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
