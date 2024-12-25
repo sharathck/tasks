@@ -63,6 +63,8 @@ let quizMultipleChoicesPrompt = '';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
+    const [speechRate, setSpeechRate] = useState('0%');
+    const [speechSilence, setSpeechSilence] = useState(10);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
     const [isDownloading, setIsDownloading] = useState();
@@ -1411,7 +1413,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     source: 'ai',
                     voice_name: voiceName,
                     chunk_size: chunk_size,
-                    silence_break: silence_break
+                    silence_break: speechSilence,
+                    prosody_rate: speechRate
                 })
             });
 
@@ -2157,6 +2160,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 GenAI Image
                             </label>
                         </button>
+                    }
+                    {showTTS &&
+                        <label style={{ marginLeft: '8px' }}>
+                            Speech Rate:
+                            <input
+                                type="text"
+                                maxLength="5"
+                                value={speechRate}
+                                onChange={(e) => setSpeechRate(e.target.value)}
+                                style={{ width: '50px', marginLeft: '5px' }}
+                            />
+                        </label>
+                    }
+                    {showTTS &&
+                        <label style={{ marginLeft: '8px' }}>
+                            Speech Silence:
+                            <input
+                                type="number"
+                                value={speechSilence}
+                                onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
+                                style={{ width: '60px', marginLeft: '5px' }}
+                            />
+                        </label>
                     }
                     {showTTS &&
                         <button className="audioButton"
