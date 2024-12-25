@@ -746,8 +746,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/[#:\-*]/g, ' ')
             .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
-            .replace(/["]/g, '&quot;')
-            .replace(/[']/g, '&apos;')
+     //       .replace(/["]/g, '&quot;')
+     //       .replace(/[']/g, '&apos;')
             .trim(); // Remove leading/trailing spaces
 
         if (isiPhone) {
@@ -1400,8 +1400,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/[#:\-*]/g, ' ')
             .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
-            .replace(/["]/g, '&quot;')
-            .replace(/[']/g, '&apos;')
+     //       .replace(/["]/g, '&quot;')
+     //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
         console.log('API URL:', apiUrl);
