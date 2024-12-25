@@ -1500,6 +1500,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             setIsGeneratingTTS(false); // Reset generating state
             // Optionally, refresh data
             fetchData(uid);
+            updateConfiguration();
         }
     };
     // Handler for DALL·E 3 Checkbox Change
@@ -1524,18 +1525,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const handleTTSChange = async (checked) => {
         setIsGeneratingTTS(true);
         callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
-        if (checked) {
-            // Turn off Image if it's on
-            setShowImageDallE3(false);
-            // Turn off all text models
-            setVisibilityOfTextModels(false);
-        } else {
-            // Restore model states from configuration
-            await fetchGenAIParameters(uid);
-            setShowTemp(true);
-            setShowTop_p(true);
-            setShowAutoPrompt(true);
-        }
     };
 
     // Add this helper function to manage text model visibility
