@@ -2765,6 +2765,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     )}
                                                 </button>
                                             )}
+                                            {item.model === 'azure-tts' && <br />}
+                                            {item.model === 'azure-tts' && <br />}
+                                            {item.model === 'azure-tts' && item.answer?.match(/\(([^)]+)\)/g) && (
+                                                <audio controls style={{ marginBottom: '10px' }}>
+                                                    <source src={item.answer.match(/\(([^)]+)\)/g)[0].slice(1, -1)} type="audio/mpeg" />
+                                                    Your browser does not support the audio element.
+                                                </audio>
+                                            )}
+                                            &nbsp; &nbsp;                                       {showPrint && (
+                                                <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
+                                            )}
                                             {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
                                                 className="button"
                                                 onClick={() => {
