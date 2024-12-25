@@ -2228,12 +2228,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <br />
                     <br />
                     {
-                        (showPrint && showYouTubeButton && showOnlyAudioTitleDescriptionButton &&<button
+                        (showPrint && showYouTubeButton && <button
                             className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'button_selected' : 'button'
                             }
                             onClick={async () => {
+                                setSpeechRate('-20%');
+                                setSpeechSilence(1200);
                                 setIsGeneratingYouTubeAudioTitlePrompt(true);
                                 setIsGeneratingTTS(true);
                                 callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
@@ -2299,7 +2301,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                YouTube Audio - Title - Description - Image Search
+                                Story Telling
                             </label>
                         </button>
                         )
