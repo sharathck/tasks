@@ -63,6 +63,7 @@ let quizMultipleChoicesPrompt = '';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
+    const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(10);
@@ -662,6 +663,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.showOnlyAudioTitleDescriptionButton !== undefined) {
                     setShowOnlyAudioTitleDescriptionButton(data.showOnlyAudioTitleDescriptionButton);
+                }
+                if (data.showDedicatedDownloadButton !== undefined) {
+                    setShowDedicatedDownloadButton(data.showDedicatedDownloadButton);
                 }
             });
         } catch (error) {
@@ -2684,7 +2688,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     </div>
                                     <br />
 
-                                    {showPrint && (
+                                    {showPrint && showDedicatedDownloadButton && (
                                         <div style={{ fontSize: '16px' }}>
                                             {(item.model === 'dall-e-3' || item.model === 'azure-tts') && (
                                                 <button
