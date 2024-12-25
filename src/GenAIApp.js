@@ -2234,7 +2234,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     'button_selected' : 'button'
                             }
                             onClick={async () => {
-                                setSpeechRate('-20%');
+                                setSpeechRate('-25%');
                                 setSpeechSilence(1200);
                                 setIsGeneratingYouTubeAudioTitlePrompt(true);
                                 setIsGeneratingTTS(true);
