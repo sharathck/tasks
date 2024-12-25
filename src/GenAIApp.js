@@ -63,6 +63,7 @@ let quizMultipleChoicesPrompt = '';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
+    const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(10);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
@@ -658,6 +659,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.labelCerebras !== undefined) {
                     setLabelCerebras(data.labelCerebras);
+                }
+                if (data.showOnlyAudioTitleDescriptionButton !== undefined) {
+                    setShowOnlyAudioTitleDescriptionButton(data.showOnlyAudioTitleDescriptionButton);
                 }
             });
         } catch (error) {
@@ -2222,30 +2226,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </div>
                     )}
                     <br />
-
-                    {showPrint && (
-                        <button
-                            className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
-                            onClick={async () => {
-                                try {
-                                    setIsLiveAudioPlayingPrompt(true);
-                                    await synthesizeSpeech(promptInput, "English");
-                                } catch (error) {
-                                    console.error('Error playing audio:', error);
-                                }
-                                finally {
-                                    setIsLiveAudioPlayingPrompt(false);
-                                }
-                            }}
-                        >
-                            <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
-                                <FaPlay /> Speak Prompt
-                            </label>
-                        </button>
-                    )
-                    }
+                    <br />
                     {
-                        (showPrint && showYouTubeButton && <button
+                        (showPrint && showYouTubeButton && showOnlyAudioTitleDescriptionButton &&<button
                             className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'button_selected' : 'button'
@@ -2325,7 +2308,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         (showPrint && showYouTubeButton && <button
                             className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'button_selected' : 'button'
+                                    'button_selected' : 'youtubeButton'
                             }
                             onClick={async () => {
 
@@ -2426,12 +2409,32 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                YouTube Content - Audio - Title - Description - Image Search - AI Generated Images <img src={youtubeIcon} alt="youtube" height="26px" style={{ marginRight: '4px' }} />
+                                YouTube <img src={youtubeIcon} alt="youtube" height="26px" style={{ marginRight: '4px' }} />
                             </label>
                         </button>
                         )
                     }
-
+                    {showPrint && (
+                        <button
+                            className={isLiveAudioPlayingPrompt ? 'button_selected' : 'speakButton'}
+                            onClick={async () => {
+                                try {
+                                    setIsLiveAudioPlayingPrompt(true);
+                                    await synthesizeSpeech(promptInput, "English");
+                                } catch (error) {
+                                    console.error('Error playing audio:', error);
+                                }
+                                finally {
+                                    setIsLiveAudioPlayingPrompt(false);
+                                }
+                            }}
+                        >
+                            <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
+                                <FaPlay /> Speak
+                            </label>
+                        </button>
+                    )
+                    }
                     <br />
                     <div className="info-text" style={{
                         fontSize: '14px',
