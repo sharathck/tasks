@@ -746,8 +746,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/[#:\-*]/g, ' ')
             .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
-     //       .replace(/["]/g, '&quot;')
-     //       .replace(/[']/g, '&apos;')
+            //       .replace(/["]/g, '&quot;')
+            //       .replace(/[']/g, '&apos;')
             .trim(); // Remove leading/trailing spaces
 
         if (isiPhone) {
@@ -841,6 +841,74 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
+    const generateYouTubeUploadInformation = async (message) => {
+        const firestoreResponseData = message;
+        console.log('First fetched data from Firestore:', firestoreResponseData);
+        console.log('firestoreResponseData:', firestoreResponseData);
+        if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+            alert('ERROR: Prompt response is not generated.');
+            return;
+        }
+        setIsGeneratingTTS(true);
+        callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
+        // Execute YouTube Title/Description
+        youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
+        youtubeSelected = true;
+        setIsYouTubeTitle(true);
+        setIsGemini(true);
+        setIsGeneratingGemini(true);
+        callAPI(modelGemini, 'youtubeTitle');
+        youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
+        callAPI(modelo1, 'youtubeDescription');
+        // Execute Image Search
+        imagePromptInput = firestoreResponseData + imagesSearchPrompt;
+        imageSelected = true;
+        setIsImagesSearch(true);
+        setIso1(true);
+        setIsGeneratingGemini(true);
+        await callAPI(modelGemini, 'imagesSearchWords');
+        console.log('Image Search generatedDocID', generatedDocID);
+        const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+        const imageSearchdocSnap = await getDoc(imageSearchdocRef);
+        if (imageSearchdocSnap.exists()) {
+            const ifirestoreResponseData = imageSearchdocSnap.data().answer;
+            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+            if (ifirestoreResponseData) {
+                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                for (const part of parts) {
+                    console.log('image prompt part:', part);
+                    imageGenerationPromptInput = part;
+                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                    window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
+                }
+            } else {
+                console.error('imageSearchfirestoreResponseData is null or undefined');
+            }
+        }
+        imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
+        await callAPI(modelGemini, 'imageGeneration');
+        console.log('Image Generation generatedDocID', generatedDocID);
+        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+        const idocSnap = await getDoc(idocRef);
+        if (idocSnap.exists()) {
+            const ifirestoreResponseData = idocSnap.data().answer;
+            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+            if (ifirestoreResponseData) {
+                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                for (const part of parts) {
+                    console.log('image prompt part:', part);
+                    imageGenerationPromptInput = part;
+                    setIsGeneratingImage_Dall_e_3(true);
+                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                    window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
+                }
+                setIsGeneratingYouTubeAudioTitlePrompt(false);
+                setIsGeneratingImage_Dall_e_3(false);
+            } else {
+                console.error('ifirestoreResponseData is null or undefined');
+            }
+        }
+    };
     const handlePromptChange = async (promptValue) => {
         /* const genaiCollection = collection(db, 'genai', uid, 'prompts');
          const q = query(genaiCollection, where('tag', '==', promptValue), limit(1));
@@ -1400,8 +1468,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/[#:\-*]/g, ' ')
             .replace(/[&]/g, ' and ')
             .replace(/[<>]/g, ' ')
-     //       .replace(/["]/g, '&quot;')
-     //       .replace(/[']/g, '&apos;')
+            //       .replace(/["]/g, '&quot;')
+            //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
         console.log('API URL:', apiUrl);
@@ -2236,67 +2304,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             onClick={async () => {
                                 setSpeechRate('-25%');
                                 setSpeechSilence(1200);
-                                setIsGeneratingYouTubeAudioTitlePrompt(true);
-                                setIsGeneratingTTS(true);
-                                callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
-                                // Execute YouTube Title/Description
-                                youtubePromptInput = promptInput + youtubeTitlePrompt;
-                                youtubeSelected = true;
-                                setIsYouTubeTitle(true);
-                                setIsGemini(true);
-                                setIsGeneratingGemini(true);
-                                callAPI(modelGemini, 'youtubeTitle');
-                                youtubeDescriptionPromptInput = promptInput + youtubeDescriptionPrompt;
-                                callAPI(modelo1, 'youtubeDescription');
-                                // Execute Image Search
-                                imagePromptInput = promptInput + imagesSearchPrompt;
-                                imageSelected = true;
-                                setIsImagesSearch(true);
-                                setIso1(true);
-                                setIsGeneratingGemini(true);
-                                await callAPI(modelGemini, 'imagesSearchWords');
-                                console.log('Image Search generatedDocID', generatedDocID);
-                                const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                const imageSearchdocSnap = await getDoc(imageSearchdocRef);
-                                if (imageSearchdocSnap.exists()) {
-                                    const ifirestoreResponseData = imageSearchdocSnap.data().answer;
-                                    console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-                                    if (ifirestoreResponseData) {
-                                        const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                                        for (const part of parts) {
-                                            console.log('image prompt part:', part);
-                                            imageGenerationPromptInput = part;
-                                            const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                                            window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
-                                        }
-                                    } else {
-                                        console.error('imageSearchfirestoreResponseData is null or undefined');
-                                    }
-                                }
-                                imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
-                                await callAPI(modelGemini, 'imageGeneration');
-                                console.log('Image Generation generatedDocID', generatedDocID);
-                                const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                const idocSnap = await getDoc(idocRef);
-                                if (idocSnap.exists()) {
-                                    const ifirestoreResponseData = idocSnap.data().answer;
-                                    console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-                                    if (ifirestoreResponseData) {
-                                        const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                                        for (const part of parts) {
-                                            console.log('image prompt part:', part);
-                                            imageGenerationPromptInput = part;
-                                            setIsGeneratingImage_Dall_e_3(true);
-                                            const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                                            window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
-                                        }
-                                        setIsGeneratingYouTubeAudioTitlePrompt(false);
-                                        setIsGeneratingImage_Dall_e_3(false);
-                                    } else {
-                                        console.error('ifirestoreResponseData is null or undefined');
-                                    }
-                                }
-                            }}>
+                                setIsGeneratingYouTubeAudioTitlePrompt(true); generateYouTubeUploadInformation(promptInput);
+                            }
+                            }>
                             <label className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
@@ -2334,70 +2344,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     if (docSnap.exists()) {
                                         const firestoreResponseData = docSnap.data().answer;
                                         console.log('First fetched data from Firestore:', firestoreResponseData);
-                                        console.log('firestoreResponseData:', firestoreResponseData);
                                         if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
                                             alert('ERROR: Prompt response is not generated.');
                                             return;
                                         }
-                                        setIsGeneratingTTS(true);
-                                        callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
-                                        // Execute YouTube Title/Description
-                                        youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
-                                        youtubeSelected = true;
-                                        setIsYouTubeTitle(true);
-                                        setIsGemini(true);
-                                        setIsGeneratingGemini(true);
-                                        callAPI(modelGemini, 'youtubeTitle');
-                                        youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
-                                        callAPI(modelo1, 'youtubeDescription');
-                                        // Execute Image Search
-                                        imagePromptInput = promptInput + imagesSearchPrompt;
-                                        imageSelected = true;
-                                        setIsImagesSearch(true);
-                                        setIso1(true);
-                                        setIsGeneratingGemini(true);
-                                        await callAPI(modelGemini, 'imagesSearchWords');
-                                        console.log('Image Search generatedDocID', generatedDocID);
-                                        const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                        const imageSearchdocSnap = await getDoc(imageSearchdocRef);
-                                        if (imageSearchdocSnap.exists()) {
-                                            const ifirestoreResponseData = imageSearchdocSnap.data().answer;
-                                            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-                                            if (ifirestoreResponseData) {
-                                                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                                                for (const part of parts) {
-                                                    console.log('image prompt part:', part);
-                                                    imageGenerationPromptInput = part;
-                                                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                                                    window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
-                                                }
-                                            } else {
-                                                console.error('imageSearchfirestoreResponseData is null or undefined');
-                                            }
-                                        }
-                                        imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
-                                        await callAPI(modelGemini, 'imageGeneration');
-                                        console.log('Image Generation generatedDocID', generatedDocID);
-                                        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                        const idocSnap = await getDoc(idocRef);
-                                        if (idocSnap.exists()) {
-                                            const ifirestoreResponseData = idocSnap.data().answer;
-                                            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-                                            if (ifirestoreResponseData) {
-                                                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                                                for (const part of parts) {
-                                                    console.log('image prompt part:', part);
-                                                    imageGenerationPromptInput = part;
-                                                    setIsGeneratingImage_Dall_e_3(true);
-                                                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                                                    window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
-                                                }
-                                                setIsGeneratingYouTubeAudioTitlePrompt(false);
-                                                setIsGeneratingImage_Dall_e_3(false);
-                                            } else {
-                                                console.error('ifirestoreResponseData is null or undefined');
-                                            }
-                                        }
+                                        generateYouTubeUploadInformation(firestoreResponseData);
                                     }
                                     return null;
                                 }
