@@ -65,7 +65,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
-    const [genOpenAIImage, setGenOpenAIImage] = useState(false);
+    const [genOpenAIImage, setGenOpenAIImage] = useState(true);
     const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(10);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
