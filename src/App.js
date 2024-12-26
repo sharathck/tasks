@@ -53,7 +53,7 @@ function App() {
   const [adminUser, setAdminUser] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [speechRate, setSpeechRate] = useState('0%');
-  const [speechSilence, setSpeechSilence] = useState(1800);
+  const [speechSilence, setSpeechSilence] = useState(1900);
   const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
   const [lastTask, setLastTask] = useState(null); // State for the limit of documents to show
   const urlParams = new URLSearchParams(window.location.search);

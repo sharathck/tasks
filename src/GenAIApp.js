@@ -2341,8 +2341,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             alert('ERROR: Prompt response is not generated.');
                                             return;
                                         }
-                                        setSpeechRate('10%');
-                                        setSpeechSilence(200);
                                         generateYouTubeUploadInformation(firestoreResponseData);
                                     }
                                     return null;

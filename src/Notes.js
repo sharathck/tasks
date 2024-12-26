@@ -36,7 +36,7 @@ const Notes = () => {
     // **State Variables**
     const [isLoading, setIsLoading] = useState(false);
     const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
-    const [speechRate, setSpeechRate] = useState('10%');
+    const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(100);
     const [genaiData, setGenaiData] = useState([]);
     const [user, setUser] = useState(null);

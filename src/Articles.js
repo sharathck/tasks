@@ -41,7 +41,7 @@ function Articles() {
     const [voiceName, setVoiceName] = useState('en-US-EvelynMultilingualNeural');
     const [limitActiveValue, setLimitActiveValue] = useState(limitMax);
     const [showLiveTTS, setShowLiveTTS] = useState(false);
-    const [speechRate, setSpeechRate] = useState('10%');
+    const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(200);
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
