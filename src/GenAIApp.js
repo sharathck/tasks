@@ -66,7 +66,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [genOpenAIImage, setGenOpenAIImage] = useState(true);
-    const [speechRate, setSpeechRate] = useState('5%');
+    const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(200);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
@@ -250,6 +250,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [practicePageButtonLabel, setPracticePageButtonLabel] = useState('');
     const [quizButtonLabel, setQuizButtonLabel] = useState('');
     const [adminUser, setAdminUser] = useState(false);
+    const [youtubeSpeecRate, setYoutubeSpeechRate] = useState('0%');
+    const [youtubeSpeechSilence, setYoutubeSpeechSilence] = useState(200);
+    const [storyTellingSpeechRate, setStoryTellingSpeechRate] = useState('-25%');
+    const [storyTellingSpeechSilence, setStoryTellingSpeechSilence] = useState(1200);
 
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
@@ -711,6 +715,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.genOpenAIImage !== undefined) {
                     setGenOpenAIImage(data.genOpenAIImage);
+                }
+                if (data.speechRate !== undefined) {
+                    setSpeechRate(data.speechRate);
+                }
+                if (data.speechSilence !== undefined) {
+                    setSpeechSilence(data.speechSilence);
+                }
+                if (data.youtubeSpeechRate !== undefined) {
+                    setYoutubeSpeechRate(data.youtubeSpeechRate);
+                } 
+                if (data.youtubeSpeechSilence !== undefined) {
+                    setYoutubeSpeechSilence(data.youtubeSpeechSilence);
+                }
+                if (data.storyTellingSpeechRate !== undefined) {
+                    setStoryTellingSpeechRate(data.storyTellingSpeechRate);
+                }
+                if (data.storyTellingSpeechSilence !== undefined) {
+                    setStoryTellingSpeechSilence(data.storyTellingSpeechSilence);
                 }
             });
         } catch (error) {
@@ -2333,8 +2355,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     'button_selected' : 'button'
                             }
                             onClick={async () => {
-                                setSpeechRate('-25%');
-                                setSpeechSilence(1200);
+                                setSpeechRate(storyTellingSpeechRate);
+                                setSpeechSilence(storyTellingSpeechSilence);
                                 setIsGeneratingYouTubeAudioTitlePrompt(true); generateYouTubeUploadInformation(promptInput);
                             }
                             }>
@@ -2379,6 +2401,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             alert('ERROR: Prompt response is not generated.');
                                             return;
                                         }
+                                        setSpeechRate(youtubeSpeecRate);
+                                        setSpeechSilence(youtubeSpeechSilence);
                                         generateYouTubeUploadInformation(firestoreResponseData);
                                     }
                                     return null;
