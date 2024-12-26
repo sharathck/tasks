@@ -65,6 +65,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
+    const [genOpenAIImage, setGenOpenAIImage] = useState(false);
     const [speechRate, setSpeechRate] = useState('0%');
     const [speechSilence, setSpeechSilence] = useState(10);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
@@ -158,6 +159,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
+    const [modelClaudeHaiku, setModelClaudeHaiku] = useState('claude-haiku');
+    const [modelGeminiImage, setModelGeminiImage] = useState('gemini-image');
     const [autoPrompt, setAutoPrompt] = useState(false);
     const [showSaveButton, setShowSaveButton] = useState(true);
     const [showSourceDocument, setShowSourceDocument] = useState(false);
@@ -667,6 +670,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showDedicatedDownloadButton !== undefined) {
                     setShowDedicatedDownloadButton(data.showDedicatedDownloadButton);
                 }
+                if (data.genOpenAIImage !== undefined) {
+                    setGenOpenAIImage(data.genOpenAIImage);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -995,7 +1001,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
         if (isClaudeHaiku && showClaudeHaiku) {
             setIsGeneratingClaudeHaiku(true); // Set generating state to true
-            callAPI('Claude-Haiku');
+            callAPI(modelClaudeHaiku);
         }
 
         // Generate API calls for each selected model
@@ -1411,7 +1417,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelCodestralApi) {
                 setIsGeneratingCodeStral(false);
             }
-            if (selectedModel === 'Claude-Haiku') {
+            if (selectedModel === modelClaudeHaiku) {
                 setIsGeneratingClaudeHaiku(false);
             }
             if (selectedModel === modelSambanova) {
@@ -1510,25 +1516,18 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // Handler for DALL·E 3 Checkbox Change
     const handleDall_e_3Change = async (checked) => {
         setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
-        callAPI(modelImageDallE3);
-        if (checked) {
-            // Turn off TTS if it's on
-            setShowTTS(false);
-            // Turn off all text models
-            setVisibilityOfTextModels(false);
-        } else {
-            // Restore model states from configuration
-            await fetchGenAIParameters(uid);
-            setShowTemp(true);
-            setShowTop_p(true);
-            setShowAutoPrompt(true);
+        await callAPI(modelGeminiImage);
+        if (genOpenAIImage) {
+            await callAPI(modelImageDallE3);
         }
+        setIsGeneratingImage_Dall_e_3(false);
     };
 
     // Handler for TTS Checkbox Change
-    const handleTTSChange = async (checked) => {
+    const handleTTSChange = async () => {
         setIsGeneratingTTS(true);
-        callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
+        await callTTSAPI(promptInput, process.env.REACT_APP_TTS_SSML_API_URL);
+        setIsGeneratingTTS(false);
     };
 
     // Add this helper function to manage text model visibility
@@ -2690,31 +2689,31 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
-                                            {isiPhone && 
-                                            (item.model === 'dall-e-3' || item.model === 'azure-tts') && (
-                                                <button
-                                                    className="button"
-                                                    onClick={() => handleDownload(item.answer, item.model)}
-                                                    style={{
-                                                        padding: '6px 6px',
-                                                        fontSize: '20px',
-                                                        backgroundColor: '#4CAF50',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '8px',
-                                                        cursor: 'pointer',
-                                                        transition: 'background-color 0.3s'
-                                                    }}
-                                                    onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                                    onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
-                                                >
-                                                    {isDownloading ? (
-                                                        <FaSpinner className="spinning" />
-                                                    ) : (
-                                                        <>Download <FaCloudDownloadAlt size={28} /></>
-                                                    )}
-                                                </button>
-                                            )}
+                                            {isiPhone &&
+                                                (item.model === 'dall-e-3' || item.model === 'azure-tts') && (
+                                                    <button
+                                                        className="button"
+                                                        onClick={() => handleDownload(item.answer, item.model)}
+                                                        style={{
+                                                            padding: '6px 6px',
+                                                            fontSize: '20px',
+                                                            backgroundColor: '#4CAF50',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            cursor: 'pointer',
+                                                            transition: 'background-color 0.3s'
+                                                        }}
+                                                        onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                                        onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+                                                    >
+                                                        {isDownloading ? (
+                                                            <FaSpinner className="spinning" />
+                                                        ) : (
+                                                            <>Download <FaCloudDownloadAlt size={28} /></>
+                                                        )}
+                                                    </button>
+                                                )}
                                             {item.model === 'azure-tts' && <br />}
                                             {item.model === 'azure-tts' && <br />}
                                             {item.model === 'azure-tts' && item.answer?.match(/\(([^)]+)\)/g) && (
@@ -2723,8 +2722,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     Your browser does not support the audio element.
                                                 </audio>
                                             )}
-                                            &nbsp; &nbsp;                   
-                                            {showPrint && (item.voiceName !== undefined && item.voiceName?.length > 2)&&(
+                                            &nbsp; &nbsp;
+                                            {showPrint && (item.voiceName !== undefined && item.voiceName?.length > 2) && (
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
                                             )}
                                             {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
