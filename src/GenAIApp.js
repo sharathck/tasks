@@ -23,6 +23,7 @@ import speakerIcon from './speak.png';
 import imageIcon from './image.png';
 import youtubeIcon from './youtube.png';
 import { call } from "@mdxeditor/editor";
+import tasksIcon from './todo.jpg';
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -2261,7 +2262,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     {!GenAIParameter ? (
                         showBackToAppButton && (
                             <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                                <FaArrowLeft />
+                                {tasksIcon}
                             </button>
                         )
                     ) : (
