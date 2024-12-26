@@ -2688,9 +2688,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     </div>
                                     <br />
 
-                                    {showPrint && showDedicatedDownloadButton && (
+                                    {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
-                                            {(item.model === 'dall-e-3' || item.model === 'azure-tts') && (
+                                            {isiPhone && 
+                                            (item.model === 'dall-e-3' || item.model === 'azure-tts') && (
                                                 <button
                                                     className="button"
                                                     onClick={() => handleDownload(item.answer, item.model)}
@@ -2722,7 +2723,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     Your browser does not support the audio element.
                                                 </audio>
                                             )}
-                                            &nbsp; &nbsp;                                       {showPrint && (
+                                            &nbsp; &nbsp;                   
+                                            {showPrint && (item.voiceName !== undefined && item.voiceName?.length > 2)&&(
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
                                             )}
                                             {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
