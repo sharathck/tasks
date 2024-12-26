@@ -29,7 +29,6 @@ const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
-const ADMIN_USER_ID = 'bTGBBpeYPmPJonItYpUOCYhdIlr1';
 let searchQuery = '';
 let searchModel = 'All';
 let userID = '';
@@ -67,8 +66,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [genOpenAIImage, setGenOpenAIImage] = useState(true);
-    const [speechRate, setSpeechRate] = useState('0%');
-    const [speechSilence, setSpeechSilence] = useState(10);
+    const [speechRate, setSpeechRate] = useState('5%');
+    const [speechSilence, setSpeechSilence] = useState(200);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
     const [isDownloading, setIsDownloading] = useState();
@@ -250,6 +249,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [keywordSearchPlaceholder, setKeywordSearchPlaceholder] = useState('');
     const [practicePageButtonLabel, setPracticePageButtonLabel] = useState('');
     const [quizButtonLabel, setQuizButtonLabel] = useState('');
+    const [adminUser, setAdminUser] = useState(false);
 
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
@@ -379,14 +379,20 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 setUid(currentUser.uid);
                 setEmail(currentUser.email);
                 // Set visibility of back button based on admin status
-                setShowBackToAppButton(currentUser.uid === ADMIN_USER_ID);
+                setShowBackToAppButton(adminUser);
                 console.log('User is signed in:', currentUser.uid);
                 console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
 
                 // Fetch data for the authenticated user
                 fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
+                await checkAdminUsers();
+                if (adminUser) {
+                await fetchGenAIParameters('admin');
+                }
+                else {
                 await fetchGenAIParameters(currentUser.uid);
+                }
                 await fetchTexts();
                 console.log('source Image Parameter:', sourceImageParameter);
                 if (sourceImageParameter && sourceImageParameter.length > 0) {
@@ -404,11 +410,43 @@ const GenAIApp = ({ sourceImageInformation }) => {
         return () => unsubscribe();
     }, [showEditPopup]);
 
+    const checkAdminUsers = async () => {
+        console.log('Fetching genai parameters...');
+        const configurationCollection = collection(db, 'public');
+        const q = query(configurationCollection, where('setup', '==', 'genaiAdmin'));
+        const adminSnapshot = await getDocs(q);
+        const adminEmails = [];
+        adminSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.emailAddresses && Array.isArray(data.emailAddresses)) {
+                adminEmails.push(...data.emailAddresses);
+            }
+        });
+        if (adminEmails.includes(auth.currentUser.email)) {
+            console.log('Admin user:', auth.currentUser.email);
+            setAdminUser(true);
+        } else {
+            console.log('Not an admin user:', auth.currentUser.email);
+            setAdminUser(false);
+        }
+    }
     const fetchGenAIParameters = async (firebaseUserID) => {
         try {
-            console.log('Fetching genai parameters...');
-            const configurationCollection = collection(db, 'genai', firebaseUserID, 'configuration');
-            const q = query(configurationCollection, where('setup', '==', 'genai'));
+            if (!firebaseUserID) {
+                console.error('No user ID provided');
+                return;
+            }
+            let q = '';
+            if (firebaseUserID === 'admin') {
+                console.log('Fetching global genai parameters...');
+                const configurationCollection = collection(db, 'public');
+                q = query(configurationCollection, where('setup', '==', 'genaiAdmin'));
+            }
+            else {
+                console.log('Fetching genai parameters...');
+                const configurationCollection = collection(db, 'genai', firebaseUserID, 'configuration');
+                q = query(configurationCollection, where('setup', '==', 'genai'));
+            }
             const configurationSnapshot = await getDocs(q);
             configurationSnapshot.forEach(doc => {
                 const data = doc.data();
@@ -2262,7 +2300,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     {!GenAIParameter ? (
                         showBackToAppButton && (
                             <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                               <img src={tasksIcon} alt="Tasks" height="26px" style={{ marginRight: '4px' }} /> 
+                                <img src={tasksIcon} alt="Tasks" height="26px" style={{ marginRight: '4px' }} />
                             </button>
                         )
                     ) : (
@@ -2688,27 +2726,27 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     </div>
                                     <br />
                                     {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
-                                                className="button"
-                                                onClick={() => {
-                                                    setCurrentDocId(item.id);
-                                                    setShowHomeworkApp(true);
-                                                }}
-                                                style={{
-                                                    padding: '3px 3px',
-                                                    fontSize: '18px',
-                                                    backgroundColor: '#278cab',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '8px',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 0.3s'
-                                                }}
-                                                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                                onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
-                                            >
-                                                {practicePageButtonLabel || 'Go to Questions/Quiz Page'}
-                                            </button>
-                                            )}
+                                        className="button"
+                                        onClick={() => {
+                                            setCurrentDocId(item.id);
+                                            setShowHomeworkApp(true);
+                                        }}
+                                        style={{
+                                            padding: '3px 3px',
+                                            fontSize: '18px',
+                                            backgroundColor: '#278cab',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.3s'
+                                        }}
+                                        onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                        onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
+                                    >
+                                        {practicePageButtonLabel || 'Go to Questions/Quiz Page'}
+                                    </button>
+                                    )}
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
                                             {isiPhone &&
