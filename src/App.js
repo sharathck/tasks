@@ -66,7 +66,7 @@ function App() {
   const [showAudioPlayer, setShowAudioPlayer] = useState(false); // State for showing audio player
   const searchInputRef = useRef(null); // Reference for the search input
   const [answerData, setAnswerData] = useState('');
-  const [voiceName, setVoiceName] = useState('en-US-LunaNeural');
+  const [voiceName, setVoiceName] = useState('en-US-EvelynMultilingualNeural');
   const [showAudioApp, setShowAudioApp] = useState(false);
   const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
   const [showGenAIApp, setShowGenAIApp] = useState(false);

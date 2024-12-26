@@ -112,7 +112,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
     const [isGeneratingCodeStral, setIsGeneratingCodeStral] = useState(false);
     const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-LunaNeural');
+    const [voiceName, setVoiceName] = useState('en-US-EvelynMultilingualNeural');
     const [genaiPrompts, setGenaiPrompts] = useState([]);
     const [showEditPopup, setShowEditPopup] = useState(false);
     const [editPromptTag, setEditPromptTag] = useState('');
@@ -2340,6 +2340,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             alert('ERROR: Prompt response is not generated.');
                                             return;
                                         }
+                                        setSpeechRate('10%');
+                                        setSpeechSilence(200);
                                         generateYouTubeUploadInformation(firestoreResponseData);
                                     }
                                     return null;

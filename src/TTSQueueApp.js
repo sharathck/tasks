@@ -38,7 +38,7 @@ function TTSQueueApp() {
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [showMainApp, setShowMainApp] = useState(false);
     const [showAudioApp, setShowAudioApp] = useState(false);
-    const [voiceName, setVoiceName] = useState('en-US-LunaNeural');
+    const [voiceName, setVoiceName] = useState('en-US-EvelynMultilingualNeural');
     const [limitActiveValue, setLimitActiveValue] = useState(limitMax);
     const [showLiveTTS, setShowLiveTTS] = useState(false);
 
