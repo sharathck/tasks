@@ -2579,7 +2579,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 </div>
                                 <div style={{ border: "1px solid black" }}>
                                     <div style={{ color: "green", fontWeight: "bold" }}>
-                                        {item.model !== 'dall-e-3' && item.model !== 'azure-tts' && (
+                                        {item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts' && (
                                             <>
 
                                                 {(showYouTubeButton && <button
@@ -2770,7 +2770,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
                                             {isiPhone &&
-                                                (item.model === 'dall-e-3' || item.model === 'azure-tts') && (
+                                                (item.model === modelImageDallE3 || item.model === modelGeminiImage|| item.model === 'azure-tts') && (
                                                     <button
                                                         className="button"
                                                         onClick={() => handleDownload(item.answer, item.model)}
@@ -2807,7 +2807,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== 'dall-e-3' && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
