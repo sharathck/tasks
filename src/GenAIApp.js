@@ -59,6 +59,7 @@ let intelligentQuestionsPrompt = '';
 let quizPrompt = '';
 let practicePrompt = '';
 let quizMultipleChoicesPrompt = '';
+let adminUser = false;
 
 
 const GenAIApp = ({ sourceImageInformation }) => {
@@ -249,7 +250,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [keywordSearchPlaceholder, setKeywordSearchPlaceholder] = useState('');
     const [practicePageButtonLabel, setPracticePageButtonLabel] = useState('');
     const [quizButtonLabel, setQuizButtonLabel] = useState('');
-    const [adminUser, setAdminUser] = useState(false);
     const [youtubeSpeecRate, setYoutubeSpeechRate] = useState('0%');
     const [youtubeSpeechSilence, setYoutubeSpeechSilence] = useState(200);
     const [storyTellingSpeechRate, setStoryTellingSpeechRate] = useState('-25%');
@@ -382,8 +382,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 setUid(currentUser.uid);
                 setEmail(currentUser.email);
-                // Set visibility of back button based on admin status
-                setShowBackToAppButton(adminUser);
                 console.log('User is signed in:', currentUser.uid);
                 console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
 
@@ -391,19 +389,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 fetchData(currentUser.uid);
                 fetchPrompts(currentUser.uid);
                 await checkAdminUsers();
-                if (adminUser) {
-                await fetchGenAIParameters('admin');
-                }
-                else {
                 await fetchGenAIParameters(currentUser.uid);
-                }
                 await fetchTexts();
+                // Set visibility of back button based on admin status
+                setShowBackToAppButton(adminUser);
                 console.log('source Image Parameter:', sourceImageParameter);
                 if (sourceImageParameter && sourceImageParameter.length > 0) {
                     console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
                     imageGenerationPromptInput = sourceImageParameter;
                     setPromptInput(sourceImageParameter);
                     setIsGeneratingImage_Dall_e_3(true);
+                    callAPI(modelGeminiImage, 'image');
                     callAPI(modelImageDallE3, 'image');
                 }
             }
@@ -428,10 +424,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         });
         if (adminEmails.includes(auth.currentUser.email)) {
             console.log('Admin user:', auth.currentUser.email);
-            setAdminUser(true);
+            adminUser = true;
         } else {
             console.log('Not an admin user:', auth.currentUser.email);
-            setAdminUser(false);
+            adminUser = false;
         }
     }
     const fetchGenAIParameters = async (firebaseUserID) => {
@@ -441,13 +437,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 return;
             }
             let q = '';
-            if (firebaseUserID === 'admin') {
+            if (adminUser) {
                 console.log('Fetching global genai parameters...');
                 const configurationCollection = collection(db, 'public');
                 q = query(configurationCollection, where('setup', '==', 'genaiAdmin'));
             }
             else {
-                console.log('Fetching genai parameters...');
+                console.log('Fetching user specific genai parameters...');
                 const configurationCollection = collection(db, 'genai', firebaseUserID, 'configuration');
                 q = query(configurationCollection, where('setup', '==', 'genai'));
             }
@@ -724,7 +720,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.youtubeSpeechRate !== undefined) {
                     setYoutubeSpeechRate(data.youtubeSpeechRate);
-                } 
+                }
                 if (data.youtubeSpeechSilence !== undefined) {
                     setYoutubeSpeechSilence(data.youtubeSpeechSilence);
                 }
