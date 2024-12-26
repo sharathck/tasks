@@ -2261,7 +2261,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     &nbsp; &nbsp;
                     {!GenAIParameter ? (
                         showBackToAppButton && (
-                            <button className='signoutbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                            <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
                                <img src={tasksIcon} alt="Tasks" height="26px" style={{ marginRight: '4px' }} /> 
                             </button>
                         )
@@ -2689,7 +2689,28 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>)}
                                     </div>
                                     <br />
-
+                                    {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
+                                                className="button"
+                                                onClick={() => {
+                                                    setCurrentDocId(item.id);
+                                                    setShowHomeworkApp(true);
+                                                }}
+                                                style={{
+                                                    padding: '3px 3px',
+                                                    fontSize: '18px',
+                                                    backgroundColor: '#278cab',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    transition: 'background-color 0.3s'
+                                                }}
+                                                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                                                onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
+                                            >
+                                                {practicePageButtonLabel || 'Go to Questions/Quiz Page'}
+                                            </button>
+                                            )}
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
                                             {isiPhone &&
@@ -2728,28 +2749,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             &nbsp; &nbsp;
                                             {showPrint && (item.voiceName !== undefined && item.voiceName?.length > 2) && (
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
-                                            )}
-                                            {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
-                                                className="button"
-                                                onClick={() => {
-                                                    setCurrentDocId(item.id);
-                                                    setShowHomeworkApp(true);
-                                                }}
-                                                style={{
-                                                    padding: '3px 3px',
-                                                    fontSize: '18px',
-                                                    backgroundColor: '#278cab',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '8px',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 0.3s'
-                                                }}
-                                                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                                onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
-                                            >
-                                                {practicePageButtonLabel || 'Go to Practice Questions Page'}
-                                            </button>
                                             )}
                                             &nbsp; &nbsp;
                                             {(item.model !== 'dall-e-3' && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (<button

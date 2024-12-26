@@ -218,6 +218,17 @@
   font-size: 16px; /* make the button text extremely small */
 }
 
+.signupbutton {
+  background-color: rgb(124, 94, 1);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 20px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 16px; /* make the button text extremely small */
+}
+
 .signinbutton {
   background-color: rgb(45, 129, 3);
   border: none;
