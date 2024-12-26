@@ -52,6 +52,8 @@ function App() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [adminUser, setAdminUser] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [speechRate, setSpeechRate] = useState('0%');
+  const [speechSilence, setSpeechSilence] = useState(1800);
   const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
   const [lastTask, setLastTask] = useState(null); // State for the limit of documents to show
   const urlParams = new URLSearchParams(window.location.search);
@@ -198,7 +200,11 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: message, uid: user.uid, source: 'ta', voice_name: voiceName })
+        body: JSON.stringify({ message: message, uid: user.uid, source: 'ta', 
+          voice_name: voiceName,
+          silence_break: speechSilence,
+          prosody_rate: speechRate
+        })
       });
 
       if (!response.ok) {

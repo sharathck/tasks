@@ -41,7 +41,8 @@ function Articles() {
     const [voiceName, setVoiceName] = useState('en-US-EvelynMultilingualNeural');
     const [limitActiveValue, setLimitActiveValue] = useState(limitMax);
     const [showLiveTTS, setShowLiveTTS] = useState(false);
-
+    const [speechRate, setSpeechRate] = useState('10%');
+    const [speechSilence, setSpeechSilence] = useState(200);
     const isiPhone = /iPhone/i.test(navigator.userAgent);
     console.log(isiPhone);
     const todoCollection = collection(db, fireBaseTTSCollection)
@@ -308,7 +309,7 @@ function Articles() {
     const callTTSAPI = async (message, appUrl) => {
         let now = new Date();
         console.log('Calling TTS API with appUrl:', appUrl, 'voiceName:', voiceName);
-        console.log('before callTTS' + `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+        console.log('before callTTS' , `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
         setIsGeneratingTTS(true); // Set generating state
         message = message.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
         message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
@@ -319,9 +320,7 @@ function Articles() {
         .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
         .replace(/[#:\-*]/g, ' ')
                     .replace(/[&]/g, ' and ')
-            .replace(/[<>]/g, ' ')
-            .replace(/["]/g, '&quot;')
-            .replace(/[']/g, '&apos;') // Remove special characters
+        .replace(/[<>]/g, ' ')
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim(); // Remove leading/trailing spaces
     
@@ -334,7 +333,12 @@ function Articles() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: cleanedArticles, uid: uid })
+                body: JSON.stringify({ message: cleanedArticles, 
+                    uid: uid,
+                    source: 'ar',
+                    voice_name: voiceName,
+                    silence_break: speechSilence,
+                    prosody_rate: speechRate })
             });
 
             if (!response.ok) {

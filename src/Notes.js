@@ -16,7 +16,6 @@ import { MdSettingsInputComponent } from "react-icons/md";
 import { FaK } from "react-icons/fa6";
 import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
-// import style manually
 import 'react-markdown-editor-lite/lib/index.css';
 
 
@@ -35,9 +34,11 @@ let prevPromptInput = '';
 
 const Notes = () => {
     // **State Variables**
-    const [genaiData, setGenaiData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
+    const [speechRate, setSpeechRate] = useState('10%');
+    const [speechSilence, setSpeechSilence] = useState(100);
+    const [genaiData, setGenaiData] = useState([]);
     const [user, setUser] = useState(null);
     const [uid, setUid] = useState(null);
     const [promptInput, setPromptInput] = useState('');
@@ -410,7 +411,8 @@ const Notes = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: message, uid: uid, source: 'ai', voice_name: voiceName })
+                body: JSON.stringify({ message: message, uid: uid, source: 'ai', voice_name: voiceName,                     silence_break: speechSilence,
+                    prosody_rate: speechRate })
             });
 
             if (!response.ok) {
