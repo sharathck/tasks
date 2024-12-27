@@ -2260,7 +2260,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             >
                                 {isQuizMultipleChoice
                                     ? (<FaSpinner className="spinning" />)
-                                    : ('Quiz-Choices')}
+                                    : ('GenAI Quiz-Choices')}
                             </button>
                         </>
                     )}
@@ -2270,7 +2270,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             className="generateButton"
                             style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
                         >
-                            {isAISearch ? (<FaSpinner className="spinning" />) : ('GoogleSearch + GenAI')}
+                            {isAISearch ? (<FaSpinner className="spinning" />) : ('GenAI Search')}
                         </button>
                     )}
                     {showImageDallE3 &&
@@ -2731,7 +2731,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             >
                                                 {isHomeWork
                                                     ? (<FaSpinner className="spinning" />)
-                                                    : (practiceButtonLabel || 'Practice')}
+                                                    : (practiceButtonLabel || 'GenAI Questions')}
                                             </button>)}
                                         {showPrint && (
                                             <button
@@ -2740,7 +2740,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             >
                                                 {isQuiz
                                                     ? (<FaSpinner className="spinning" />)
-                                                    : (quizButtonLabel || 'Trivia/Quiz')}
+                                                    : (quizButtonLabel || 'GenAI Quiz')}
                                             </button>)}
                                     </div>
                                     <br />
