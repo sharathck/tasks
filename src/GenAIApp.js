@@ -1401,14 +1401,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (invocationType === 'homeWork') {
                     setCurrentDocId(data[0].results[0].docID);
                     console.log('currenDocID:', currentDocId);
-                    if (selectedModel === modelo1) {
-                        setShowHomeworkApp(true);
-                    }
-                    else {
-                        const baseUrl = window.location.href.split('?')[0];
-                        const newUrl = `${baseUrl}?g=${data[0].results[0].docID}`;
-                        window.open(newUrl, '_blank');
-                    }
+                    setShowHomeworkApp(true);
                 }
             }
             //console.log('Response:', data);
