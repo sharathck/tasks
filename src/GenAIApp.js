@@ -2744,7 +2744,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>)}
                                     </div>
                                     <br />
-                                    {(((item.answer.slice(0, 7)).toLowerCase() === '```json') && item.answer) && (<button
+                                    {((((item.answer.slice(0, 7)).toLowerCase() === '```json') || adminUser )&& item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
