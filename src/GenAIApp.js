@@ -1759,6 +1759,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             return;
         }
         setIsHomeWork(true);
+        setTemperature(0.6);
+        setTop_p(0.8);
 
         // Ensure genaiPrompts is populated
         if (genaiPrompts.length === 0) {
@@ -1828,6 +1830,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('Please enter a message.');
             return;
         }
+        setTemperature(0.4);
+        setTop_p(0.5);
         setIsQuiz(true);
         // Ensure genaiPrompts is populated
         if (genaiPrompts.length === 0) {
@@ -1957,6 +1961,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('Please enter a message.');
             return;
         }
+        setTemperature(0.4);
+        setTop_p(0.5);
         setIsQuizMultipleChoice(true);
 
         // Ensure genaiPrompts is populated
