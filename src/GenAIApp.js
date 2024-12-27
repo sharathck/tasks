@@ -1815,8 +1815,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         homeWorkInput = message + intelligentQuestionsPrompt;
         setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'homeWork');
-        setIsGeneratingo1(true); // Set generating state to true
-        callAPI(modelo1, 'homeWork');
+        if (adminUser) {
+            setIsGeneratingo1(true); // Set generating state to true
+            callAPI(modelo1, 'homeWork');
+        }
         updateConfiguration();
     };
 
@@ -1852,8 +1854,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         homeWorkInput = message + quizPrompt;
         setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'homeWork');
-        setIsGeneratingo1(true); // Set generating state to true
-        callAPI(modelo1, 'homeWork');
+        if (adminUser) {
+            setIsGeneratingo1(true); // Set generating state to true
+            callAPI(modelo1, 'homeWork');
+        }
         updateConfiguration();
     };
 
@@ -1968,8 +1972,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         homeWorkInput = message + multipleChoicePrompt;
         setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'homeWork');
-        setIsGeneratingo1(true); // Set generating state to true
-        callAPI(modelo1, 'homeWork');
+        if (adminUser) {
+            setIsGeneratingo1(true); // Set generating state to true
+            callAPI(modelo1, 'homeWork');
+        }
         updateConfiguration();
     };
 
@@ -2763,7 +2769,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     {showPrint && (
                                         <div style={{ fontSize: '16px' }}>
                                             {isiPhone &&
-                                                (item.model === modelImageDallE3 || item.model === modelGeminiImage|| item.model === 'azure-tts') && (
+                                                (item.model === modelImageDallE3 || item.model === modelGeminiImage || item.model === 'azure-tts') && (
                                                     <button
                                                         className="button"
                                                         onClick={() => handleDownload(item.answer, item.model)}
