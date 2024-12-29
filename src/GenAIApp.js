@@ -35,6 +35,7 @@ let userID = '';
 let dataLimit = 21;
 let youtubeContentInput = '';
 let generatedDocID = '';
+let ttsGeneratedDocID = '';
 let imageGenerationPrompt = '';
 let imagePromptsGenerationInput = '';
 let promptSuggestion = 'NA';
@@ -65,6 +66,7 @@ let adminUser = false;
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
+    const [showDownloadTextButton, setShowDownloadTextButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [genOpenAIImage, setGenOpenAIImage] = useState(true);
     const [speechRate, setSpeechRate] = useState('0%');
@@ -356,6 +358,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // Helper function to truncate questions based on limit
     const getQuestionSubstring = (question) => {
         const marker = '###';
+        // if question is undefined or null, return an empty string
+        if (!question) {
+            return '';
+        }
+        // if length of the question is less than the limit, return the question
+        if (question.length <= questionTrimLength) {
+            return question;
+        }
         const markerIndex = question.indexOf(marker);
         if (markerIndex !== -1) {
             return question.substring(0, Math.min(markerIndex, questionTrimLength));
@@ -730,6 +740,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.storyTellingSpeechSilence !== undefined) {
                     setStoryTellingSpeechSilence(data.storyTellingSpeechSilence);
                 }
+                if (data.showDownloadTextButton !== undefined) {
+                    setShowDownloadTextButton(data.showDownloadTextButton);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -908,6 +921,64 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
+    const generateAndDownloadYouTubeUploadInformation = async (message) => {
+        const firestoreResponseData = message;
+        console.log('First fetched data from Firestore:', firestoreResponseData);
+        console.log('firestoreResponseData:', firestoreResponseData);
+        if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+            alert('ERROR: Prompt response is not generated.');
+            return;
+        }
+
+        setIsYouTubeTitle(true);
+        setIsGemini(true);
+        setIsGeneratingGemini(true);
+        youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
+        youtubeSelected = true;
+        await callAPI(modelGemini, 'youtubeTitle');
+        console.log('youtube Title Gen and Upload generatedDocID:', generatedDocID);
+        const youtubeTitledocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+        const youtubeTitledocSnap = await getDoc(youtubeTitledocRef);
+        if (youtubeTitledocSnap.exists()) {
+         console.log('Youtube title fetched data from Firestore:', youtubeTitledocSnap.data().answer);
+        const plainText = (youtubeTitledocSnap.data().answer || '')
+            .replace(/[#*~`>-]/g, '')
+            .replace(/\r?\n/g, '\r\n');
+        const blob = new Blob([plainText], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'title.txt';
+        link.click();
+        }
+        youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
+        await callAPI(modelo1, 'youtubeDescription');
+        console.log('youtube Description Gen and Upload generatedDocID:', generatedDocID);
+        const youtubeDescrdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+        const youtubeDescrdocSnap = await getDoc(youtubeDescrdocRef);
+        if (youtubeDescrdocSnap.exists()) {
+         console.log('Youtube title fetched data from Firestore:', youtubeDescrdocSnap.data().answer);
+        const plainText = (youtubeDescrdocSnap.data().answer || '')
+            .replace(/[#*~`>-]/g, '')
+            .replace(/\r?\n/g, '\r\n');
+        const blob = new Blob([plainText], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'description.txt';
+        link.click();
+    }
+    await callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
+    console.log('TTS generatedDocID:', ttsGeneratedDocID);
+    const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', ttsGeneratedDocID);
+    const ttsdocSnap = await getDoc(ttsdocRef);
+    if (ttsdocSnap.exists()) {
+        console.log('TTS fetched data from Firestore:', ttsdocSnap.data().answer);
+        const audioURL = ttsdocSnap.data().answer;
+        console.log('TTS audioURL:', audioURL);
+        await handleDownload(audioURL, 'azure-tts');
+    }
+
+    };
+
     const generateYouTubeUploadInformation = async (message) => {
         const firestoreResponseData = message;
         console.log('First fetched data from Firestore:', firestoreResponseData);
@@ -916,17 +987,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('ERROR: Prompt response is not generated.');
             return;
         }
-        setIsGeneratingTTS(true);
-        callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
-        // Execute YouTube Title/Description
-        youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
+        // Execute YouTube Title/Description/Audio
         youtubeSelected = true;
         setIsYouTubeTitle(true);
+        setIsGeneratingTTS(true);
         setIsGemini(true);
         setIsGeneratingGemini(true);
-        callAPI(modelGemini, 'youtubeTitle');
-        youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
-        callAPI(modelo1, 'youtubeDescription');
+        generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
         // Execute Image Search
         imagePromptInput = firestoreResponseData + imagesSearchPrompt;
         imageSelected = true;
@@ -1527,6 +1594,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/http?:\/\/[^\s]+/g, '')
             .replace(/[#:\-*]/g, ' ')
             .replace(/[&]/g, ' and ')
+            .replace('```json', '')
             .replace(/[<>]/g, ' ')
             //       .replace(/["]/g, '&quot;')
             //       .replace(/[']/g, '&apos;')
@@ -1553,6 +1621,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (!response.ok) {
                 throw new Error([`Network response was not ok: ${response.statusText}`]);
             }
+            const data = await response.json();
+            ttsGeneratedDocID = data[0].docID;
         } catch (error) {
             console.error('Error calling TTS API:', error);
             alert([`Error: ${error.message}`]);
@@ -2358,7 +2428,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             onClick={async () => {
                                 setSpeechRate(storyTellingSpeechRate);
                                 setSpeechSilence(storyTellingSpeechSilence);
-                                setIsGeneratingYouTubeAudioTitlePrompt(true); generateYouTubeUploadInformation(promptInput);
+                                setIsGeneratingYouTubeAudioTitlePrompt(true); 
+                                generateYouTubeUploadInformation(promptInput);
                             }
                             }>
                             <label className={
@@ -2647,10 +2718,19 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                                 {showPrint && (<button
                                                     className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'}
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                         setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
-                                                        callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
+                                                        await callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
                                                             .finally(() => setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: false })));
+                                                        console.log('TTS generatedDocID:', ttsGeneratedDocID);
+                                                        const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', ttsGeneratedDocID);
+                                                        const ttsdocSnap = await getDoc(ttsdocRef);
+                                                        if (ttsdocSnap.exists()) {
+                                                            console.log('TTS fetched data from Firestore:', ttsdocSnap.data().answer);
+                                                            const audioURL = ttsdocSnap.data().answer;
+                                                            console.log('TTS audioURL:', audioURL);
+                                                            handleDownload(audioURL, 'azure-tts');
+                                                        }                                                    
                                                     }}
                                                 >
                                                     <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
@@ -2750,7 +2830,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>)}
                                     </div>
                                     <br />
-                                    {((((item.answer.slice(0, 7)).toLowerCase() === '```json') || adminUser )&& item.answer) && (<button
+                                    {((((item.answer.slice(0, 7)).toLowerCase() === '```json') || adminUser) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
@@ -2812,7 +2892,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && showDownloadTextButton && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
