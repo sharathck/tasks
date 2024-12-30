@@ -54,6 +54,8 @@ let appendPrompt = ' ';
 let imagePromptInput = '';
 let imageSelected = false;
 let homeWorkInput = '';
+let quizInput = '';
+let quizMultipleChoicesInput = '';
 let chunk_size = 4000;
 let silence_break = 900;
 let YouTubePrompt = '';
@@ -1372,11 +1374,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'homeWork':
                     promptText = homeWorkInput;
                     break;
+                case 'quiz':
+                    promptText = quizInput;
+                    break;
                 case 'google-search':
                     promptText = googleSearchPromptInput;
                     break;
                 case 'multipleChoiceQuiz':
-                    promptText = homeWorkInput;
+                    promptText = quizMultipleChoicesInput;
                     break;
                 default:
                     if (autoPrompt) {
@@ -1877,7 +1882,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Append the prompt to promptInput
-        homeWorkInput = message + quizPrompt;
+        quizInput = message + quizPrompt;
         setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'homeWork');
         if (adminUser) {
@@ -1997,7 +2002,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         let multipleChoicePrompt = prompt ? prompt.fullText : quizMultipleChoicesPrompt;
 
         // Append the prompt to promptInput
-        homeWorkInput = message + multipleChoicePrompt;
+        quizMultipleChoicesInput = message + multipleChoicePrompt;
         setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'homeWork');
         if (adminUser) {

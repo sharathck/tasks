@@ -25,40 +25,71 @@ const Homework = ({ sourceDocumentID }) => {
 
     const initializeHomeworkData = async (firestoreData, userId) => {
         try {
+            // Check if data already exists
             const homeworkCollection = collection(db, 'genai', userId, 'homework');
             const q = query(homeworkCollection, where('sourceDocumentID', '==', sourceDocID));
-
-            // First check if data already exists
             const snapshot = await getDocs(q);
+            
             if (snapshot.docs.length > 2) {
                 console.log('Existing homework data found. Skipping initialization');
                 return;
             }
 
-            // Parse the questions from Firestore data
+            // Clean and parse the JSON data
             let questions = [];
             try {
-                // Try parsing if it's a JSON string
                 if (typeof firestoreData === 'string') {
-                    const jsonData = JSON.parse(firestoreData);
-                    questions = Array.isArray(jsonData) ? jsonData : jsonData.questions || [];
+                    // Clean the JSON string
+                    let cleanJson = firestoreData
+                        .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
+                        .replace(/\\n/g, " ")                          // Replace newlines
+                        .replace(/\\"/g, '"')                         // Fix escaped quotes
+                        .replace(/\s+/g, " ")                         // Normalize whitespace
+                        .trim();
+
+                    // Remove markdown code block markers if present
+                    cleanJson = cleanJson.replace(/```json\s*|\s*```/g, "");
+
+                    // Ensure the string starts with [ and ends with ]
+                    if (!cleanJson.startsWith('[')) {
+                        const startIndex = cleanJson.indexOf('[');
+                        if (startIndex !== -1) {
+                            cleanJson = cleanJson.substring(startIndex);
+                        }
+                    }
+                    if (!cleanJson.endsWith(']')) {
+                        const endIndex = cleanJson.lastIndexOf(']');
+                        if (endIndex !== -1) {
+                            cleanJson = cleanJson.substring(0, endIndex + 1);
+                        }
+                    }
+
+                    try {
+                        questions = JSON.parse(cleanJson);
+                    } catch (parseError) {
+                        console.error("JSON Parse Error:", parseError);
+                        console.log("Attempted to parse:", cleanJson);
+                        return;
+                    }
                 } else if (firestoreData.questions) {
-                    // If it's already an object with questions
                     questions = firestoreData.questions;
                 } else if (Array.isArray(firestoreData)) {
-                    // If it's already an array
                     questions = firestoreData;
                 }
             } catch (parseError) {
                 console.error("Error parsing questions data:", parseError);
+                console.log("Raw data:", firestoreData);
                 return;
             }
 
-            if (!questions.length) {
+            // Validate questions array
+            if (!Array.isArray(questions) || !questions.length) {
                 console.error("No valid questions found in data");
                 return;
             }
-            // Add questions to homework collection
+
+            // Process questions and add to Firestore
+            // ...rest of the existing initialization code...
             const currentDateTime = new Date();
             const batch = writeBatch(db);
             questions.forEach((question) => {
