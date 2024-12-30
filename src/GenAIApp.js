@@ -46,6 +46,7 @@ let youtubeDescriptionPromptInput = '';
 let googleSearchPromptInput = '';
 let youtubeSelected = false;
 let imageGenerationPromptInput = '';
+let stories_image_generation_prompt = '';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -421,15 +422,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 await fetchTexts();
                 // Set visibility of back button based on admin status
                 setShowBackToAppButton(adminUser);
-                console.log('source Image Parameter:', sourceImageParameter);
-                if (sourceImageParameter && sourceImageParameter.length > 0) {
-                    console.log('Calling Dall-E API with source image parameter:', sourceImageParameter);
-                    imageGenerationPromptInput = sourceImageParameter;
-                    setPromptInput(sourceImageParameter);
-                    setIsGeneratingImage_Dall_e_3(true);
-                    callAPI(modelGeminiImage, 'image_ai_agent');
-                    callAPI(modelImageDallE3, 'image_ai_agent');
-                }
             }
             else {
                 console.log('No user is signed in');
@@ -1008,7 +1000,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
     };
 
-    const generateYouTubeUploadInformation = async (message) => {
+    const generateYouTubeUploadInformation = async (message, invocation_source = 'youtube') => {
         const firestoreResponseData = message;
         console.log('First fetched data from Firestore:', firestoreResponseData);
         console.log('firestoreResponseData:', firestoreResponseData);
@@ -1030,6 +1022,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIso1(true);
         setIsGeneratingGemini(true);
         imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
+        if (invocation_source === 'stories') {
+            imagePromptsGenerationInput = promptInput + stories_image_generation_prompt;
+        }
         await callAPI(modelGemini, 'imageGeneration');
         console.log('Image Generation generatedDocID', generatedDocID);
         const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
@@ -1045,8 +1040,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setIsGeneratingImage_Dall_e_3(true);
                     callAPI(modelGeminiImage, 'image_ai_agent');
                     callAPI(modelImageDallE3, 'image_ai_agent');
-                    //const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                    //window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
                 }
                 setIsGeneratingYouTubeAudioTitlePrompt(false);
                 setIsGeneratingYouTubeBedtimeStory(false);
@@ -2004,6 +1997,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'imageGenerationPrompt':
                         imageGenerationPrompt = data.fullText;
                         break;
+                    case 'stories_image_generation_prompt':
+                        stories_image_generation_prompt = data.fullText;
+                        break;
                     case 'quiz-multiple-choices':
                         quizMultipleChoicesPrompt = data.fullText;
                         break;
@@ -2389,6 +2385,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 'button_selected' : 'storiesButton'
                                         }
                                         onClick={async () => {
+                                            setTemperature(1);
+                                            setTop_p(1);
                                             setSpeechRate(storyTellingSpeechRate);
                                             setSpeechSilence(storyTellingSpeechSilence);
                                             setIsGeneratingYouTubeBedtimeStory(true);
@@ -2416,7 +2414,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                         alert('ERROR: Prompt response is not generated.');
                                                         return;
                                                     }
-                                                    generateYouTubeUploadInformation(firestoreResponseData);
+                                                    generateYouTubeUploadInformation(firestoreResponseData, 'stories');
                                                 }
                                                 return null;
                                             }
