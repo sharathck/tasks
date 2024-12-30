@@ -427,8 +427,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     imageGenerationPromptInput = sourceImageParameter;
                     setPromptInput(sourceImageParameter);
                     setIsGeneratingImage_Dall_e_3(true);
-                    callAPI(modelGeminiImage, 'image');
-                    callAPI(modelImageDallE3, 'image');
+                    callAPI(modelGeminiImage, 'image_ai_agent');
+                    callAPI(modelImageDallE3, 'image_ai_agent');
                 }
             }
             else {
@@ -1022,13 +1022,39 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGeneratingTTS(true);
         setIsGemini(true);
         setIsGeneratingGemini(true);
-        generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
+        await generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
         // Execute Image Search
         imagePromptInput = firestoreResponseData + imagesSearchPrompt;
         imageSelected = true;
         setIsImagesSearch(true);
         setIso1(true);
         setIsGeneratingGemini(true);
+        imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
+        await callAPI(modelGemini, 'imageGeneration');
+        console.log('Image Generation generatedDocID', generatedDocID);
+        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+        const idocSnap = await getDoc(idocRef);
+        if (idocSnap.exists()) {
+            const ifirestoreResponseData = idocSnap.data().answer;
+            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
+            if (ifirestoreResponseData) {
+                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                for (const part of parts) {
+                    console.log('image prompt part:', part);
+                    imageGenerationPromptInput = part;
+                    setIsGeneratingImage_Dall_e_3(true);
+                    callAPI(modelGeminiImage, 'image_ai_agent');
+                    callAPI(modelImageDallE3, 'image_ai_agent');
+                    //const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                    //window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
+                }
+                setIsGeneratingYouTubeAudioTitlePrompt(false);
+                setIsGeneratingYouTubeBedtimeStory(false);
+                setIsGeneratingImage_Dall_e_3(false);
+            } else {
+                console.error('ifirestoreResponseData is null or undefined');
+            }
+        }
         await callAPI(modelGemini, 'imagesSearchWords');
         console.log('Image Search generatedDocID', generatedDocID);
         const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
@@ -1046,30 +1072,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
             } else {
                 console.error('imageSearchfirestoreResponseData is null or undefined');
-            }
-        }
-        imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
-        await callAPI(modelGemini, 'imageGeneration');
-        console.log('Image Generation generatedDocID', generatedDocID);
-        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-        const idocSnap = await getDoc(idocRef);
-        if (idocSnap.exists()) {
-            const ifirestoreResponseData = idocSnap.data().answer;
-            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-            if (ifirestoreResponseData) {
-                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                for (const part of parts) {
-                    console.log('image prompt part:', part);
-                    imageGenerationPromptInput = part;
-                    setIsGeneratingImage_Dall_e_3(true);
-                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                    window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
-                }
-                setIsGeneratingYouTubeAudioTitlePrompt(false);
-                setIsGeneratingYouTubeBedtimeStory(false);
-                setIsGeneratingImage_Dall_e_3(false);
-            } else {
-                console.error('ifirestoreResponseData is null or undefined');
             }
         }
     };
@@ -1374,8 +1376,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'imageGeneration':
                     promptText = imagePromptsGenerationInput;
                     break;
-                case 'image':
+                case 'image_ai_agent':
                     promptText = imageGenerationPromptInput;
+                    break;
+                case 'image':
+                    promptText = promptInput;
                     break;
                 case 'youtube':
                     promptText = youtubeContentInput;
