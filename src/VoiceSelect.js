@@ -36,7 +36,7 @@ const VoiceSelect = ({ selectedVoice, onVoiceChange }) => {
             voiceNamesSnapshot.forEach(doc => {
                 const data = doc.data();
                 if (Array.isArray(data.tts)) {
-                    console.log('Voice names:', data.tts);
+                    // console.log('Voice names:', data.tts);
                     setGenaiVoices(prevVoices => [...prevVoices, ...data.tts]);
                 }
             });

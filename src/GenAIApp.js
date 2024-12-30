@@ -64,10 +64,21 @@ let quizPrompt = '';
 let practicePrompt = '';
 let quizMultipleChoicesPrompt = '';
 let adminUser = false;
+let quiz_Multiple_Choices_Label = '';
+let genai_stories_label = '';
+let genai_image_label = '';
+let genai_youtube_label = '';
+let genai_tasks_label = '';
+let genai_search_label = '';
+let genai_audio_label = '';
+let genai_autoprompt_label = '';
+
+
 
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
+    const [fetchFromPublic, setFetchFromPublic] = useState(false);
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showBigQueryModelSearch, setShowBigQueryModelSearch] = useState(false);
     const [showDownloadTextButton, setShowDownloadTextButton] = useState(false);
@@ -341,6 +352,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             setEditPromptTag('');
             setEditPromptFullText('');
             setShowEditPopup(false);
+            await fetchPrompts(user.uid);
             return;
 
         } catch (error) {
@@ -749,6 +761,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.showBigQueryModelSearch !== undefined) {
                     setShowBigQueryModelSearch(data.showBigQueryModelSearch);
+                }
+                if (data.fetchFromPublic !== undefined) {
+                    setFetchFromPublic(data.fetchFromPublic);
                 }
             });
         } catch (error) {
@@ -1920,16 +1935,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
     };
 
     const fetchTexts = async () => {
+        let q;
         try {
-            const q = query(
+            if (fetchFromPublic) {
+                console.log('Fetching Texts from public collection');
+            q = query(
                 collection(db, 'public'),
                 where('tag', '>', ''),
                 where('fullText', '>', '')
             );
+        } else {
+            console.log('Fetching Texts from user collection');
+            q = query( collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts'),where('tag', '>', ''),
+            where('fullText', '>', ''), orderBy('modifiedDateTime', 'asc'));
+        }
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                //console.log('Data:', data.fullText);
+                console.log('fetchTexts Data:',data.tag, '    ' , data.fullText);
                 switch (data.tag) {
                     case 'practice-button-label':
                         setPracticeButtonLabel(data.fullText);
@@ -1972,6 +1995,30 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         break;
                     case 'quiz-multiple-choices':
                         quizMultipleChoicesPrompt = data.fullText;
+                        break;
+                    case 'quiz_Multiple_Choices_Label':
+                        quiz_Multiple_Choices_Label = data.fullText;
+                        break;
+                    case 'genai_stories_label':
+                        genai_stories_label = data.fullText;
+                        break;
+                    case 'genai_image_label':
+                        genai_image_label = data.fullText;
+                        break;
+                    case 'genai_youtube_label':
+                        genai_youtube_label = data.fullText; 
+                        break;
+                    case 'genai_tasks_label':
+                        genai_tasks_label = data.fullText;
+                        break;
+                    case 'genai_search_label':
+                        genai_search_label = data.fullText;
+                        break;
+                    case 'genai_audio_label':
+                        genai_audio_label = data.fullText;
+                        break;
+                    case 'genai_autoprompt_label':
+                        genai_autoprompt_label = data.fullText;
                         break;
                     default:
                         break;
@@ -2148,6 +2195,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     )}
+                    <br />
+                    <div className="button-section" data-title="Generative AI">
                     {showTemp && (
                         <label style={{ marginLeft: '8px' }}>
                             Temp:
@@ -2176,12 +2225,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             />
                         </label>
                     )}
-                    {showVoiceSelect && (
-                        <VoiceSelect
-                            selectedVoice={voiceName} // Current selected voice
-                            onVoiceChange={setVoiceName} // Handler to update selected voice
-                        />
-                    )}
                     {showPromptsDropDown && (
                         <select className="promptDropdownInput" id="promptSelect"
                             onChange={(e) => {
@@ -2208,7 +2251,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     {showAutoPrompt && (
                         <button className={autoPrompt ? 'button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
-                            AutoPrompt
+                            {genai_autoprompt_label || 'AutoPrompt'}
                         </button>
                     )}
                     {!isAISearch && !isHomeWork && !isQuiz && showGenAIButton && (
@@ -2267,124 +2310,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             )}
                         </button>
                     )}
+                    </div>
+                    <br />
+                    <div className="button-section" data-title="Gen AI Agents">
                     {(showHomeWorkButton && !isAISearch &&
                         <>
-                            <button
-                                onClick={() => handleHomeWork(promptInput)}
-                                className="practiceButton"
-                            >
-                                {isHomeWork
-                                    ? (<FaSpinner className="spinning" />)
-                                    : (practiceButtonLabel || 'Practice')}
-                            </button>
-                            <button
-                                onClick={() => handleQuiz(promptInput)}
-                                className="practiceButton"
-                                style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
-                            >
-                                {isQuiz
-                                    ? (<FaSpinner className="spinning" />)
-                                    : (quizButtonLabel || 'Trivia/Quiz')}
-                            </button>
-                            <button
-                                onClick={() => handleMultipleChoiceQuiz(promptInput)}
-                                className="practiceButton"
-                                style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
-                            >
-                                {isQuizMultipleChoice
-                                    ? (<FaSpinner className="spinning" />)
-                                    : ('GenAI Quiz-Choices')}
-                            </button>
-                        </>
-                    )}
-                    {showAISearchButton && !isHomeWork && !isQuiz && (
-                        <button
-                            onClick={handleAISearch}
-                            className="generateButton"
-                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
-                        >
-                            {isAISearch ? (<FaSpinner className="spinning" />) : ('GenAI Search')}
-                        </button>
-                    )}
-                    {showImageDallE3 &&
-                        <button className="imageButton"
-                            onClick={() => handleDall_e_3Change()}>
-                            <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
-                                GenAI Image
-                            </label>
-                        </button>
-                    }
-                    {showTTS &&
-                        <label style={{ marginLeft: '8px' }}>
-                            Speech Rate:
-                            <input
-                                type="text"
-                                maxLength="5"
-                                value={speechRate}
-                                onChange={(e) => setSpeechRate(e.target.value)}
-                                style={{ width: '50px', marginLeft: '5px' }}
-                            />
-                        </label>
-                    }
-                    {showTTS &&
-                        <label style={{ marginLeft: '8px' }}>
-                            Speech Silence:
-                            <input
-                                type="number"
-                                value={speechSilence}
-                                onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
-                                style={{ width: '60px', marginLeft: '5px' }}
-                            />
-                        </label>
-                    }
-                    {showTTS &&
-                        <button className="audioButton"
-                            onClick={() => handleTTSChange()}
-                        >
-                            <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                GenAI Audio
-                            </label>
-                        </button>
-                    }
-                    {autoPrompt && selectedPrompt && showSourceDocument && (
-                        <div style={{ marginTop: '10px', fontSize: '16px' }}>
-                            Source document(s): <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleEditSource();
-                                }}
-                                className="sourceDocumentButton"
-                            >
-                                {selectedPrompt}
-
-                            </button>
-                        </div>
-                    )}
-                    <br />
-                    <br />
-                    {
-                        (showPrint && showYouTubeButton && <button
-                            className={
-                                (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'button_selected' : 'speakButton'
-                            }
-                            onClick={async () => {
-                                setSpeechRate(storyTellingSpeechRate);
-                                setSpeechSilence(storyTellingSpeechSilence);
-                                setIsGeneratingYouTubeAudioTitlePrompt(true);
-                                generateYouTubeUploadInformation(promptInput);
-                            }
-                            }>
-                            <label className={
-                                (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'flashing' : ''
-                            }>
-                                GenAI Stories
-                            </label>
-                        </button>
-                        )
-                    }
-                    {
+                          {
                         (showPrint && showYouTubeButton && <button
                             className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
@@ -2432,12 +2363,90 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                YouTube <img src={youtubeIcon} alt="youtube" height="26px" style={{ marginRight: '4px' }} />
+                               {genai_youtube_label || 'YouTube'} <img src={youtubeIcon} alt="youtube" height="15px" style={{ marginRight: '4px' }} />
                             </label>
                         </button>
                         )
                     }
-                    {showPrint && (
+                        {
+                        (showPrint && showYouTubeButton && <button
+                            className={
+                                (isGeneratingYouTubeAudioTitlePrompt) ?
+                                    'button_selected' : 'storiesButton'
+                            }
+                            onClick={async () => {
+                                setSpeechRate(storyTellingSpeechRate);
+                                setSpeechSilence(storyTellingSpeechSilence);
+                                setIsGeneratingYouTubeAudioTitlePrompt(true);
+                                generateYouTubeUploadInformation(promptInput);
+                            }
+                            }>
+                            <label className={
+                                (isGeneratingYouTubeAudioTitlePrompt) ?
+                                    'flashing' : ''
+                            }>
+                                {genai_stories_label || 'GenAI Stories'}
+                            </label>
+                        </button>
+                        )
+                    }
+                  
+                    &nbsp; &nbsp;
+                            <button
+                                onClick={() => handleHomeWork(promptInput)}
+                                className="practiceButton"
+                            >
+                                {isHomeWork
+                                    ? (<FaSpinner className="spinning" />)
+                                    : (practiceButtonLabel || 'Practice')}
+                            </button>
+                            <button
+                                onClick={() => handleQuiz(promptInput)}
+                                className="practiceButton"
+                                style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
+                            >
+                                {isQuiz
+                                    ? (<FaSpinner className="spinning" />)
+                                    : (quizButtonLabel || 'Trivia/Quiz')}
+                            </button>
+                            <button
+                                onClick={() => handleMultipleChoiceQuiz(promptInput)}
+                                className="practiceButton"
+                                style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                            >
+                                {isQuizMultipleChoice
+                                    ? (<FaSpinner className="spinning" />)
+                                    : (quiz_Multiple_Choices_Label || 'GenAI Quiz-Choices')}
+                            </button>
+                        </>
+                    )}
+                    {showAISearchButton && !isHomeWork && !isQuiz && (
+                        <button
+                            onClick={handleAISearch}
+                            className="generateButton"
+                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
+                        >
+                            {isAISearch ? (<FaSpinner className="spinning" />) : (genai_search_label || 'GenAI Search')}
+                        </button>
+                    )}
+                    {showImageDallE3 &&
+                        <button className="imageButton"
+                            onClick={() => handleDall_e_3Change()}>
+                            <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
+                                {genai_image_label || 'GenAI Image'}
+                            </label>
+                        </button>
+                    }
+                    </div>
+                    <br />
+                    <div className="button-section" data-title="Gen AI Audio - Text to Speech">
+                    {showVoiceSelect && (
+                        <VoiceSelect
+                            selectedVoice={voiceName} // Current selected voice
+                            onVoiceChange={setVoiceName} // Handler to update selected voice
+                        />
+                    )}
+                                                        {showPrint && (
                         <button
                             className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
                             onClick={async () => {
@@ -2458,11 +2467,60 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                     )
                     }
-                                        &nbsp; &nbsp;
+                        {showTTS &&
+                            <label style={{ marginLeft: '8px' }}>
+                                Speech Rate:
+                                <input
+                                    type="text"
+                                    maxLength="5"
+                                    value={speechRate}
+                                    onChange={(e) => setSpeechRate(e.target.value)}
+                                    style={{ width: '50px', marginLeft: '5px' }}
+                                />
+                            </label>
+                        }
+                        {showTTS &&
+                            <label style={{ marginLeft: '8px' }}>
+                                Speech Silence:
+                                <input
+                                    type="number"
+                                    value={speechSilence}
+                                    onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
+                                    style={{ width: '60px', marginLeft: '5px' }}
+                                />
+                            </label>
+                        }
+                        {showPrint && showTTS &&
+                            <button className="button"
+                                onClick={() => handleTTSChange()}
+                            >
+                                <label className={isGeneratingTTS ? 'flashing' : ''}>
+                                    <FaCloudDownloadAlt />                                 {genai_audio_label || 'Audio'}
+                                </label>
+                            </button>
+                        }
+                    </div>
+                    {autoPrompt && selectedPrompt && showSourceDocument && (
+                        <div style={{ marginTop: '10px', fontSize: '16px' }}>
+                            Source document(s): <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleEditSource();
+                                }}
+                                className="sourceDocumentButton"
+                            >
+                                {selectedPrompt}
+
+                            </button>
+                        </div>
+                    )}
+                    <br />
+                    <br />
+                                     
                     {!GenAIParameter ? (
                         showBackToAppButton && (
                             <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                                <img src={tasksIcon} alt="Tasks" height="26px" style={{ marginRight: '4px' }} />
+                                <img src={tasksIcon} alt={genai_tasks_label || 'Tasks'} height="26px" style={{ marginRight: '4px' }} />
                             </button>
                         )
                     ) : (
@@ -2558,7 +2616,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 value={editPromptFullText}
                                 renderHTML={editPromptFullText => mdParser.render(editPromptFullText)}
                                 onChange={({ text }) => setEditPromptFullText(text)}
-                                config={{ view: { menu: true, md: false, html: true } }}
+                                config={{ view: { menu: true, md: true, html: true } }}
                             />
                             <div>
                                 {showSaveButton && (<button onClick={handleSavePrompt} className="signinbutton">Save</button>)}
@@ -2762,7 +2820,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 Print <FaPrint />
                                             </button>
                                         )}
-                                        &nbsp; &nbsp;
+                                        &nbsp; 
                                         {showPrint && (
                                             <button
                                                 className="button"

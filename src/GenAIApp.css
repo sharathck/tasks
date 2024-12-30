@@ -169,7 +169,7 @@
 }
 .youtubeButton {
   background-color: rgb(218, 193, 103);
-  border: none;
+  border: 2px solid black;
   color: #fff;
   cursor: pointer;
   margin-left: 12px;
@@ -177,9 +177,9 @@
   padding: 5px 5px;
   font-size: 18px; /* make the button text extremely small */
 }
-.speakButton {
+.storiesButton {
   background-color: rgb(20, 195, 218);
-  border: none;
+  border: 2px solid black;
   color: #fff;
   cursor: pointer;
   margin-left: 12px;
@@ -499,6 +499,23 @@ form {
   font-size: 18px;
 }
 
+.button-section {
+  border: 2px dotted #ccc;
+  padding: 10px;
+  margin: 10px 0;
+  position: relative;
+}
+
+.button-section::before {
+  content: attr(data-title);
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background: white;
+  padding: 0 5px;
+  font-size: 14px;
+  color: #666;
+}
 
 .modal-overlay {
   position: fixed;
