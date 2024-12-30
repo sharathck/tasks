@@ -1015,11 +1015,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGemini(true);
         setIsGeneratingGemini(true);
         await generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
-        imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
-        if (invocation_source === 'stories') {
-            console.log('Invoking stories image generation', stories_image_generation_prompt);
-            imagePromptsGenerationInput = firestoreResponseData + stories_image_generation_prompt;
-        }
         if (invocation_source !== 'stories') {
             // Execute Image Search
             imagePromptInput = firestoreResponseData + imagesSearchPrompt;
@@ -1046,31 +1041,37 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     console.error('imageSearchfirestoreResponseData is null or undefined');
                 }
             }
-            setIsGeneratingGemini(true);
-            await callAPI(modelGemini, 'imageGeneration');
-            console.log('Image Generation generatedDocID', generatedDocID);
-            const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-            const idocSnap = await getDoc(idocRef);
-            if (idocSnap.exists()) {
-                const ifirestoreResponseData = idocSnap.data().answer;
-                console.log('Gen AI Image Generation - Second fetched data from Firestore:', ifirestoreResponseData);
-                if (ifirestoreResponseData) {
-                    const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                    for (const part of parts) {
-                        console.log('image prompt part:', part);
-                        imageGenerationPromptInput = part;
-                        setIsGeneratingImage_Dall_e_3(true);
-                        await callAPI(modelGeminiImage, 'image_ai_agent');
-                        await callAPI(modelImageDallE3, 'image_ai_agent');
-                    }
-                    setIsGeneratingImage_Dall_e_3(false);
-                } else {
-                    console.error('ifirestoreResponseData is null or undefined');
-                }
-            }
-            setIsGeneratingYouTubeAudioTitlePrompt(false);
-            setIsGeneratingYouTubeBedtimeStory(false);
         }
+        imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
+        if (invocation_source === 'stories') {
+            console.log('Invoking stories image generation', stories_image_generation_prompt);
+            imagePromptsGenerationInput = firestoreResponseData + stories_image_generation_prompt;
+        }
+        setIsGeneratingo1(true);
+        await callAPI(modelo1, 'imageGeneration');
+        console.log('Image Generation generatedDocID', generatedDocID);
+        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+        const idocSnap = await getDoc(idocRef);
+        if (idocSnap.exists()) {
+            const ifirestoreResponseData = idocSnap.data().answer;
+            console.log('Gen AI Image Generation - Second fetched data from Firestore:', ifirestoreResponseData);
+            if (ifirestoreResponseData) {
+                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                for (const part of parts) {
+                    console.log('image prompt part:', part);
+                    imageGenerationPromptInput = part;
+                    setIsGeneratingImage_Dall_e_3(true);
+                    await callAPI(modelGeminiImage, 'image_ai_agent');
+                    await callAPI(modelImageDallE3, 'image_ai_agent');
+                }
+                setIsGeneratingImage_Dall_e_3(false);
+            } else {
+                console.error('ifirestoreResponseData is null or undefined');
+            }
+        }
+        setIsGeneratingYouTubeAudioTitlePrompt(false);
+        setIsGeneratingYouTubeBedtimeStory(false);
+
     };
     const handlePromptChange = async (promptValue) => {
         /* const genaiCollection = collection(db, 'genai', uid, 'prompts');
