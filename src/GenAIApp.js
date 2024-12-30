@@ -1015,58 +1015,61 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGemini(true);
         setIsGeneratingGemini(true);
         await generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
-        // Execute Image Search
-        imagePromptInput = firestoreResponseData + imagesSearchPrompt;
-        imageSelected = true;
-        setIsImagesSearch(true);
-        setIso1(true);
         setIsGeneratingGemini(true);
         imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
         if (invocation_source === 'stories') {
             console.log('Invoking stories image generation', stories_image_generation_prompt);
             imagePromptsGenerationInput = firestoreResponseData + stories_image_generation_prompt;
         }
-        await callAPI(modelGemini, 'imageGeneration');
-        console.log('Image Generation generatedDocID', generatedDocID);
-        const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-        const idocSnap = await getDoc(idocRef);
-        if (idocSnap.exists()) {
-            const ifirestoreResponseData = idocSnap.data().answer;
-            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-            if (ifirestoreResponseData) {
-                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                for (const part of parts) {
-                    console.log('image prompt part:', part);
-                    imageGenerationPromptInput = part;
-                    setIsGeneratingImage_Dall_e_3(true);
-                    callAPI(modelGeminiImage, 'image_ai_agent');
-                    callAPI(modelImageDallE3, 'image_ai_agent');
+        if (invocation_source !== 'stories') {
+            // Execute Image Search
+            imagePromptInput = firestoreResponseData + imagesSearchPrompt;
+            imageSelected = true;
+            setIsGemini(true);
+            setIsImagesSearch(true);
+            await callAPI(modelGemini, 'imagesSearchWords');
+            console.log('Image Search generatedDocID', generatedDocID);
+            const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+            const imageSearchdocSnap = await getDoc(imageSearchdocRef);
+            if (imageSearchdocSnap.exists()) {
+                const ifirestoreResponseData = imageSearchdocSnap.data().answer;
+                console.log('Gen AI Images Search - Second fetched data from Firestore:', ifirestoreResponseData);
+                if (ifirestoreResponseData) {
+                    const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                    for (const part of parts) {
+                        console.log('image prompt part:', part);
+                        imageGenerationPromptInput = part;
+                        const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
+                        window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
+                    }
+                } else {
+                    console.error('imageSearchfirestoreResponseData is null or undefined');
                 }
-                setIsGeneratingYouTubeAudioTitlePrompt(false);
-                setIsGeneratingYouTubeBedtimeStory(false);
-                setIsGeneratingImage_Dall_e_3(false);
-            } else {
-                console.error('ifirestoreResponseData is null or undefined');
             }
-        }
-        await callAPI(modelGemini, 'imagesSearchWords');
-        console.log('Image Search generatedDocID', generatedDocID);
-        const imageSearchdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-        const imageSearchdocSnap = await getDoc(imageSearchdocRef);
-        if (imageSearchdocSnap.exists()) {
-            const ifirestoreResponseData = imageSearchdocSnap.data().answer;
-            console.log('Second fetched data from Firestore:', ifirestoreResponseData);
-            if (ifirestoreResponseData) {
-                const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                for (const part of parts) {
-                    console.log('image prompt part:', part);
-                    imageGenerationPromptInput = part;
-                    const encodedPrompt = encodeURIComponent(imageGenerationPromptInput);
-                    window.open(`https://www.google.com/search?tbm=isch&q=${encodedPrompt}`, '_blank');
+            setIso1(true);
+            await callAPI(modelo1, 'imageGeneration');
+            console.log('Image Generation generatedDocID', generatedDocID);
+            const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+            const idocSnap = await getDoc(idocRef);
+            if (idocSnap.exists()) {
+                const ifirestoreResponseData = idocSnap.data().answer;
+                console.log('Gen AI Image Generation - Second fetched data from Firestore:', ifirestoreResponseData);
+                if (ifirestoreResponseData) {
+                    const parts = ifirestoreResponseData.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                    for (const part of parts) {
+                        console.log('image prompt part:', part);
+                        imageGenerationPromptInput = part;
+                        setIsGeneratingImage_Dall_e_3(true);
+                        await callAPI(modelGeminiImage, 'image_ai_agent');
+                        await callAPI(modelImageDallE3, 'image_ai_agent');
+                    }
+                    setIsGeneratingImage_Dall_e_3(false);
+                } else {
+                    console.error('ifirestoreResponseData is null or undefined');
                 }
-            } else {
-                console.error('imageSearchfirestoreResponseData is null or undefined');
             }
+            setIsGeneratingYouTubeAudioTitlePrompt(false);
+            setIsGeneratingYouTubeBedtimeStory(false);
         }
     };
     const handlePromptChange = async (promptValue) => {
