@@ -30,6 +30,7 @@ const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
 let searchQuery = '';
+let invocationType = '';
 let searchModel = 'All';
 let userID = '';
 let dataLimit = 21;
@@ -803,6 +804,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
         bigQueryResults();
     };
 
+    const handleInvocationChange = (event) => {
+        invocationType = event.target.value;
+        bigQueryResults();
+    };
+
     const handleVectorSearchChange = (event) => {
         searchQuery = event.target.value;
         vectorSearchResults();
@@ -944,15 +950,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
         const youtubeTitledocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
         const youtubeTitledocSnap = await getDoc(youtubeTitledocRef);
         if (youtubeTitledocSnap.exists()) {
-         console.log('Youtube title fetched data from Firestore:', youtubeTitledocSnap.data().answer);
-        const plainText = (youtubeTitledocSnap.data().answer || '')
-            .replace(/[#*~`>-]/g, '')
-            .replace(/\r?\n/g, '\r\n');
-        const blob = new Blob([plainText], { type: 'text/plain' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'title.txt';
-        link.click();
+            console.log('Youtube title fetched data from Firestore:', youtubeTitledocSnap.data().answer);
+            const plainText = (youtubeTitledocSnap.data().answer || '')
+                .replace(/[#*~`>-]/g, '')
+                .replace(/\r?\n/g, '\r\n');
+            const blob = new Blob([plainText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'title.txt';
+            link.click();
         }
         youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
         await callAPI(modelo1, 'youtubeDescription');
@@ -960,26 +966,26 @@ const GenAIApp = ({ sourceImageInformation }) => {
         const youtubeDescrdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
         const youtubeDescrdocSnap = await getDoc(youtubeDescrdocRef);
         if (youtubeDescrdocSnap.exists()) {
-         console.log('Youtube title fetched data from Firestore:', youtubeDescrdocSnap.data().answer);
-        const plainText = (youtubeDescrdocSnap.data().answer || '')
-            .replace(/[#*~`>-]/g, '')
-            .replace(/\r?\n/g, '\r\n');
-        const blob = new Blob([plainText], { type: 'text/plain' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'description.txt';
-        link.click();
-    }
-    await callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
-    console.log('TTS generatedDocID:', ttsGeneratedDocID);
-    const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', ttsGeneratedDocID);
-    const ttsdocSnap = await getDoc(ttsdocRef);
-    if (ttsdocSnap.exists()) {
-        console.log('TTS fetched data from Firestore:', ttsdocSnap.data().answer);
-        const audioURL = ttsdocSnap.data().answer;
-        console.log('TTS audioURL:', audioURL);
-        await handleDownload(audioURL, 'azure-tts');
-    }
+            console.log('Youtube title fetched data from Firestore:', youtubeDescrdocSnap.data().answer);
+            const plainText = (youtubeDescrdocSnap.data().answer || '')
+                .replace(/[#*~`>-]/g, '')
+                .replace(/\r?\n/g, '\r\n');
+            const blob = new Blob([plainText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'description.txt';
+            link.click();
+        }
+        await callTTSAPI(firestoreResponseData, process.env.REACT_APP_TTS_SSML_API_URL);
+        console.log('TTS generatedDocID:', ttsGeneratedDocID);
+        const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', ttsGeneratedDocID);
+        const ttsdocSnap = await getDoc(ttsdocRef);
+        if (ttsdocSnap.exists()) {
+            console.log('TTS fetched data from Firestore:', ttsdocSnap.data().answer);
+            const audioURL = ttsdocSnap.data().answer;
+            console.log('TTS audioURL:', audioURL);
+            await handleDownload(audioURL, 'azure-tts');
+        }
 
     };
 
@@ -1334,130 +1340,69 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
-    const callAPI = async (selectedModel, invocationType = '') => {
+    const callAPI = async (selectedModel, invocationType = 'GenAI') => {
         console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput, '  youtubeDescriptionPromptInput : ', youtubeDescriptionPromptInput);
         console.log('youtube Content Input prompt:', youtubeContentInput);
         console.log('imageGenerationPromptInput :', imageGenerationPromptInput);
         console.log('imagePromptsGenerationInput:', imagePromptsGenerationInput);
         try {
             let response;
+            let promptText = promptInput;
+
+            // Determine promptText based on invocation type
             switch (invocationType) {
                 case 'imageGeneration':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: imagePromptsGenerationInput, model: selectedModel, uid: userID })
-                    });
+                    promptText = imagePromptsGenerationInput;
                     break;
                 case 'image':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: imageGenerationPromptInput, model: selectedModel, uid: userID })
-                    });
+                    promptText = imageGenerationPromptInput;
                     break;
                 case 'youtube':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: youtubeContentInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
+                    promptText = youtubeContentInput;
                     break;
                 case 'youtubeTitle':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: youtubePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
+                    promptText = youtubePromptInput;
                     break;
                 case 'youtubeDescription':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: youtubeDescriptionPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
+                    promptText = youtubeDescriptionPromptInput;
                     break;
                 case 'imagesSearchWords':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: imagePromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
+                    promptText = imagePromptInput;
                     break;
                 case 'homeWork':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: homeWorkInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
-                    //.then(homework_response => homework_response.json());
-                    //console.log('Response:', homework_response);
-                    //console.log('docID:', homework_response[0].results[0].docID);
+                    promptText = homeWorkInput;
                     break;
                 case 'google-search':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: googleSearchPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                    });
+                    promptText = googleSearchPromptInput;
                     break;
                 case 'multipleChoiceQuiz':
-                    response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            prompt: homeWorkInput,
-                            model: selectedModel,
-                            uid: uid,
-                            temperature: temperature,
-                            top_p: top_p
-                        })
-                    });
+                    promptText = homeWorkInput;
                     break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
-                        console.log('Prompt:', autoPromptInput);
-                        response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ prompt: autoPromptInput, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                        });
-                    }
-                    else {
-                        let finalPrompt = promptInput;
-                        if (fullPromptInput.length > 2) {
-                            finalPrompt = promptInput + autoPromptSeparator + fullPromptInput;
-                        }
-                        response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ prompt: finalPrompt, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-                        });
+                        promptText = autoPromptInput;
+                    } else if (fullPromptInput.length > 2) {
+                        promptText = promptInput + autoPromptSeparator + fullPromptInput;
                     }
             }
+
+
+            // Single API call with the determined promptText
+            response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: promptText,
+                    model: selectedModel,
+                    uid: uid,
+                    temperature: temperature,
+                    top_p: top_p,
+                    invocationType: invocationType
+                })
+            });
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -1467,13 +1412,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
             const data = await response.json();
             generatedDocID = data[0].results[0].docID;
             console.log('Generated Doc ID:', generatedDocID);
-
-            if (invocationType === 'homeWork' || invocationType === 'youtube' || invocationType === 'imageGeneration') {
-                if (invocationType === 'homeWork') {
-                    setCurrentDocId(data[0].results[0].docID);
-                    console.log('currenDocID:', currentDocId);
-                    setShowHomeworkApp(true);
-                }
+            if (invocationType === 'homeWork') {
+                setCurrentDocId(data[0].results[0].docID);
+                console.log('currenDocID:', currentDocId);
+                setShowHomeworkApp(true);
             }
             //console.log('Response:', data);
         } catch (error) {
@@ -1640,9 +1582,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // Handler for DALL·E 3 Checkbox Change
     const handleDall_e_3Change = async (checked) => {
         setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
-        await callAPI(modelGeminiImage);
+        await callAPI(modelGeminiImage,'image');
         if (genOpenAIImage) {
-            await callAPI(modelImageDallE3);
+            await callAPI(modelImageDallE3,'image');
         }
         setIsGeneratingImage_Dall_e_3(false);
     };
@@ -1744,14 +1686,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 uid: uid,
                 limit: dataLimit,
                 q: searchQuery,
-                model: searchModel
+                model: searchModel,
+                invocationType: invocationType
             })
         })
             .then((res) => res.json())
             .then((data) => {
                 // Print data objects received from API
                 data.forEach(item => {
-                    console.log(item);        
+                    console.log(item);
                 });
                 setGenaiData(data);
                 setIsLoading(false);
@@ -2397,20 +2340,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     }
-                    &nbsp; &nbsp;
-                    {!GenAIParameter ? (
-                        showBackToAppButton && (
-                            <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
-                                <img src={tasksIcon} alt="Tasks" height="26px" style={{ marginRight: '4px' }} />
-                            </button>
-                        )
-                    ) : (
-                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
-                    )}
-                    <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
-                    {user && <span style={{ marginLeft: '5px' }}> {user.email}
-                    </span>
-                    }
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button
@@ -2431,12 +2360,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         (showPrint && showYouTubeButton && <button
                             className={
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'button_selected' : 'button'
+                                    'button_selected' : 'speakButton'
                             }
                             onClick={async () => {
                                 setSpeechRate(storyTellingSpeechRate);
                                 setSpeechSilence(storyTellingSpeechSilence);
-                                setIsGeneratingYouTubeAudioTitlePrompt(true); 
+                                setIsGeneratingYouTubeAudioTitlePrompt(true);
                                 generateYouTubeUploadInformation(promptInput);
                             }
                             }>
@@ -2444,7 +2373,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 (isGeneratingYouTubeAudioTitlePrompt) ?
                                     'flashing' : ''
                             }>
-                                Story Telling
+                                GenAI Stories
                             </label>
                         </button>
                         )
@@ -2504,7 +2433,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     }
                     {showPrint && (
                         <button
-                            className={isLiveAudioPlayingPrompt ? 'button_selected' : 'speakButton'}
+                            className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
                             onClick={async () => {
                                 try {
                                     setIsLiveAudioPlayingPrompt(true);
@@ -2522,6 +2451,20 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     )
+                    }
+                                        &nbsp; &nbsp;
+                    {!GenAIParameter ? (
+                        showBackToAppButton && (
+                            <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                                <img src={tasksIcon} alt="Tasks" height="26px" style={{ marginRight: '4px' }} />
+                            </button>
+                        )
+                    ) : (
+                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    )}
+                    <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    {user && <span style={{ marginLeft: '5px' }}> {user.email}
+                    </span>
                     }
                     <br />
                     <div className="info-text" style={{
@@ -2555,7 +2498,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
                     placeholder={keywordSearchPlaceholder || "Keyword Search"}
                 />
-
+                <input
+                    className="searchInput"
+                    type="text"
+                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleInvocationChange(event)}
+                    placeholder={"invocationType"}
+                />
                 {showPromptsDropDownAfterSearch && showBigQueryModelSearch && (<select
                     className="modelInput"
                     value={searchModel}
@@ -2719,7 +2667,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                         }}
                                                     >
                                                         <label className={isLiveAudioPlaying[item.id] ? 'flashing' : ''}>
-                                                            <FaPlay /> Audio
+                                                            <FaPlay /> Speak
                                                         </label>
                                                     </button>
                                                 )}
@@ -2738,7 +2686,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                             const audioURL = ttsdocSnap.data().answer;
                                                             console.log('TTS audioURL:', audioURL);
                                                             handleDownload(audioURL, 'azure-tts');
-                                                        }                                                    
+                                                        }
                                                     }}
                                                 >
                                                     <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
@@ -2898,6 +2846,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             &nbsp; &nbsp;
                                             {showPrint && (item.voiceName !== undefined && item.voiceName?.length > 2) && (
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
+                                            )}
+                                                                                        &nbsp; &nbsp;
+                                            {showPrint && (item.invocationType !== undefined && item.invocationType?.length > 2) && (
+                                                <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
                                             {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && showDownloadTextButton && (<button
