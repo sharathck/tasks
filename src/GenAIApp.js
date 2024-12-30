@@ -2679,15 +2679,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                         setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
                                                         await callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
                                                             .finally(() => setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: false })));
-                                                        console.log('TTS generatedDocID:', ttsGeneratedDocID);
-                                                        const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', ttsGeneratedDocID);
-                                                        const ttsdocSnap = await getDoc(ttsdocRef);
-                                                        if (ttsdocSnap.exists()) {
-                                                            console.log('TTS fetched data from Firestore:', ttsdocSnap.data().answer);
-                                                            const audioURL = ttsdocSnap.data().answer;
-                                                            console.log('TTS audioURL:', audioURL);
-                                                            handleDownload(audioURL, 'azure-tts');
-                                                        }
                                                     }}
                                                 >
                                                     <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
