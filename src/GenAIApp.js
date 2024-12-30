@@ -1424,6 +1424,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         } finally {
             // click refresh button
             searchQuery = '';
+            invocationType = '';
             searchModel = 'All';
             youtubeSelected = false;
             imageSelected = false;
