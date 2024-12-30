@@ -66,6 +66,7 @@ let adminUser = false;
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
+    const [showBigQueryModelSearch, setShowBigQueryModelSearch] = useState(false);
     const [showDownloadTextButton, setShowDownloadTextButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [genOpenAIImage, setGenOpenAIImage] = useState(true);
@@ -742,6 +743,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.showDownloadTextButton !== undefined) {
                     setShowDownloadTextButton(data.showDownloadTextButton);
+                }
+                if (data.showBigQueryModelSearch !== undefined) {
+                    setShowBigQueryModelSearch(data.showBigQueryModelSearch);
                 }
             });
         } catch (error) {
@@ -1745,6 +1749,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         })
             .then((res) => res.json())
             .then((data) => {
+                // Print data objects received from API
+                data.forEach(item => {
+                    console.log(item);        
+                });
                 setGenaiData(data);
                 setIsLoading(false);
             })
@@ -2548,7 +2556,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     placeholder={keywordSearchPlaceholder || "Keyword Search"}
                 />
 
-                {showPromptsDropDownAfterSearch && (<select
+                {showPromptsDropDownAfterSearch && showBigQueryModelSearch && (<select
                     className="modelInput"
                     value={searchModel}
                     onChange={(e) => handleModelChange(e.target.value)}
