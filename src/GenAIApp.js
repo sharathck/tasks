@@ -1015,7 +1015,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGemini(true);
         setIsGeneratingGemini(true);
         await generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
-        setIsGeneratingGemini(true);
         imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
         if (invocation_source === 'stories') {
             console.log('Invoking stories image generation', stories_image_generation_prompt);
@@ -1025,6 +1024,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             // Execute Image Search
             imagePromptInput = firestoreResponseData + imagesSearchPrompt;
             imageSelected = true;
+            setIsGeneratingGemini(true);
             setIsGemini(true);
             setIsImagesSearch(true);
             await callAPI(modelGemini, 'imagesSearchWords');
@@ -1046,8 +1046,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     console.error('imageSearchfirestoreResponseData is null or undefined');
                 }
             }
-            setIso1(true);
-            await callAPI(modelo1, 'imageGeneration');
+            setIsGeneratingGemini(true);
+            await callAPI(modelGemini, 'imageGeneration');
             console.log('Image Generation generatedDocID', generatedDocID);
             const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
             const idocSnap = await getDoc(idocRef);
