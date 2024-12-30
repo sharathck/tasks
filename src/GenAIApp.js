@@ -72,13 +72,15 @@ let genai_tasks_label = '';
 let genai_search_label = '';
 let genai_audio_label = '';
 let genai_autoprompt_label = '';
-
+let bedtime_stories_content_input = '';
+let story_teller_prompt = '';
 
 
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
+    const [isGeneratingYouTubeBedtimeStory, setIsGeneratingYouTubeBedtimeStory] = useState(false);
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showBigQueryModelSearch, setShowBigQueryModelSearch] = useState(false);
     const [showDownloadTextButton, setShowDownloadTextButton] = useState(false);
@@ -1064,6 +1066,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     window.open(`https://www.listsoftasks.com/?i=${encodedPrompt}`, '_blank');
                 }
                 setIsGeneratingYouTubeAudioTitlePrompt(false);
+                setIsGeneratingYouTubeBedtimeStory(false);
                 setIsGeneratingImage_Dall_e_3(false);
             } else {
                 console.error('ifirestoreResponseData is null or undefined');
@@ -1386,6 +1389,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'imagesSearchWords':
                     promptText = imagePromptInput;
                     break;
+                case 'bedtime_stories':
+                    promptText = bedtime_stories_content_input;
+                    break;
                 case 'homeWork':
                     promptText = homeWorkInput;
                     break;
@@ -1603,9 +1609,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // Handler for DALL·E 3 Checkbox Change
     const handleDall_e_3Change = async (checked) => {
         setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
-        await callAPI(modelGeminiImage,'image');
+        await callAPI(modelGeminiImage, 'image');
         if (genOpenAIImage) {
-            await callAPI(modelImageDallE3,'image');
+            await callAPI(modelImageDallE3, 'image');
         }
         setIsGeneratingImage_Dall_e_3(false);
     };
@@ -1939,20 +1945,20 @@ const GenAIApp = ({ sourceImageInformation }) => {
         try {
             if (fetchFromPublic) {
                 console.log('Fetching Texts from public collection');
-            q = query(
-                collection(db, 'public'),
-                where('tag', '>', ''),
-                where('fullText', '>', '')
-            );
-        } else {
-            console.log('Fetching Texts from user collection');
-            q = query( collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts'),where('tag', '>', ''),
-            where('fullText', '>', ''), orderBy('modifiedDateTime', 'asc'));
-        }
+                q = query(
+                    collection(db, 'public'),
+                    where('tag', '>', ''),
+                    where('fullText', '>', '')
+                );
+            } else {
+                console.log('Fetching Texts from user collection');
+                q = query(collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts'), where('tag', '>', ''),
+                    where('fullText', '>', ''), orderBy('modifiedDateTime', 'asc'));
+            }
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                console.log('fetchTexts Data:',data.tag, '    ' , data.fullText);
+                console.log('fetchTexts Data:', data.tag, '    ', data.fullText);
                 switch (data.tag) {
                     case 'practice-button-label':
                         setPracticeButtonLabel(data.fullText);
@@ -2006,7 +2012,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         genai_image_label = data.fullText;
                         break;
                     case 'genai_youtube_label':
-                        genai_youtube_label = data.fullText; 
+                        genai_youtube_label = data.fullText;
                         break;
                     case 'genai_tasks_label':
                         genai_tasks_label = data.fullText;
@@ -2019,6 +2025,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         break;
                     case 'genai_autoprompt_label':
                         genai_autoprompt_label = data.fullText;
+                        break;
+                    case 'bedtime_stories':
+                        story_teller_prompt = data.fullText;
                         break;
                     default:
                         break;
@@ -2197,276 +2206,307 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     <br />
                     <div className="button-section" data-title="Generative AI">
-                    {showTemp && (
-                        <label style={{ marginLeft: '8px' }}>
-                            Temp:
-                            <input
-                                type="number"
-                                value={temperature}
-                                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                                step="0.1"
-                                min="0"
-                                max="1"
-                                style={{ width: '50px', marginLeft: '5px' }}
-                            />
-                        </label>
-                    )}
-                    {showTop_p && (
-                        <label style={{ marginLeft: '8px' }}>
-                            Top_p:
-                            <input
-                                type="number"
-                                value={top_p}
-                                onChange={(e) => setTop_p(parseFloat(e.target.value))}
-                                step="0.1"
-                                min="0"
-                                max="1"
-                                style={{ width: '50px', marginLeft: '5px' }}
-                            />
-                        </label>
-                    )}
-                    {showPromptsDropDown && (
-                        <select className="promptDropdownInput" id="promptSelect"
-                            onChange={(e) => {
-                                handlePromptChange(e.target.value);
-                                setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
-                                setSelectedPromptFullText(e.target.value);
-                            }}
-                            style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
-                        >
-                            <option value="NA">Select Prompt</option>
-                            {genaiPrompts.map((prompt) => (
-                                <option key={prompt.id} value={prompt.fullText}>{prompt.tag}</option>
-                            ))}
-                        </select>
-                    )}
-                    {showEditPromptButton && (
-                        <button
-                            className="signonpagebutton"
-                            onClick={() => handleEditPrompt()}
-                            style={{ padding: '10px', background: 'lightblue', fontSize: '16px' }}
-                        >
-                            <FaEdit />
-                        </button>
-                    )}
-                    {showAutoPrompt && (
-                        <button className={autoPrompt ? 'button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
-                            {genai_autoprompt_label || 'AutoPrompt'}
-                        </button>
-                    )}
-                    {!isAISearch && !isHomeWork && !isQuiz && showGenAIButton && (
-                        <button
-                            onClick={handleGenerate}
-                            className="generateButton"
-                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
-                            disabled={
-                                isGenerating ||
-                                isGeneratingGemini ||
-                                isGeneratingAnthropic ||
-                                isGeneratingo1Mini ||
-                                isGeneratingo1 ||
-                                isGeneratingImage_Dall_e_3 ||
-                                isGeneratingTTS ||
-                                isGeneratingMistral ||
-                                isGeneratingLlama ||
-                                isGeneratingGpt4Turbo ||
-                                isGeneratingGeminiSearch ||
-                                isGeneratingGeminiFlash ||
-                                isGeneratingPerplexity ||
-                                isGeneratingPerplexityFast ||
-                                isGeneratingCodeStral ||
-                                isGeneratingGpt4oMini ||
-                                isGeneratingClaudeHaiku ||
-                                isGeneratingSambanova ||
-                                isGeneratingGroq ||
-                                isGeneratingNova ||
-                                isGeneratingCerebras
-                            }
-                        >
-                            {isGenerating ||
-                                isGeneratingGemini ||
-                                isGeneratingAnthropic ||
-                                isGeneratingo1Mini ||
-                                isGeneratingo1 ||
-                                isGeneratingImage_Dall_e_3 ||
-                                isGeneratingTTS ||
-                                isGeneratingMistral ||
-                                isGeneratingLlama ||
-                                isGeneratingGpt4Turbo ||
-                                isGeneratingGeminiSearch ||
-                                isGeneratingGeminiFlash ||
-                                isGeneratingPerplexity ||
-                                isGeneratingPerplexityFast ||
-                                isGeneratingCodeStral ||
-                                isGeneratingGpt4oMini ||
-                                isGeneratingClaudeHaiku ||
-                                isGeneratingSambanova ||
-                                isGeneratingGroq ||
-                                isGeneratingNova ||
-                                isGeneratingCerebras ? (
-                                <FaSpinner className="spinning" />
-                            ) : (
-                                'GenAI'
-                            )}
-                        </button>
-                    )}
+                        {showTemp && (
+                            <label style={{ marginLeft: '8px' }}>
+                                Temp:
+                                <input
+                                    type="number"
+                                    value={temperature}
+                                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                                    step="0.1"
+                                    min="0"
+                                    max="1"
+                                    style={{ width: '50px', marginLeft: '5px' }}
+                                />
+                            </label>
+                        )}
+                        {showTop_p && (
+                            <label style={{ marginLeft: '8px' }}>
+                                Top_p:
+                                <input
+                                    type="number"
+                                    value={top_p}
+                                    onChange={(e) => setTop_p(parseFloat(e.target.value))}
+                                    step="0.1"
+                                    min="0"
+                                    max="1"
+                                    style={{ width: '50px', marginLeft: '5px' }}
+                                />
+                            </label>
+                        )}
+                        {showPromptsDropDown && (
+                            <select className="promptDropdownInput" id="promptSelect"
+                                onChange={(e) => {
+                                    handlePromptChange(e.target.value);
+                                    setSelectedPrompt(e.target.options[e.target.selectedIndex].text);
+                                    setSelectedPromptFullText(e.target.value);
+                                }}
+                                style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
+                            >
+                                <option value="NA">Select Prompt</option>
+                                {genaiPrompts.map((prompt) => (
+                                    <option key={prompt.id} value={prompt.fullText}>{prompt.tag}</option>
+                                ))}
+                            </select>
+                        )}
+                        {showEditPromptButton && (
+                            <button
+                                className="signonpagebutton"
+                                onClick={() => handleEditPrompt()}
+                                style={{ padding: '10px', background: 'lightblue', fontSize: '16px' }}
+                            >
+                                <FaEdit />
+                            </button>
+                        )}
+                        {showAutoPrompt && (
+                            <button className={autoPrompt ? 'button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
+                                {genai_autoprompt_label || 'AutoPrompt'}
+                            </button>
+                        )}
+                        {!isAISearch && !isHomeWork && !isQuiz && showGenAIButton && (
+                            <button
+                                onClick={handleGenerate}
+                                className="generateButton"
+                                style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
+                                disabled={
+                                    isGenerating ||
+                                    isGeneratingGemini ||
+                                    isGeneratingAnthropic ||
+                                    isGeneratingo1Mini ||
+                                    isGeneratingo1 ||
+                                    isGeneratingImage_Dall_e_3 ||
+                                    isGeneratingTTS ||
+                                    isGeneratingMistral ||
+                                    isGeneratingLlama ||
+                                    isGeneratingGpt4Turbo ||
+                                    isGeneratingGeminiSearch ||
+                                    isGeneratingGeminiFlash ||
+                                    isGeneratingPerplexity ||
+                                    isGeneratingPerplexityFast ||
+                                    isGeneratingCodeStral ||
+                                    isGeneratingGpt4oMini ||
+                                    isGeneratingClaudeHaiku ||
+                                    isGeneratingSambanova ||
+                                    isGeneratingGroq ||
+                                    isGeneratingNova ||
+                                    isGeneratingCerebras
+                                }
+                            >
+                                {isGenerating ||
+                                    isGeneratingGemini ||
+                                    isGeneratingAnthropic ||
+                                    isGeneratingo1Mini ||
+                                    isGeneratingo1 ||
+                                    isGeneratingImage_Dall_e_3 ||
+                                    isGeneratingTTS ||
+                                    isGeneratingMistral ||
+                                    isGeneratingLlama ||
+                                    isGeneratingGpt4Turbo ||
+                                    isGeneratingGeminiSearch ||
+                                    isGeneratingGeminiFlash ||
+                                    isGeneratingPerplexity ||
+                                    isGeneratingPerplexityFast ||
+                                    isGeneratingCodeStral ||
+                                    isGeneratingGpt4oMini ||
+                                    isGeneratingClaudeHaiku ||
+                                    isGeneratingSambanova ||
+                                    isGeneratingGroq ||
+                                    isGeneratingNova ||
+                                    isGeneratingCerebras ? (
+                                    <FaSpinner className="spinning" />
+                                ) : (
+                                    'GenAI'
+                                )}
+                            </button>
+                        )}
                     </div>
                     <br />
                     <div className="button-section" data-title="Gen AI Agents">
-                    {(showHomeWorkButton && !isAISearch &&
-                        <>
-                          {
-                        (showPrint && showYouTubeButton && <button
-                            className={
-                                (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'button_selected' : 'youtubeButton'
-                            }
-                            onClick={async () => {
-
-                                setIsGeneratingYouTubeAudioTitlePrompt(true);
-                                console.log('youtube prompt:', YouTubePrompt);
-                                if (YouTubePrompt === undefined || YouTubePrompt.length < 5) {
-                                    alert('ERROR: YouTubePrompt is blank.');
-                                    return;
-                                }
-                                youtubeContentInput = promptInput + YouTubePrompt;
-                                await callAPI(modelo1, 'youtube');
-                                console.log(' generatedDocID', generatedDocID);
-                                if (!generatedDocID || generatedDocID.length < 5) {
-                                    alert('ERROR: generatedDocID is not set.');
-                                    return;
-                                }
-                                try {
-                                    const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                    const docSnap = await getDoc(docRef);
-
-                                    if (docSnap.exists()) {
-                                        const firestoreResponseData = docSnap.data().answer;
-                                        console.log('First fetched data from Firestore:', firestoreResponseData);
-                                        if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
-                                            alert('ERROR: Prompt response is not generated.');
-                                            return;
+                        {(showHomeWorkButton && !isAISearch &&
+                            <>
+                                {
+                                    (showPrint && showYouTubeButton && <button
+                                        className={
+                                            (isGeneratingYouTubeAudioTitlePrompt) ?
+                                                'button_selected' : 'youtubeButton'
                                         }
-                                        setSpeechRate(youtubeSpeecRate);
-                                        setSpeechSilence(youtubeSpeechSilence);
-                                        generateYouTubeUploadInformation(firestoreResponseData);
-                                    }
-                                    return null;
+                                        onClick={async () => {
+
+                                            setIsGeneratingYouTubeAudioTitlePrompt(true);
+                                            console.log('youtube prompt:', YouTubePrompt);
+                                            if (YouTubePrompt === undefined || YouTubePrompt.length < 5) {
+                                                alert('ERROR: YouTubePrompt is blank.');
+                                                return;
+                                            }
+                                            youtubeContentInput = promptInput + YouTubePrompt;
+                                            await callAPI(modelo1, 'youtube');
+                                            console.log(' generatedDocID', generatedDocID);
+                                            if (!generatedDocID || generatedDocID.length < 5) {
+                                                alert('ERROR: generatedDocID is not set.');
+                                                return;
+                                            }
+                                            try {
+                                                const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                                const docSnap = await getDoc(docRef);
+
+                                                if (docSnap.exists()) {
+                                                    const firestoreResponseData = docSnap.data().answer;
+                                                    console.log('First fetched data from Firestore:', firestoreResponseData);
+                                                    if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+                                                        alert('ERROR: Prompt response is not generated.');
+                                                        return;
+                                                    }
+                                                    setSpeechRate(youtubeSpeecRate);
+                                                    setSpeechSilence(youtubeSpeechSilence);
+                                                    generateYouTubeUploadInformation(firestoreResponseData);
+                                                }
+                                                return null;
+                                            }
+                                            catch (error) {
+                                                console.error("Error fetching questions from Firestore:", error);
+                                                return null;
+                                            }
+
+                                        }}>
+                                        <label className={
+                                            (isGeneratingYouTubeAudioTitlePrompt) ?
+                                                'flashing' : ''
+                                        }>
+                                            {genai_youtube_label || 'YouTube'} <img src={youtubeIcon} alt="youtube" height="15px" style={{ marginRight: '4px' }} />
+                                        </label>
+                                    </button>
+                                    )
                                 }
-                                catch (error) {
-                                    console.error("Error fetching questions from Firestore:", error);
-                                    return null;
+                                {
+                                    (showPrint && showYouTubeButton && <button
+                                        className={
+                                            (isGeneratingYouTubeAudioTitlePrompt) ?
+                                                'button_selected' : 'storiesButton'
+                                        }
+                                        onClick={async () => {
+                                            setSpeechRate(storyTellingSpeechRate);
+                                            setSpeechSilence(storyTellingSpeechSilence);
+                                            setIsGeneratingYouTubeBedtimeStory(true);
+                                            console.log('Story Teller prompt:', story_teller_prompt);
+                                            if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
+                                                alert('ERROR: story_teller_prompt is blank.');
+                                                return;
+                                            }
+                                            bedtime_stories_content_input = promptInput + story_teller_prompt;
+                                            console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
+                                            await callAPI(modelo1, 'bedtime_stories');
+                                            console.log(' generatedDocID', generatedDocID);
+                                            if (!generatedDocID || generatedDocID.length < 5) {
+                                                alert('ERROR: generatedDocID is not set.');
+                                                return;
+                                            }
+                                            try {
+                                                const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                                const docSnap = await getDoc(docRef);
+
+                                                if (docSnap.exists()) {
+                                                    const firestoreResponseData = docSnap.data().answer;
+                                                    console.log('First fetched data from Firestore:', firestoreResponseData);
+                                                    if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+                                                        alert('ERROR: Prompt response is not generated.');
+                                                        return;
+                                                    }
+                                                    generateYouTubeUploadInformation(firestoreResponseData);
+                                                }
+                                                return null;
+                                            }
+                                            catch (error) {
+                                                console.error("Error fetching questions from Firestore:", error);
+                                                return null;
+                                            }
+                                        }
+                                        }>
+                                        <label className={
+                                            (isGeneratingYouTubeBedtimeStory) ?
+                                                'flashing' : ''
+                                        }>
+                                            {genai_stories_label || 'Bedtime Stories'}
+                                        </label>
+                                    </button>
+                                    )
                                 }
 
-                            }}>
-                            <label className={
-                                (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'flashing' : ''
-                            }>
-                               {genai_youtube_label || 'YouTube'} <img src={youtubeIcon} alt="youtube" height="15px" style={{ marginRight: '4px' }} />
-                            </label>
-                        </button>
-                        )
-                    }
-                        {
-                        (showPrint && showYouTubeButton && <button
-                            className={
-                                (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'button_selected' : 'storiesButton'
-                            }
-                            onClick={async () => {
-                                setSpeechRate(storyTellingSpeechRate);
-                                setSpeechSilence(storyTellingSpeechSilence);
-                                setIsGeneratingYouTubeAudioTitlePrompt(true);
-                                generateYouTubeUploadInformation(promptInput);
-                            }
-                            }>
-                            <label className={
-                                (isGeneratingYouTubeAudioTitlePrompt) ?
-                                    'flashing' : ''
-                            }>
-                                {genai_stories_label || 'GenAI Stories'}
-                            </label>
-                        </button>
-                        )
-                    }
-                  
-                    &nbsp; &nbsp;
+                                &nbsp; &nbsp;
+                                <button
+                                    onClick={() => handleHomeWork(promptInput)}
+                                    className="practiceButton"
+                                >
+                                    {isHomeWork
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (practiceButtonLabel || 'Practice')}
+                                </button>
+                                <button
+                                    onClick={() => handleQuiz(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isQuiz
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (quizButtonLabel || 'Trivia/Quiz')}
+                                </button>
+                                <button
+                                    onClick={() => handleMultipleChoiceQuiz(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isQuizMultipleChoice
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (quiz_Multiple_Choices_Label || 'GenAI Quiz-Choices')}
+                                </button>
+                            </>
+                        )}
+                        {showAISearchButton && !isHomeWork && !isQuiz && (
                             <button
-                                onClick={() => handleHomeWork(promptInput)}
-                                className="practiceButton"
+                                onClick={handleAISearch}
+                                className="generateButton"
+                                style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
                             >
-                                {isHomeWork
-                                    ? (<FaSpinner className="spinning" />)
-                                    : (practiceButtonLabel || 'Practice')}
+                                {isAISearch ? (<FaSpinner className="spinning" />) : (genai_search_label || 'GenAI Search')}
                             </button>
-                            <button
-                                onClick={() => handleQuiz(promptInput)}
-                                className="practiceButton"
-                                style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
-                            >
-                                {isQuiz
-                                    ? (<FaSpinner className="spinning" />)
-                                    : (quizButtonLabel || 'Trivia/Quiz')}
+                        )}
+                        {showImageDallE3 &&
+                            <button className="imageButton"
+                                onClick={() => handleDall_e_3Change()}>
+                                <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
+                                    {genai_image_label || 'GenAI Image'}
+                                </label>
                             </button>
-                            <button
-                                onClick={() => handleMultipleChoiceQuiz(promptInput)}
-                                className="practiceButton"
-                                style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
-                            >
-                                {isQuizMultipleChoice
-                                    ? (<FaSpinner className="spinning" />)
-                                    : (quiz_Multiple_Choices_Label || 'GenAI Quiz-Choices')}
-                            </button>
-                        </>
-                    )}
-                    {showAISearchButton && !isHomeWork && !isQuiz && (
-                        <button
-                            onClick={handleAISearch}
-                            className="generateButton"
-                            style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
-                        >
-                            {isAISearch ? (<FaSpinner className="spinning" />) : (genai_search_label || 'GenAI Search')}
-                        </button>
-                    )}
-                    {showImageDallE3 &&
-                        <button className="imageButton"
-                            onClick={() => handleDall_e_3Change()}>
-                            <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
-                                {genai_image_label || 'GenAI Image'}
-                            </label>
-                        </button>
-                    }
+                        }
                     </div>
                     <br />
                     <div className="button-section" data-title="Gen AI Audio - Text to Speech">
-                    {showVoiceSelect && (
-                        <VoiceSelect
-                            selectedVoice={voiceName} // Current selected voice
-                            onVoiceChange={setVoiceName} // Handler to update selected voice
-                        />
-                    )}
-                                                        {showPrint && (
-                        <button
-                            className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
-                            onClick={async () => {
-                                try {
-                                    setIsLiveAudioPlayingPrompt(true);
-                                    await synthesizeSpeech(promptInput, "English");
-                                } catch (error) {
-                                    console.error('Error playing audio:', error);
-                                }
-                                finally {
-                                    setIsLiveAudioPlayingPrompt(false);
-                                }
-                            }}
-                        >
-                            <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
-                                <FaPlay /> Speak
-                            </label>
-                        </button>
-                    )
-                    }
+                        {showVoiceSelect && (
+                            <VoiceSelect
+                                selectedVoice={voiceName} // Current selected voice
+                                onVoiceChange={setVoiceName} // Handler to update selected voice
+                            />
+                        )}
+                        {showPrint && (
+                            <button
+                                className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
+                                onClick={async () => {
+                                    try {
+                                        setIsLiveAudioPlayingPrompt(true);
+                                        await synthesizeSpeech(promptInput, "English");
+                                    } catch (error) {
+                                        console.error('Error playing audio:', error);
+                                    }
+                                    finally {
+                                        setIsLiveAudioPlayingPrompt(false);
+                                    }
+                                }}
+                            >
+                                <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
+                                    <FaPlay /> Speak
+                                </label>
+                            </button>
+                        )
+                        }
                         {showTTS &&
                             <label style={{ marginLeft: '8px' }}>
                                 Speech Rate:
@@ -2516,7 +2556,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     <br />
                     <br />
-                                     
+
                     {!GenAIParameter ? (
                         showBackToAppButton && (
                             <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
@@ -2820,7 +2860,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 Print <FaPrint />
                                             </button>
                                         )}
-                                        &nbsp; 
+                                        &nbsp;
                                         {showPrint && (
                                             <button
                                                 className="button"
@@ -2902,7 +2942,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             {showPrint && (item.voiceName !== undefined && item.voiceName?.length > 2) && (
                                                 <span style={{ color: "black", fontSize: "16px" }}> voice : <strong>{item.voiceName}</strong></span>
                                             )}
-                                                                                        &nbsp; &nbsp;
+                                            &nbsp; &nbsp;
                                             {showPrint && (item.invocationType !== undefined && item.invocationType?.length > 2) && (
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
