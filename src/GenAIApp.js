@@ -81,6 +81,7 @@ let story_teller_prompt = '';
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
+    const [generateGeminiImage, setGenerateGeminiImage] = useState(false);
     const [isGeneratingYouTubeBedtimeStory, setIsGeneratingYouTubeBedtimeStory] = useState(false);
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showBigQueryModelSearch, setShowBigQueryModelSearch] = useState(false);
@@ -759,6 +760,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.fetchFromPublic !== undefined) {
                     setFetchFromPublic(data.fetchFromPublic);
                 }
+                if (data.generateGeminiImage !== undefined) {
+                    setGenerateGeminiImage(data.generateGeminiImage);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -1061,8 +1065,28 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     console.log('image prompt part:', part);
                     imageGenerationPromptInput = part;
                     setIsGeneratingImage_Dall_e_3(true);
-                    await callAPI(modelGeminiImage, 'image_ai_agent');
+                    if (generateGeminiImage === true) {
+                        await callAPI(modelGeminiImage, 'image_ai_agent');
+                        console.log('Image generatedDocID:', generatedDocID);
+                        const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                        const ttsdocSnap = await getDoc(ttsdocRef);
+                        if (ttsdocSnap.exists()) {
+                            console.log('Image fetched data from Firestore:', ttsdocSnap.data().answer);
+                            const audioURL = ttsdocSnap.data().answer;
+                            console.log('Image URL:', audioURL);
+                            await handleDownload(audioURL, 'image');
+                        }
+                    }
                     await callAPI(modelImageDallE3, 'image_ai_agent');
+                    console.log('Image generatedDocID:', generatedDocID);
+                    const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                    const ttsdocSnap = await getDoc(ttsdocRef);
+                    if (ttsdocSnap.exists()) {
+                        console.log('Image fetched data from Firestore:', ttsdocSnap.data().answer);
+                        const audioURL = ttsdocSnap.data().answer;
+                        console.log('Image URL:', audioURL);
+                        await handleDownload(audioURL, 'image');
+                    }
                 }
                 setIsGeneratingImage_Dall_e_3(false);
             } else {
