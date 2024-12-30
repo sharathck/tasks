@@ -1021,9 +1021,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsImagesSearch(true);
         setIso1(true);
         setIsGeneratingGemini(true);
-        imagePromptsGenerationInput = promptInput + imageGenerationPrompt;
+        imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
         if (invocation_source === 'stories') {
-            imagePromptsGenerationInput = promptInput + stories_image_generation_prompt;
+            console.log('Invoking stories image generation', stories_image_generation_prompt);
+            imagePromptsGenerationInput = firestoreResponseData + stories_image_generation_prompt;
         }
         await callAPI(modelGemini, 'imageGeneration');
         console.log('Image Generation generatedDocID', generatedDocID);
@@ -2385,8 +2386,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 'button_selected' : 'storiesButton'
                                         }
                                         onClick={async () => {
-                                            setTemperature(1);
-                                            setTop_p(1);
                                             setSpeechRate(storyTellingSpeechRate);
                                             setSpeechSilence(storyTellingSpeechSilence);
                                             setIsGeneratingYouTubeBedtimeStory(true);
