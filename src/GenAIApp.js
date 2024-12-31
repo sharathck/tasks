@@ -252,6 +252,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
     const [showHomeworkApp, setShowHomeworkApp] = useState(false);
     const [currentDocId, setCurrentDocId] = useState(null);
+    const currentDocIdRef = useRef(currentDocId);
 
     // Add new state variables after other state variables
     const [showGenAIButton, setShowGenAIButton] = useState(false);
@@ -297,7 +298,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
         speechRateRef.current = speechRate;
         speechSilenceRef.current = speechSilence;
         promptInputRef.current = promptInput;
-    }, [youtubeSpeecRate, youtubeSpeechSilence, storyTellingSpeechRate, storyTellingSpeechSilence, speechRate, speechSilence, promptInput]);
+        currentDocIdRef.current = currentDocId;
+    }, [youtubeSpeecRate, youtubeSpeechSilence, storyTellingSpeechRate, storyTellingSpeechSilence, speechRate, speechSilence, promptInput, currentDocId]);
 
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
@@ -1128,7 +1130,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
         setIsGeneratingYouTubeAudioTitlePrompt(false);
         setIsGeneratingYouTubeBedtimeStory(false);
-
     };
     const handlePromptChange = async (promptValue) => {
         /* const genaiCollection = collection(db, 'genai', uid, 'prompts');
@@ -1495,9 +1496,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
-            const data = await response.json();
+            let data;
+            // Try to get docID with retry logic
+            let retries = 12;
+            while (retries > 0) {
+                data = await response.json();
+                if (data[0]?.results?.[0]?.docID) {
+                    // docID exists
+                    break;
+                }
+                // Wait 2 seconds before retrying
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                retries--;
+                if (retries === 0) {
+                    throw new Error('Failed to get document ID after multiple retries');
+                }
+            }
             generatedDocID = data[0].results[0].docID;
-            console.log('Generated Doc ID:', generatedDocID);
+            console.log('Generated Doc ID:', generatedDocID, '  invocationType:', invocationType);
             if (['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(invocationType)) {
                 setCurrentDocId(data[0].results[0].docID);
                 console.log('currenDocID:', currentDocId);
