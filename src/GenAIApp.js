@@ -1836,58 +1836,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsHomeWork(true);
         setTemperature(0.6);
         setTop_p(0.8);
-
-        // Ensure genaiPrompts is populated
-        if (genaiPrompts.length === 0) {
-            await fetchPrompts(uid); // Fetch prompts if not already loaded
-        }
-
-        // Correct the tag name and add null check
-        const prompt = genaiPrompts.find(prompt => prompt.tag === 'AutoQ');
-        let intelligentQuestionsPrompt = prompt ? prompt.fullText : '';
-
-        if (intelligentQuestionsPrompt === '') {
-            try {
-                const genaiCollection = collection(db, 'public');
-                const q = query(genaiCollection, limit(1), where('tag', '==', 'AutoQ'));
-                const genaiSnapshot = await getDocs(q);
-                const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                console.log('AutoQ:', genaiList[0].fullText);
-                intelligentQuestionsPrompt = genaiList[0].fullText;
-            } catch (error) {
-                console.error("Error fetching prompts: ", error);
-            }
-            if (intelligentQuestionsPrompt === '') {
-                intelligentQuestionsPrompt = `### ------ please generate practice questions based on the topic(s) mentioned above --------- 
-                Text from below is prompt purpose only ::::::::::::::::
-
-                Rules for practice questions for home work to students ::::
-                * design 20 questions that are tricky, intelligent and brain twister questions    
-                * questions should provoke thinking in student's mind
-                * ask questions with more practical and real-life scenarios
-
-                ### --------- response should be strictly JSON, don't include any other introductory text, I want entire response to be strictly JSON Array data with following fields :::
-                1. Question
-                2. Answer
-
-                ### --- following is JSON reference for strict schema reference:
-                [
-                    {
-                        "Question": "sample question 1",
-                        "Answer": "sample answer 1"
-                    },
-                    {
-                        "Question": "sample question 2", 
-                        "Answer": "sample answer 2"
-                    },
-                    {
-                        "Question": "sample question 3",
-                        "Answer": "sample answer 3"
-                    }
-                ]`;
-            }
-        }
-
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
         setIsGeneratingGemini(true);
@@ -1908,34 +1856,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setTemperature(0.4);
         setTop_p(0.5);
         setIsQuiz(true);
-        // Ensure genaiPrompts is populated
-        if (genaiPrompts.length === 0) {
-            await fetchPrompts(uid);
-        }
-
-        // Get quiz prompt template
-        const prompt = genaiPrompts.find(prompt => prompt.tag === 'quiz');
-        let quizPrompt = prompt ? prompt.fullText : '';
-
-        if (quizPrompt === '') {
-            try {
-                const genaiCollection = collection(db, 'public');
-                const q = query(genaiCollection, limit(1), where('tag', '==', 'quiz'));
-                const genaiSnapshot = await getDocs(q);
-                const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                quizPrompt = genaiList[0]?.fullText || '';
-            } catch (error) {
-                console.error("Error fetching quiz prompt: ", error);
-            }
-        }
-
         // Append the prompt to promptInput
         quizInput = message + quizPrompt;
         setIsGeneratingGemini(true);
-        await callAPI(modelGemini, 'homeWork');
+        await callAPI(modelGemini, 'quiz');
         if (adminUser) {
             setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1, 'homeWork');
+            callAPI(modelo1, 'quiz');
         }
         updateConfiguration();
     };
@@ -2059,6 +1986,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'bedtime_stories':
                         story_teller_prompt = data.fullText;
                         break;
+                    case 'quiz':
+                        quizPrompt = data.fullText;
+                        break;
+                    case 'homeWork':
+                        intelligentQuestionsPrompt = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2077,23 +2010,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setTemperature(0.4);
         setTop_p(0.5);
         setIsQuizMultipleChoice(true);
-
-        // Ensure genaiPrompts is populated
-        if (genaiPrompts.length === 0) {
-            await fetchPrompts(uid);
-        }
-
-        // Get quiz prompt template
-        const prompt = genaiPrompts.find(prompt => prompt.tag === 'quiz-multiple-choices');
-        let multipleChoicePrompt = prompt ? prompt.fullText : quizMultipleChoicesPrompt;
-
         // Append the prompt to promptInput
-        quizMultipleChoicesInput = message + multipleChoicePrompt;
+        quizMultipleChoicesInput = message + quizMultipleChoicesPrompt;
         setIsGeneratingGemini(true);
-        await callAPI(modelGemini, 'homeWork');
+        await callAPI(modelGemini, 'multipleChoiceQuiz');
         if (adminUser) {
             setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1, 'homeWork');
+            callAPI(modelo1, 'multipleChoiceQuiz');
         }
         updateConfiguration();
     };

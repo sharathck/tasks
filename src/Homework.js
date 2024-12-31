@@ -39,36 +39,18 @@ const Homework = ({ sourceDocumentID }) => {
             let questions = [];
             try {
                 if (typeof firestoreData === 'string') {
-                    // Clean the JSON string
-                    let cleanJson = firestoreData
-                        .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
-                        .replace(/\\n/g, " ")                          // Replace newlines
-                        .replace(/\\"/g, '"')                         // Fix escaped quotes
-                        .replace(/\s+/g, " ")                         // Normalize whitespace
-                        .trim();
-
-                    // Remove markdown code block markers if present
-                    cleanJson = cleanJson.replace(/```json\s*|\s*```/g, "");
-
-                    // Ensure the string starts with [ and ends with ]
-                    if (!cleanJson.startsWith('[')) {
-                        const startIndex = cleanJson.indexOf('[');
-                        if (startIndex !== -1) {
-                            cleanJson = cleanJson.substring(startIndex);
-                        }
-                    }
-                    if (!cleanJson.endsWith(']')) {
-                        const endIndex = cleanJson.lastIndexOf(']');
-                        if (endIndex !== -1) {
-                            cleanJson = cleanJson.substring(0, endIndex + 1);
-                        }
-                    }
-
+                    console.log('Raw JSON:', firestoreData);
                     try {
-                        questions = JSON.parse(cleanJson);
+                        // Extract JSON content from markdown format
+                        const jsonMatch = firestoreData.match(/```(?:json|JSON)\s*([\s\S]*?)\s*```/);
+                        if (jsonMatch && jsonMatch[1]) {
+                            questions = JSON.parse(jsonMatch[1].trim());
+                        } else {
+                            questions = JSON.parse(firestoreData);
+                        }
                     } catch (parseError) {
                         console.error("JSON Parse Error:", parseError);
-                        console.log("Attempted to parse:", cleanJson);
+                        console.log("Attempted to parse:", firestoreData);
                         return;
                     }
                 } else if (firestoreData.questions) {
