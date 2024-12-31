@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint } from 'react-icons/fa';
@@ -24,6 +24,7 @@ import imageIcon from './image.png';
 import youtubeIcon from './youtube.png';
 import tasksIcon from './todo.jpg';
 import { call } from "@mdxeditor/editor";
+import { use } from "react";
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -145,7 +146,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showMainApp, setShowMainApp] = useState(false);
     const [GenAIParameter, setGenAIParameter] = useState(false);
     const [temperature, setTemperature] = useState(0.7);
+    const temperatureRef = useRef(temperature);
     const [top_p, setTop_p] = useState(0.8);
+    const top_pRef = useRef(top_p);
+    useEffect(() => {
+        temperatureRef.current = temperature;
+        top_pRef.current = top_p;
+      }, [temperature, top_p]);
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showTemp, setShowTemp] = useState(false);
     const [showTop_p, setShowTop_p] = useState(false);
@@ -1465,7 +1472,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             const data = await response.json();
             generatedDocID = data[0].results[0].docID;
             console.log('Generated Doc ID:', generatedDocID);
-            if (invocationType === 'homeWork') {
+            if (['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(invocationType)) {
                 setCurrentDocId(data[0].results[0].docID);
                 console.log('currenDocID:', currentDocId);
                 setShowHomeworkApp(true);
@@ -1481,8 +1488,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
             searchModel = 'All';
             youtubeSelected = false;
             imageSelected = false;
-            setIsHomeWork(false);
-            setIsQuiz(false);
             setIsYouTubeTitle(false);
             setIsImagesSearch(false);
             setIsGeneratingGeminiSearch(false);
@@ -1836,15 +1841,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsHomeWork(true);
         setTemperature(0.6);
         setTop_p(0.8);
+        // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 1));
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
-        setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'homeWork');
-        if (adminUser) {
-            setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1, 'homeWork');
-        }
         updateConfiguration();
+        setIsHomeWork(false);
     };
 
     // Add handleQuiz function after handleHomeWork
@@ -1858,13 +1861,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsQuiz(true);
         // Append the prompt to promptInput
         quizInput = message + quizPrompt;
-        setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'quiz');
-        if (adminUser) {
-            setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1, 'quiz');
-        }
         updateConfiguration();
+        setIsQuiz(false);
     };
 
     // Add handler for AI Search
@@ -1912,7 +1911,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                console.log('fetchTexts Data:', data.tag, '    ', data.fullText);
+              //  console.log('fetchTexts Data:', data.tag, '    ', data.fullText);
                 switch (data.tag) {
                     case 'practice-button-label':
                         setPracticeButtonLabel(data.fullText);
@@ -2014,11 +2013,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
         quizMultipleChoicesInput = message + quizMultipleChoicesPrompt;
         setIsGeneratingGemini(true);
         await callAPI(modelGemini, 'multipleChoiceQuiz');
-        if (adminUser) {
-            setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1, 'multipleChoiceQuiz');
-        }
         updateConfiguration();
+        setIsQuizMultipleChoice(false);
     };
 
 
@@ -2286,14 +2282,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         onClick={async () => {
 
                                             setIsGeneratingYouTubeAudioTitlePrompt(true);
-                                            console.log('youtube prompt:', YouTubePrompt);
+                                            //console.log('youtube prompt:', YouTubePrompt);
                                             if (YouTubePrompt === undefined || YouTubePrompt.length < 5) {
                                                 alert('ERROR: YouTubePrompt is blank.');
                                                 return;
                                             }
                                             youtubeContentInput = promptInput + YouTubePrompt;
                                             await callAPI(modelo1, 'youtube');
-                                            console.log(' generatedDocID', generatedDocID);
+                                            //console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
                                                 return;
@@ -2304,7 +2300,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                                 if (docSnap.exists()) {
                                                     const firestoreResponseData = docSnap.data().answer;
-                                                    console.log('First fetched data from Firestore:', firestoreResponseData);
+                                                  //  console.log('First fetched data from Firestore:', firestoreResponseData);
                                                     if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
                                                         alert('ERROR: Prompt response is not generated.');
                                                         return;
@@ -2340,15 +2336,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setSpeechRate(storyTellingSpeechRate);
                                             setSpeechSilence(storyTellingSpeechSilence);
                                             setIsGeneratingYouTubeBedtimeStory(true);
-                                            console.log('Story Teller prompt:', story_teller_prompt);
+                                           // console.log('Story Teller prompt:', story_teller_prompt);
                                             if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
                                                 alert('ERROR: story_teller_prompt is blank.');
                                                 return;
                                             }
                                             bedtime_stories_content_input = promptInput + story_teller_prompt;
-                                            console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
+                                            //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
                                             await callAPI(modelo1, 'bedtime_stories');
-                                            console.log(' generatedDocID', generatedDocID);
+                                           // console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
                                                 return;
@@ -2834,7 +2830,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>)}
                                     </div>
                                     <br />
-                                    {((((item.answer.slice(0, 7)).toLowerCase() === '```json') || adminUser) && item.answer) && (<button
+                                    {(((['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType))  || adminUser) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
@@ -2900,7 +2896,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && showDownloadTextButton && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
@@ -2933,8 +2929,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
 
-                                            {item.showRawAnswer ? (((item.answer.slice(0, 7)).toLowerCase() !== '```json') && item.answer) : (
-                                                item.answer && ((item.answer.slice(0, 7)).toLowerCase() !== '```json') && (
+                                            {item.showRawAnswer ? ((!['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) && item.answer) : (
+                                                item.answer && (!['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) && (
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
                                                         renderHTML={text => mdParser.render(text || '')} // Add default empty string

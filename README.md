@@ -1,4 +1,13 @@
 ### Lessons Learned
+- React updates state variables asynchronously, if the value is udpated through UI, then React re-renders state variables but if the set method is used inside a method then it won't update the source valur immediately so, use the React Hook, useRef and useEffect to udpate the value to current value synchronously.
+    const [temperature, setTemperature] = useState(0.7);
+    const temperatureRef = useRef(temperature);
+    const [top_p, setTop_p] = useState(0.8);
+    const top_pRef = useRef(top_p);
+    useEffect(() => {
+        temperatureRef.current = temperature;
+        top_pRef.current = top_p;
+      }, [temperature, top_p]);
 
 - Using global variable to access across the app instead of using StateVariable with State Management caused lot of cache issues.
 - Using State Management to manage the state of the app is very important.
