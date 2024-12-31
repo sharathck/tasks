@@ -89,8 +89,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showDownloadTextButton, setShowDownloadTextButton] = useState(false);
     const [showOnlyAudioTitleDescriptionButton, setShowOnlyAudioTitleDescriptionButton] = useState(false);
     const [genOpenAIImage, setGenOpenAIImage] = useState(true);
-    const [speechRate, setSpeechRate] = useState('0%');
-    const [speechSilence, setSpeechSilence] = useState(200);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
     const [isDownloading, setIsDownloading] = useState();
@@ -149,10 +147,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const temperatureRef = useRef(temperature);
     const [top_p, setTop_p] = useState(0.8);
     const top_pRef = useRef(top_p);
-    useEffect(() => {
-        temperatureRef.current = temperature;
-        top_pRef.current = top_p;
-      }, [temperature, top_p]);
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showTemp, setShowTemp] = useState(false);
     const [showTop_p, setShowTop_p] = useState(false);
@@ -278,10 +272,32 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [keywordSearchPlaceholder, setKeywordSearchPlaceholder] = useState('');
     const [practicePageButtonLabel, setPracticePageButtonLabel] = useState('');
     const [quizButtonLabel, setQuizButtonLabel] = useState('');
+    const [speechRate, setSpeechRate] = useState('0%');
+    const [speechSilence, setSpeechSilence] = useState(200);
     const [youtubeSpeecRate, setYoutubeSpeechRate] = useState('0%');
     const [youtubeSpeechSilence, setYoutubeSpeechSilence] = useState(200);
     const [storyTellingSpeechRate, setStoryTellingSpeechRate] = useState('-25%');
     const [storyTellingSpeechSilence, setStoryTellingSpeechSilence] = useState(1200);
+
+    // Add refs for speech variables
+    const speechRateRef = useRef(speechRate);
+    const speechSilenceRef = useRef(speechSilence);
+    const youtubeSpeecRateRef = useRef(youtubeSpeecRate);
+    const youtubeSpeechSilenceRef = useRef(youtubeSpeechSilence);
+    const storyTellingSpeechRateRef = useRef(storyTellingSpeechRate);
+    const storyTellingSpeechSilenceRef = useRef(storyTellingSpeechSilence);
+    const promptInputRef = useRef(promptInput);
+
+    // Update refs when state changes
+    useEffect(() => {
+        youtubeSpeecRateRef.current = youtubeSpeecRate;
+        youtubeSpeechSilenceRef.current = youtubeSpeechSilence;
+        storyTellingSpeechRateRef.current = storyTellingSpeechRate;
+        storyTellingSpeechSilenceRef.current = storyTellingSpeechSilence;
+        speechRateRef.current = speechRate;
+        speechSilenceRef.current = speechSilence;
+        promptInputRef.current = promptInput;
+    }, [youtubeSpeecRate, youtubeSpeechSilence, storyTellingSpeechRate, storyTellingSpeechSilence, speechRate, speechSilence, promptInput]);
 
     // Add new show state variables
     const [showPrint, setShowPrint] = useState(false);
@@ -294,7 +310,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labelCerebras, setLabelCerebras] = useState('Llama-C');
     const [youtubeTitlePrompt, setYoutubeTitlePrompt] = useState(`### Give me the best YouTube Title for the above content`);
     const [youtubeDescriptionPrompt, setYoutubeDescriptionPrompt] = useState(`#### Give me the best YouTube description for the above content, I need exactly one response and don't include any other text or URLs in the response. ----- Text from below is only prompt purpose --- YouTube description should be engaging, detailed, informative, and YouTube search engine optimized and SEO friendly, it can contain special characters, emojis, and numbers to make it more appealing and expressive. Please use the emojis, icons to make it more visually appealing.   Use relevant tags to improve the visibility and reach of your video in Youtube video Description.   Use bullet points, numbered points, lists, and paragraphs to organize Youtube video description.  Bold, italicize, underline, and highlight important information in Youtube video description.   Also, please request users to subscribe and click on bell icon for latest content at the end. `);
+    const youtubeDescriptionPromptRef = useRef(youtubeDescriptionPrompt);
+    const youtubeTitlePromptRef = useRef(youtubeTitlePrompt);
 
+    useEffect(() => {
+        temperatureRef.current = temperature;
+        top_pRef.current = top_p;
+        youtubeDescriptionPromptRef.current = youtubeDescriptionPrompt;
+        youtubeTitlePromptRef.current = youtubeTitlePrompt
+      }, [temperature, top_p, youtubeTitlePrompt, youtubeDescriptionPrompt]);
+    
     const embedPrompt = async (docId) => {
         try {
             console.log('Embedding prompt:', docId);
@@ -1839,7 +1864,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             return;
         }
         setIsHomeWork(true);
-        setTemperature(0.6);
+        setTemperature(0.4);
         setTop_p(0.8);
         // Need to wait for state updates to be applied
         await new Promise(resolve => setTimeout(resolve, 1));
@@ -1856,7 +1881,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('Please enter a message.');
             return;
         }
-        setTemperature(0.4);
+        setTemperature(0.3);
         setTop_p(0.5);
         setIsQuiz(true);
         // Append the prompt to promptInput
@@ -2006,7 +2031,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('Please enter a message.');
             return;
         }
-        setTemperature(0.4);
+        setTemperature(0.3);
         setTop_p(0.5);
         setIsQuizMultipleChoice(true);
         // Append the prompt to promptInput
