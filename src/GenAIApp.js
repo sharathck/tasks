@@ -701,7 +701,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showHomeWorkButton !== undefined) {
                     setShowHomeWorkButton(data.showHomeWorkButton);
                 }
-                if (data.voiceName !== undefined) setVoiceName(data.voiceName);
+                if (data.voiceName !== undefined) {
+                    setVoiceName(data.voiceName);
+                }
                 if (data.chunk_size !== undefined) {
                     chunk_size = data.chunk_size;
                 }
@@ -1083,8 +1085,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             console.log('Invoking stories image generation', stories_image_generation_prompt);
             imagePromptsGenerationInput = firestoreResponseData + stories_image_generation_prompt;
         }
-        setIsGeneratingo1(true);
-        await callAPI(modelo1, 'imageGeneration');
+        await callAPI(modelGemini, 'imageGeneration');
         console.log('Image Generation generatedDocID', generatedDocID);
         const idocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
         const idocSnap = await getDoc(idocRef);
@@ -2305,13 +2306,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 'button_selected' : 'youtubeButton'
                                         }
                                         onClick={async () => {
-
-                                            setIsGeneratingYouTubeAudioTitlePrompt(true);
                                             //console.log('youtube prompt:', YouTubePrompt);
                                             if (YouTubePrompt === undefined || YouTubePrompt.length < 5) {
                                                 alert('ERROR: YouTubePrompt is blank.');
                                                 return;
                                             }
+                                            setTemperature(0.9);
+                                            setTop_p(0.9);
+                                            setIsGeneratingYouTubeAudioTitlePrompt(true);
                                             youtubeContentInput = promptInput + YouTubePrompt;
                                             await callAPI(modelo1, 'youtube');
                                             //console.log(' generatedDocID', generatedDocID);
@@ -2358,15 +2360,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 'button_selected' : 'storiesButton'
                                         }
                                         onClick={async () => {
-                                            setSpeechRate(storyTellingSpeechRate);
-                                            setSpeechSilence(storyTellingSpeechSilence);
-                                            setIsGeneratingYouTubeBedtimeStory(true);
                                            // console.log('Story Teller prompt:', story_teller_prompt);
                                             if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
                                                 alert('ERROR: story_teller_prompt is blank.');
                                                 return;
                                             }
                                             bedtime_stories_content_input = promptInput + story_teller_prompt;
+                                            setTemperature(1);
+                                            setTop_p(1);
+                                            setSpeechRate(storyTellingSpeechRate);
+                                            setSpeechSilence(storyTellingSpeechSilence);
+                                            setIsGeneratingYouTubeBedtimeStory(true);
                                             //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
                                             await callAPI(modelo1, 'bedtime_stories');
                                            // console.log(' generatedDocID', generatedDocID);
