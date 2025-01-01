@@ -2954,7 +2954,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         {practicePageButtonLabel || 'Go to Questions/Quiz Page'}
                                     </button>
                                     )}
-                                    {showPrint && (
+                                    {(showPrint || item.invocationType === 'explain') && (
                                         <div style={{ fontSize: '16px' }}>
                                             {isiPhone &&
                                                 (item.model === modelImageDallE3 || item.model === modelGeminiImage || item.model === 'azure-tts') && (
