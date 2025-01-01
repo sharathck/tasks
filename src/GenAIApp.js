@@ -375,26 +375,42 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 console.log('Updating prompt');
                 const q = query(genaiCollection, where('tag', '==', selectedPrompt), limit(1));
                 const genaiSnapshot = await getDocs(q);
-                const genaiList = genaiSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const docRef = doc(db, 'genai', user.uid, 'prompts', genaiList[0].id);
-                await updateDoc(docRef, {
-                    tag: editPromptTag,
-                    fullText: editPromptFullText,
-                    modifiedDateTime: currentDateTime,
-                    size: promptSize
-                });
-                docId = docRef.id;
-                await fetchPrompts(user.uid);
+                
+                if (genaiSnapshot.empty) {
+                    console.log('No existing prompt found, adding new one');
+                    const newDocRef = await addDoc(genaiCollection, {
+                        tag: editPromptTag,
+                        fullText: editPromptFullText,
+                        createdDateTime: currentDateTime,
+                        modifiedDateTime: currentDateTime,
+                        size: promptSize
+                    });
+                    docId = newDocRef.id;
+                } else {
+                    const docToUpdate = genaiSnapshot.docs[0];
+                    const docRef = doc(db, 'genai', user.uid, 'prompts', docToUpdate.id);
+                    await updateDoc(docRef, {
+                        tag: editPromptTag,
+                        fullText: editPromptFullText,
+                        modifiedDateTime: currentDateTime,
+                        size: promptSize
+                    });
+                    docId = docToUpdate.id;
+                }
             }
-            embedPrompt(docId);
+
+            if (docId) {
+                await embedPrompt(docId);
+            }
+
             setEditPromptTag('');
             setEditPromptFullText('');
             setShowEditPopup(false);
             await fetchPrompts(user.uid);
-            return;
 
         } catch (error) {
             console.error("Error saving prompt: ", error);
+            alert('Error saving prompt: ' + error.message);
         }
     };
 
@@ -2728,7 +2744,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                         // Execute Image Search
                                                         imagePromptInput = imagesSearchPrompt + item.answer;
                                                         imageSelected = true;
-                                                        setIsImagesSearch(true);
                                                         setIso1(true);
                                                         setIsGeneratingo1(true);
                                                         await callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: false })));;
