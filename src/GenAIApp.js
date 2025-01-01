@@ -2227,7 +2227,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                     )}
                     <br />
-                    <div className="button-section" data-title="Generative AI">
+                    {showPrint && ( <div className="button-section" data-title="Generative AI">
                         {showTemp && (
                             <label style={{ marginLeft: '8px' }}>
                                 Temp:
@@ -2344,6 +2344,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </button>
                         )}
                     </div>
+                    )}
                     <br />
                     <div className="button-section" data-title="Gen AI Agents">
                         {(showHomeWorkButton && !isAISearch &&
@@ -2520,6 +2521,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         }
                     </div>
                     <br />
+                    {showPrint && (
                     <div className="button-section" data-title="Gen AI Audio - Text to Speech">
                         {showVoiceSelect && (
                             <VoiceSelect
@@ -2581,6 +2583,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </button>
                         }
                     </div>
+                    )}
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button
