@@ -1888,7 +1888,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
         setIsHomeWork(true);
         setTemperature(0.4);
-        setTop_p(0.8);
+        setTop_p(0.5);
         // Need to wait for state updates to be applied
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
@@ -2080,7 +2080,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             return;
         }
         setIsExplain(true);
-        setTemperature(0.7); // Slightly higher temperature for more creative explanations
+        setTemperature(0.7);
         setTop_p(0.8);
         // Need to wait for state updates to be applied
         await new Promise(resolve => setTimeout(resolve, 1000));
