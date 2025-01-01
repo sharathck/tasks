@@ -76,11 +76,14 @@ let genai_audio_label = '';
 let genai_autoprompt_label = '';
 let bedtime_stories_content_input = '';
 let story_teller_prompt = '';
+let explainInput = '';
+let explainPrompt = '';
 
 
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
+    const [isExplain, setIsExplain] = useState(false);
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
     const [generateGeminiImage, setGenerateGeminiImage] = useState(false);
     const [isGeneratingYouTubeBedtimeStory, setIsGeneratingYouTubeBedtimeStory] = useState(false);
@@ -320,8 +323,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
         top_pRef.current = top_p;
         youtubeDescriptionPromptRef.current = youtubeDescriptionPrompt;
         youtubeTitlePromptRef.current = youtubeTitlePrompt;
-      }, [temperature, top_p, youtubeTitlePrompt, youtubeDescriptionPrompt]);
-    
+    }, [temperature, top_p, youtubeTitlePrompt, youtubeDescriptionPrompt]);
+
     const embedPrompt = async (docId) => {
         try {
             console.log('Embedding prompt:', docId);
@@ -375,7 +378,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 console.log('Updating prompt');
                 const q = query(genaiCollection, where('tag', '==', selectedPrompt), limit(1));
                 const genaiSnapshot = await getDocs(q);
-                
+
                 if (genaiSnapshot.empty) {
                     console.log('No existing prompt found, adding new one');
                     const newDocRef = await addDoc(genaiCollection, {
@@ -1481,6 +1484,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'multipleChoiceQuiz':
                     promptText = quizMultipleChoicesInput;
                     break;
+                case 'explain':
+                    promptText = explainInput;
+                    break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
@@ -1975,7 +1981,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-              //  console.log('fetchTexts Data:', data.tag, '    ', data.fullText);
+                //  console.log('fetchTexts Data:', data.tag, '    ', data.fullText);
                 switch (data.tag) {
                     case 'practice-button-label':
                         setPracticeButtonLabel(data.fullText);
@@ -2055,6 +2061,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'homeWork':
                         intelligentQuestionsPrompt = data.fullText;
                         break;
+                    case 'explain':
+                        explainPrompt = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2062,6 +2071,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
         } catch (error) {
             console.error("Error fetching texts: ", error);
         }
+    };
+
+    // Add handler function after handleHomeWork
+    const handleExplain = async (message) => {
+        if (!message.trim()) {
+            alert('Please enter content to explain.');
+            return;
+        }
+        setIsExplain(true);
+        setTemperature(0.7); // Slightly higher temperature for more creative explanations
+        setTop_p(0.8);
+        // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Append the prompt to promptInput
+        explainInput = message + explainPrompt;
+        await callAPI(modelGemini, 'explain');
+        updateConfiguration();
+        setIsExplain(false);
     };
 
     return (
@@ -2284,7 +2311,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingSambanova ||
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
-                                    isGeneratingCerebras
+                                    isGeneratingCerebras ||
+                                    isExplain
                                 }
                             >
                                 {isGenerating ||
@@ -2307,7 +2335,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingSambanova ||
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
-                                    isGeneratingCerebras ? (
+                                    isGeneratingCerebras ||
+                                    isExplain ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
                                     'GenAI'
@@ -2319,6 +2348,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Gen AI Agents">
                         {(showHomeWorkButton && !isAISearch &&
                             <>
+                                <button
+                                    onClick={() => handleExplain(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightyellow', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isExplain
+                                        ? (<FaSpinner className="spinning" />)
+                                        : ('Explain with Examples')}
+                                </button>
                                 {
                                     (showPrint && showYouTubeButton && <button
                                         className={
@@ -2347,15 +2385,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                                 if (docSnap.exists()) {
                                                     const firestoreResponseData = docSnap.data().answer;
-                                                  //  console.log('First fetched data from Firestore:', firestoreResponseData);
+                                                    //  console.log('First fetched data from Firestore:', firestoreResponseData);
                                                     if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
                                                         alert('ERROR: Prompt response is not generated.');
                                                         return;
                                                     }
                                                     setSpeechRate(youtubeSpeecRate);
                                                     setSpeechSilence(youtubeSpeechSilence);
-                                                            // Need to wait for state updates to be applied
-        await new Promise(resolve => setTimeout(resolve, 1000));
+                                                    // Need to wait for state updates to be applied
+                                                    await new Promise(resolve => setTimeout(resolve, 1000));
 
                                                     generateYouTubeUploadInformation(firestoreResponseData);
                                                 }
@@ -2383,7 +2421,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 'button_selected' : 'storiesButton'
                                         }
                                         onClick={async () => {
-                                           // console.log('Story Teller prompt:', story_teller_prompt);
+                                            // console.log('Story Teller prompt:', story_teller_prompt);
                                             if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
                                                 alert('ERROR: story_teller_prompt is blank.');
                                                 return;
@@ -2393,13 +2431,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setTop_p(1);
                                             setSpeechRate(storyTellingSpeechRate);
                                             setSpeechSilence(storyTellingSpeechSilence);
-                                                    // Need to wait for state updates to be applied
-        await new Promise(resolve => setTimeout(resolve, 1000));
+                                            // Need to wait for state updates to be applied
+                                            await new Promise(resolve => setTimeout(resolve, 1000));
 
                                             setIsGeneratingYouTubeBedtimeStory(true);
                                             //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
                                             await callAPI(modelo1, 'bedtime_stories');
-                                           // console.log(' generatedDocID', generatedDocID);
+                                            // console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
                                                 return;
@@ -2434,15 +2472,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     </button>
                                     )
                                 }
-
-                                &nbsp; &nbsp;
+                                &nbsp;
                                 <button
                                     onClick={() => handleHomeWork(promptInput)}
                                     className="practiceButton"
                                 >
                                     {isHomeWork
                                         ? (<FaSpinner className="spinning" />)
-                                        : (practiceButtonLabel || 'Practice')}
+                                        : (practiceButtonLabel || 'Practice Questions')}
                                 </button>
                                 <button
                                     onClick={() => handleQuiz(promptInput)}
@@ -2460,7 +2497,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 >
                                     {isQuizMultipleChoice
                                         ? (<FaSpinner className="spinning" />)
-                                        : (quiz_Multiple_Choices_Label || 'GenAI Quiz-Choices')}
+                                        : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
                                 </button>
                             </>
                         )}
@@ -2871,7 +2908,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             >
                                                 {isHomeWork
                                                     ? (<FaSpinner className="spinning" />)
-                                                    : (practiceButtonLabel || 'GenAI Questions')}
+                                                    : (practiceButtonLabel || 'Practice Questions')}
                                             </button>)}
                                         {showPrint && (
                                             <button
@@ -2880,11 +2917,22 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             >
                                                 {isQuiz
                                                     ? (<FaSpinner className="spinning" />)
-                                                    : (quizButtonLabel || 'GenAI Quiz')}
+                                                    : (quizButtonLabel || 'Quiz - Trivia')}
                                             </button>)}
+                                        {showPrint && (
+                                            <button
+                                                className="button"
+                                                onClick={() => handleExplain(item.answer)}
+                                                style={{ backgroundColor: '#e6b800', color: 'black', marginLeft: '10px' }}
+                                            >
+                                                {isExplain
+                                                    ? (<FaSpinner className="spinning" />)
+                                                    : ('Explain')}
+                                            </button>
+                                        )}
                                     </div>
                                     <br />
-                                    {(((['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType))  || adminUser) && item.answer) && (<button
+                                    {(((['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
