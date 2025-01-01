@@ -1637,7 +1637,22 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (!response.ok) {
                 throw new Error([`Network response was not ok: ${response.statusText}`]);
             }
-            const data = await response.json();
+            let data;
+            // Try to get docID with retry logic
+            let retries = 12;
+            while (retries > 0) {
+                data = await response.json();
+                if (data[0]?.docID) {
+                    // docID exists
+                    break;
+                }
+                // Wait 2 seconds before retrying
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                retries--;
+                if (retries === 0) {
+                    throw new Error('Failed to get document ID after multiple retries');
+                }
+            }
             ttsGeneratedDocID = data[0].docID;
         } catch (error) {
             console.error('Error calling TTS API:', error);
