@@ -319,7 +319,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         temperatureRef.current = temperature;
         top_pRef.current = top_p;
         youtubeDescriptionPromptRef.current = youtubeDescriptionPrompt;
-        youtubeTitlePromptRef.current = youtubeTitlePrompt
+        youtubeTitlePromptRef.current = youtubeTitlePrompt;
       }, [temperature, top_p, youtubeTitlePrompt, youtubeDescriptionPrompt]);
     
     const embedPrompt = async (docId) => {
@@ -1473,7 +1473,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         promptText = promptInput + autoPromptSeparator + fullPromptInput;
                     }
             }
-
+            console.log('temp:', temperatureRef.current.valueOf(), 'top_p:', top_pRef.current.valueOf());
 
             // Single API call with the determined promptText
             response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
@@ -1485,8 +1485,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     prompt: promptText,
                     model: selectedModel,
                     uid: uid,
-                    temperature: temperature,
-                    top_p: top_p,
+                    temperature: temperatureRef.current.valueOf(),
+                    top_p: top_pRef.current.valueOf(),
                     invocationType: invocationType
                 })
             });
@@ -1600,38 +1600,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
-    const callImageAPI = async (selectedModel, imageDescription = '') => {
-        console.log('Calling API with model:', selectedModel);
-        console.log('imageDescription:', imageDescription);
-        try {
-            let response;
-            response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ prompt: imageDescription, model: selectedModel, uid: uid, temperature: temperature, top_p: top_p })
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                alert(errorData.error + 'Failed to generate content');
-                throw new Error(errorData.error || 'Failed to generate content.');
-            }
-            const data = await response.json();
-            console.log('Generated Doc ID:', data[0].results[0].docID);
-            generatedDocID = data[0].results[0].docID;
-            //console.log('Response:', data);
-        } catch (error) {
-            console.error('Error generating content:', error);
-            alert(`Error: ${error.message}`);
-        } finally {
-            setIsImagesSearch(false);
-            setIsAISearch(false);
-            if (selectedModel === modelImageDallE3) {
-                setIsGeneratingImage_Dall_e_3(false);
-            }
-        }
-    };
     // Function to call the TTS API
     const callTTSAPI = async (message, apiUrl) => {
 
@@ -1647,6 +1615,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
+        console.log('speechSilence:', speechSilenceRef.current.valueOf(), 'speechRate:', speechRateRef.current.valueOf());
         console.log('API URL:', apiUrl);
         try {
             const response = await fetch(apiUrl, {
@@ -1660,8 +1629,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     source: 'ai',
                     voice_name: voiceName,
                     chunk_size: chunk_size,
-                    silence_break: speechSilence,
-                    prosody_rate: speechRate
+                    silence_break: speechSilenceRef.current.valueOf(),
+                    prosody_rate: speechRateRef.current.valueOf()
                 })
             });
 
@@ -1884,7 +1853,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setTemperature(0.4);
         setTop_p(0.8);
         // Need to wait for state updates to be applied
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
         await callAPI(modelGemini, 'homeWork');
@@ -1901,12 +1870,34 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setTemperature(0.3);
         setTop_p(0.5);
         setIsQuiz(true);
+        // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         quizInput = message + quizPrompt;
         await callAPI(modelGemini, 'quiz');
         updateConfiguration();
         setIsQuiz(false);
     };
+
+
+    // Add the handler function for multiple choice quiz
+    const handleMultipleChoiceQuiz = async (message) => {
+        if (!message.trim()) {
+            alert('Please enter a message.');
+            return;
+        }
+        setTemperature(0.3);
+        setTop_p(0.5);
+        setIsQuizMultipleChoice(true);
+        // Append the prompt to promptInput
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        quizMultipleChoicesInput = message + quizMultipleChoicesPrompt;
+        setIsGeneratingGemini(true);
+        await callAPI(modelGemini, 'multipleChoiceQuiz');
+        updateConfiguration();
+        setIsQuizMultipleChoice(false);
+    };
+
 
     // Add handler for AI Search
     const handleAISearch = async () => {
@@ -2041,24 +2032,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
             console.error("Error fetching texts: ", error);
         }
     };
-
-    // Add the handler function for multiple choice quiz
-    const handleMultipleChoiceQuiz = async (message) => {
-        if (!message.trim()) {
-            alert('Please enter a message.');
-            return;
-        }
-        setTemperature(0.3);
-        setTop_p(0.5);
-        setIsQuizMultipleChoice(true);
-        // Append the prompt to promptInput
-        quizMultipleChoicesInput = message + quizMultipleChoicesPrompt;
-        setIsGeneratingGemini(true);
-        await callAPI(modelGemini, 'multipleChoiceQuiz');
-        updateConfiguration();
-        setIsQuizMultipleChoice(false);
-    };
-
 
     return (
         <div>
@@ -2350,6 +2323,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     }
                                                     setSpeechRate(youtubeSpeecRate);
                                                     setSpeechSilence(youtubeSpeechSilence);
+                                                            // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
                                                     generateYouTubeUploadInformation(firestoreResponseData);
                                                 }
                                                 return null;
@@ -2386,6 +2362,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setTop_p(1);
                                             setSpeechRate(storyTellingSpeechRate);
                                             setSpeechSilence(storyTellingSpeechSilence);
+                                                    // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
                                             setIsGeneratingYouTubeBedtimeStory(true);
                                             //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
                                             await callAPI(modelo1, 'bedtime_stories');
