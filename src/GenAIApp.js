@@ -78,12 +78,16 @@ let bedtime_stories_content_input = '';
 let story_teller_prompt = '';
 let explainInput = '';
 let explainPrompt = '';
+let lyricsInput = '';
+let lyricsPrompt = '';
+
 
 
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [isExplain, setIsExplain] = useState(false);
+    const [isLyrics, setIsLyrics] = useState(false);
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
     const [generateGeminiImage, setGenerateGeminiImage] = useState(false);
     const [isGeneratingYouTubeBedtimeStory, setIsGeneratingYouTubeBedtimeStory] = useState(false);
@@ -1487,6 +1491,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'explain':
                     promptText = explainInput;
                     break;
+                case 'lyrics':
+                    promptText = lyricsInput;
+                    break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
@@ -2064,6 +2071,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'explain':
                         explainPrompt = data.fullText;
                         break;
+                    case 'lyrics':
+                        lyricsPrompt = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2083,7 +2093,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setTemperature(0.7);
         setTop_p(0.8);
         // Need to wait for state updates to be applied
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         // Append the prompt to promptInput
         explainInput = message + explainPrompt;
         await callAPI(modelGemini, 'explain');
@@ -2091,6 +2101,26 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsExplain(false);
     };
 
+        // Add handler function after handleHomeWork
+        const handleLyrics = async (message) => {
+            if (!message.trim()) {
+                alert('Please enter content to lyrics.');
+                return;
+            }
+            setIsLyrics(true);
+            setTemperature(1);
+            setTop_p(1);
+            // Need to wait for state updates to be applied
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // Append the prompt to promptInput
+            lyricsInput = message + lyricsPrompt;
+            await callAPI(modelGemini, 'lyrics');
+            await callAPI(modelo1, 'lyrics');
+            await callAPI(modelOpenAI, 'lyrics');
+            updateConfiguration();
+            setIsLyrics(false);
+        };
+    
     return (
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
@@ -2312,7 +2342,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
-                                    isExplain
+                                    isExplain ||
+                                    isLyrics
                                 }
                             >
                                 {isGenerating ||
@@ -2336,7 +2367,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
-                                    isExplain ? (
+                                    isExplain || isLyrics ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
                                     'GenAI'
@@ -2500,6 +2531,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     {isQuizMultipleChoice
                                         ? (<FaSpinner className="spinning" />)
                                         : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
+                                </button>
+                                <button
+                                    onClick={() => handleLyrics(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'brown', color: 'white', marginLeft: '10px' }}
+                                >
+                                    {isLyrics
+                                        ? (<FaSpinner className="spinning" />)
+                                        : 'Lyrics'}
                                 </button>
                             </>
                         )}
