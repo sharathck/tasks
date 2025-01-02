@@ -11,7 +11,7 @@ import {
 import App from './App';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
-import Homework from "./Homework";
+import homeWork from "./homeWork";
 import { TbEmpathize } from "react-icons/tb";
 import { MdSettingsInputComponent } from "react-icons/md";
 import { FaK } from "react-icons/fa6";
@@ -245,9 +245,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isImagesSearch, setIsImagesSearch] = useState(false);
     const [showImagesSearchWordsButton, setShowImagesSearchWordsButton] = useState(false);
     const [showYouTubeTitleDescriptionButton, setShowYouTubeTitleDescriptionButton] = useState(false);
-    const [isHomeWork, setIsHomeWork] = useState(false);
+    const [ishomeWork, setIshomeWork] = useState(false);
     const [isQuiz, setIsQuiz] = useState(false);
-    const [showHomeWorkButton, setShowHomeWorkButton] = useState(true);
+    const [showhomeWorkButton, setShowhomeWorkButton] = useState(true);
 
     // Add state variable for AI Search
     const [isAISearch, setIsAISearch] = useState(false);
@@ -257,7 +257,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingDownloadableAudio, setIsGeneratingDownloadableAudio] = useState({});
     // Add new state variable for YouTube audio title button
     const [isGeneratingYouTubeAudioTitle, setIsGeneratingYouTubeAudioTitle] = useState({});
-    const [showHomeworkApp, setShowHomeworkApp] = useState(false);
+    const [showhomeWorkApp, setShowhomeWorkApp] = useState(false);
     const [currentDocId, setCurrentDocId] = useState(null);
     const currentDocIdRef = useRef(currentDocId);
 
@@ -723,8 +723,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showYouTubeTitleDescriptionButton !== undefined) {
                     setShowYouTubeTitleDescriptionButton(data.showYouTubeTitleDescriptionButton);
                 }
-                if (data.showHomeWorkButton !== undefined) {
-                    setShowHomeWorkButton(data.showHomeWorkButton);
+                if (data.showhomeWorkButton !== undefined) {
+                    setShowhomeWorkButton(data.showhomeWorkButton);
                 }
                 if (data.voiceName !== undefined) {
                     setVoiceName(data.voiceName);
@@ -1476,7 +1476,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'bedtime_stories':
                     promptText = bedtime_stories_content_input;
                     break;
-                case 'homework':
+                case 'homeWork':
                     promptText = homeWorkInput;
                     break;
                 case 'quiz':
@@ -1543,10 +1543,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
             }
             generatedDocID = data[0].results[0].docID;
             console.log('Generated Doc ID:', generatedDocID, '  invocationType:', invocationType);
-            if (['homework', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
+            if (['homeWork', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
                 setCurrentDocId(data[0].results[0].docID);
                 console.log('currenDocID:', currentDocId);
-                setShowHomeworkApp(true);
+                setShowhomeWorkApp(true);
             }
             //console.log('Response:', data);
         } catch (error) {
@@ -1824,11 +1824,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
         );
     }
 
-    if (showHomeworkApp) {  // Add this block
+    if (showhomeWorkApp) {  // Add this block
         return (
-            <Homework
+            <homeWork
                 user={user}
-                onBack={() => setShowHomeworkApp(false)}
+                onBack={() => setShowhomeWorkApp(false)}
                 sourceDocumentID={currentDocId}
             />
         );
@@ -1888,24 +1888,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }, 1000);
     };
 
-    const handleHomeWork = async (message) => {
+    const handlehomeWork = async (message) => {
         if (!message.trim()) {
             alert('Please enter a prompt.');
             return;
         }
-        setIsHomeWork(true);
+        setIshomeWork(true);
         setTemperature(0.4);
         setTop_p(0.5);
         // Need to wait for state updates to be applied
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
-        await callAPI(modelGemini, 'homework');
+        await callAPI(modelGemini, 'homeWork');
         updateConfiguration();
-        setIsHomeWork(false);
+        setIshomeWork(false);
     };
 
-    // Add handleQuiz function after handleHomeWork
+    // Add handleQuiz function after handlehomeWork
     const handleQuiz = async (message) => {
         if (!message.trim()) {
             alert('Please enter a message.');
@@ -2083,7 +2083,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
-    // Add handler function after handleHomeWork
+    // Add handler function after handlehomeWork
     const handleExplain = async (message) => {
         if (!message.trim()) {
             alert('Please enter content to explain.');
@@ -2101,7 +2101,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsExplain(false);
     };
 
-        // Add handler function after handleHomeWork
+        // Add handler function after handlehomeWork
         const handleLyrics = async (message) => {
             if (!message.trim()) {
                 alert('Please enter content to lyrics.');
@@ -2315,7 +2315,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 {genai_autoprompt_label || 'AutoPrompt'}
                             </button>
                         )}
-                        {!isAISearch && !isHomeWork && !isQuiz && showGenAIButton && (
+                        {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
                             <button
                                 onClick={handleGenerate}
                                 className="generateButton"
@@ -2378,7 +2378,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     <br />
                     <div className="button-section" data-title="Gen AI Agents">
-                        {(showHomeWorkButton && !isAISearch &&
+                        {(showhomeWorkButton && !isAISearch &&
                             <>
                                 <button
                                     onClick={() => handleExplain(promptInput)}
@@ -2507,10 +2507,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 }
                                 &nbsp;
                                 <button
-                                    onClick={() => handleHomeWork(promptInput)}
+                                    onClick={() => handlehomeWork(promptInput)}
                                     className="practiceButton"
                                 >
-                                    {isHomeWork
+                                    {ishomeWork
                                         ? (<FaSpinner className="spinning" />)
                                         : (practiceButtonLabel || 'Practice Questions')}
                                 </button>
@@ -2544,7 +2544,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 }
                             </>
                         )}
-                        {showAISearchButton && !isHomeWork && !isQuiz && (
+                        {showAISearchButton && !ishomeWork && !isQuiz && (
                             <button
                                 onClick={handleAISearch}
                                 className="generateButton"
@@ -2966,9 +2966,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         {showPrint && (
                                             <button
                                                 className="button"
-                                                onClick={() => handleHomeWork(item.answer)}
+                                                onClick={() => handlehomeWork(item.answer)}
                                             >
-                                                {isHomeWork
+                                                {ishomeWork
                                                     ? (<FaSpinner className="spinning" />)
                                                     : (practiceButtonLabel || 'Practice Questions')}
                                             </button>)}
@@ -2994,11 +2994,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         )}
                                     </div>
                                     <br />
-                                    {(((['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
+                                    {(((['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
-                                            setShowHomeworkApp(true);
+                                            setShowhomeWorkApp(true);
                                         }}
                                         style={{
                                             padding: '3px 3px',
@@ -3060,7 +3060,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
@@ -3093,8 +3093,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
 
-                                            {item.showRawAnswer ? ((!['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
-                                                item.answer && (!['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
+                                            {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
+                                                item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
                                                         renderHTML={text => mdParser.render(text || '')} // Add default empty string
