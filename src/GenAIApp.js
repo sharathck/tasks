@@ -2370,11 +2370,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 alert('ERROR: YouTubePrompt is blank.');
                                                 return;
                                             }
-                                            setTemperature(0.9);
-                                            setTop_p(0.9);
+                                            setTemperature(0.8);
+                                            setTop_p(0.8);
                                             setIsGeneratingYouTubeAudioTitlePrompt(true);
                                             youtubeContentInput = promptInput + YouTubePrompt;
-                                            await callAPI(modelo1, 'youtube');
+                                            await callAPI(modelGemini, 'youtube');
                                             //console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
