@@ -1476,7 +1476,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'bedtime_stories':
                     promptText = bedtime_stories_content_input;
                     break;
-                case 'homeWork':
+                case 'practice_questions':
                     promptText = homeWorkInput;
                     break;
                 case 'quiz':
@@ -1485,7 +1485,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'google-search':
                     promptText = googleSearchPromptInput;
                     break;
-                case 'multipleChoiceQuiz':
+                case 'quiz_with_choices':
                     promptText = quizMultipleChoicesInput;
                     break;
                 case 'explain':
@@ -1543,7 +1543,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             }
             generatedDocID = data[0].results[0].docID;
             console.log('Generated Doc ID:', generatedDocID, '  invocationType:', invocationType);
-            if (['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(invocationType)) {
+            if (['practice_questions', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
                 setCurrentDocId(data[0].results[0].docID);
                 console.log('currenDocID:', currentDocId);
                 setShowHomeworkApp(true);
@@ -1900,7 +1900,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
-        await callAPI(modelGemini, 'homeWork');
+        await callAPI(modelGemini, 'practice_questions');
         updateConfiguration();
         setIsHomeWork(false);
     };
@@ -1937,7 +1937,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         quizMultipleChoicesInput = message + quizMultipleChoicesPrompt;
         setIsGeneratingGemini(true);
-        await callAPI(modelGemini, 'multipleChoiceQuiz');
+        await callAPI(modelGemini, 'quiz_with_choices');
         updateConfiguration();
         setIsQuizMultipleChoice(false);
     };
@@ -2032,7 +2032,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'stories_image_generation_prompt':
                         stories_image_generation_prompt = data.fullText;
                         break;
-                    case 'quiz-multiple-choices':
+                    case 'quiz_with_choices':
                         quizMultipleChoicesPrompt = data.fullText;
                         break;
                     case 'quiz_Multiple_Choices_Label':
@@ -2065,7 +2065,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'quiz':
                         quizPrompt = data.fullText;
                         break;
-                    case 'homeWork':
+                    case 'practice_questions':
                         intelligentQuestionsPrompt = data.fullText;
                         break;
                     case 'explain':
@@ -2688,12 +2688,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleSearchChange(event)}
                     placeholder={keywordSearchPlaceholder || "Keyword Search"}
                 />
-                <input
+                <select
                     className="searchInput"
-                    type="text"
-                    onKeyDown={(event) => (event.key === "Enter" || event.key === "Tab") && handleInvocationChange(event)}
-                    placeholder={"invocationType"}
-                />
+                    onChange={(event) => handleInvocationChange(event)}
+                    defaultValue=""
+                    style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
+                >
+                    <option value="">Select Invocation Type</option>
+                    <option value="practice_questions">Practice Questions</option>
+                    <option value="quiz">Trivia / Quiz</option>
+                    <option value="image">Image</option>
+                    <option value="youtube">YouTube Content</option>
+                    <option value="youtubeTitle">YouTube Title</option>
+                    <option value="youtubeDescription">YouTube Description</option>
+                    <option value="imagesSearchWords">Google Image Search</option>
+                    <option value="bedtime_stories">Bedtime Stories</option>
+                    <option value="quiz_with_choices">Multiple Choice Quiz</option>
+                    <option value="explain">Explain</option>
+                    <option value="lyrics">Lyrics</option>
+                    <option value="google-search">Google Search</option>
+                    <option value="image_ai_agent">Image AI Agent</option>
+                    <option value="imageGeneration">Image Generation Prompts</option>
+                    <option value="GenAI">Gen AI Button</option>
+                </select>
                 {showPromptsDropDownAfterSearch && showBigQueryModelSearch && (<select
                     className="modelInput"
                     value={searchModel}
@@ -2977,7 +2994,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         )}
                                     </div>
                                     <br />
-                                    {(((['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
+                                    {(((['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
@@ -3043,7 +3060,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
@@ -3076,8 +3093,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
 
-                                            {item.showRawAnswer ? ((!['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) && item.answer) : (
-                                                item.answer && (!['homeWork', 'multipleChoiceQuiz', 'quiz'].includes(item.invocationType)) && (
+                                            {item.showRawAnswer ? ((!['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
+                                                item.answer && (!['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
                                                         renderHTML={text => mdParser.render(text || '')} // Add default empty string
