@@ -1476,7 +1476,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'bedtime_stories':
                     promptText = bedtime_stories_content_input;
                     break;
-                case 'practice_questions':
+                case 'homework':
                     promptText = homeWorkInput;
                     break;
                 case 'quiz':
@@ -2065,7 +2065,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'quiz':
                         quizPrompt = data.fullText;
                         break;
-                    case 'homework':
+                    case 'practice_questions':
                         intelligentQuestionsPrompt = data.fullText;
                         break;
                     case 'explain':
