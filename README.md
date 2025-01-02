@@ -8,6 +8,8 @@
         temperatureRef.current = temperature;
         top_pRef.current = top_p;
       }, [temperature, top_p]);
+      - Make sure that promise (resolve for 1 second) is used so that values get updated.
+- Make sure that we use temperatureRef.current.valueOf() to get the latest value (don't use state variable temperature as React updates them asynchronously)
 
 - Using global variable to access across the app instead of using StateVariable with State Management caused lot of cache issues.
 - Using State Management to manage the state of the app is very important.
