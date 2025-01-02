@@ -2116,7 +2116,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             lyricsInput = message + lyricsPrompt;
             await callAPI(modelGemini, 'lyrics');
             await callAPI(modelo1, 'lyrics');
-            await callAPI(modelOpenAI, 'lyrics');
+            await callAPI(modelGpto1Mini, 'lyrics');
             updateConfiguration();
             setIsLyrics(false);
         };
