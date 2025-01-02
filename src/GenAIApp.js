@@ -11,20 +11,13 @@ import {
 import App from './App';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
-import homeWork from "./homeWork";
-import { TbEmpathize } from "react-icons/tb";
-import { MdSettingsInputComponent } from "react-icons/md";
-import { FaK } from "react-icons/fa6";
+import Homework from "./Homework";
 import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
 // import style manually
 import 'react-markdown-editor-lite/lib/index.css';
-import speakerIcon from './speak.png';
-import imageIcon from './image.png';
 import youtubeIcon from './youtube.png';
 import tasksIcon from './todo.jpg';
-import { call } from "@mdxeditor/editor";
-import { use } from "react";
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -1826,7 +1819,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
     if (showhomeWorkApp) {  // Add this block
         return (
-            <homeWork
+            <Homework
                 user={user}
                 onBack={() => setShowhomeWorkApp(false)}
                 sourceDocumentID={currentDocId}
@@ -2820,45 +2813,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     <div style={{ color: "green", fontWeight: "bold" }}>
                                         {item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts' && (
                                             <>
-
-                                                {(showYouTubeButton && <button
-                                                    className={
-                                                        (isGeneratingYouTubeAudioTitle[item.id]) ?
-                                                            'button_selected' : 'button'
-                                                    }
-                                                    onClick={async () => {
-                                                        setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: true }));
-                                                        setIsGeneratingTTS(true);
-                                                        callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL);
-
-                                                        // Execute YouTube Title/Description
-                                                        youtubePromptInput = item.answer + youtubeTitlePrompt;
-                                                        youtubeSelected = true;
-                                                        setIsYouTubeTitle(true);
-                                                        setIsGemini(true);
-                                                        setIsGeneratingGemini(true);
-                                                        callAPI(modelGemini, 'youtubeTitle');
-                                                        youtubeDescriptionPromptInput = item.answer + youtubeDescriptionPrompt;
-                                                        callAPI(modelo1, 'youtubeDescription');
-                                                        // Execute Image Search
-                                                        imagePromptInput = imagesSearchPrompt + item.answer;
-                                                        imageSelected = true;
-                                                        setIso1(true);
-                                                        setIsGeneratingo1(true);
-                                                        await callAPI(modelo1, 'imagesSearchWords').finally(() => setIsGeneratingYouTubeAudioTitle(prev => ({ ...prev, [item.id]: false })));;
-                                                    }}>
-                                                    <label className={
-                                                        (isGeneratingYouTubeAudioTitle[item.id]) ?
-                                                            'flashing' : ''
-                                                    }>
-                                                        YouTube Audio                                                         <img src={speakerIcon} alt="speaker" height="22px" style={{ marginRight: '4px' }} />
-                                                        / Title - Description                                                    <img src={youtubeIcon} alt="youtube" height="22px" style={{ marginRight: '4px' }} />
-                                                        / Image Search Words
-                                                        <img src={imageIcon} alt="" height="22px" style={{ marginRight: '4px' }} />
-                                                    </label>
-                                                </button>
-                                                )}
-
                                                 {(!isiPhone && showPrint &&
                                                     <button
                                                         className={isLiveAudioPlaying[item.id] ? 'button_selected' : 'button'}
@@ -2960,36 +2914,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 }}
                                             >
                                                 Print <FaPrint />
-                                            </button>
-                                        )}
-                                        &nbsp;
-                                        {showPrint && (
-                                            <button
-                                                className="button"
-                                                onClick={() => handlehomeWork(item.answer)}
-                                            >
-                                                {ishomeWork
-                                                    ? (<FaSpinner className="spinning" />)
-                                                    : (practiceButtonLabel || 'Practice Questions')}
-                                            </button>)}
-                                        {showPrint && (
-                                            <button
-                                                className="button"
-                                                onClick={() => handleQuiz(item.answer)}
-                                            >
-                                                {isQuiz
-                                                    ? (<FaSpinner className="spinning" />)
-                                                    : (quizButtonLabel || 'Quiz - Trivia')}
-                                            </button>)}
-                                        {showPrint && (
-                                            <button
-                                                className="button"
-                                                onClick={() => handleExplain(item.answer)}
-                                                style={{ backgroundColor: '#e6b800', color: 'black', marginLeft: '10px' }}
-                                            >
-                                                {isExplain
-                                                    ? (<FaSpinner className="spinning" />)
-                                                    : ('Explain')}
                                             </button>
                                         )}
                                     </div>
