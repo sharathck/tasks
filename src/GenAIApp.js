@@ -1543,7 +1543,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             }
             generatedDocID = data[0].results[0].docID;
             console.log('Generated Doc ID:', generatedDocID, '  invocationType:', invocationType);
-            if (['practice_questions', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
+            if (['homework', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
                 setCurrentDocId(data[0].results[0].docID);
                 console.log('currenDocID:', currentDocId);
                 setShowHomeworkApp(true);
@@ -1900,7 +1900,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
-        await callAPI(modelGemini, 'practice_questions');
+        await callAPI(modelGemini, 'homework');
         updateConfiguration();
         setIsHomeWork(false);
     };
@@ -2065,7 +2065,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'quiz':
                         quizPrompt = data.fullText;
                         break;
-                    case 'practice_questions':
+                    case 'homework':
                         intelligentQuestionsPrompt = data.fullText;
                         break;
                     case 'explain':
@@ -2695,7 +2695,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     style={{ marginLeft: '2px', padding: '2px', fontSize: '16px' }}
                 >
                     <option value="">Select Invocation Type</option>
-                    <option value="practice_questions">Practice Questions</option>
+                    <option value="homeWork">Practice Questions</option>
                     <option value="quiz">Trivia / Quiz</option>
                     <option value="image">Image</option>
                     <option value="youtube">YouTube Content</option>
@@ -2994,7 +2994,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         )}
                                     </div>
                                     <br />
-                                    {(((['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
+                                    {(((['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || adminUser) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
@@ -3060,7 +3060,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
@@ -3093,8 +3093,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
 
-                                            {item.showRawAnswer ? ((!['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
-                                                item.answer && (!['practice_questions', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
+                                            {item.showRawAnswer ? ((!['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
+                                                item.answer && (!['homework', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
                                                         renderHTML={text => mdParser.render(text || '')} // Add default empty string
