@@ -2532,7 +2532,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         ? (<FaSpinner className="spinning" />)
                                         : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
                                 </button>
-                                <button
+                                {showPrint && (<button
                                     onClick={() => handleLyrics(promptInput)}
                                     className="practiceButton"
                                     style={{ backgroundColor: 'brown', color: 'white', marginLeft: '10px' }}
@@ -2540,7 +2540,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     {isLyrics
                                         ? (<FaSpinner className="spinning" />)
                                         : 'Lyrics'}
-                                </button>
+                                </button>)
+                                }
                             </>
                         )}
                         {showAISearchButton && !isHomeWork && !isQuiz && (
