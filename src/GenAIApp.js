@@ -2373,8 +2373,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setTemperature(0.8);
                                             setTop_p(0.8);
                                             setIsGeneratingYouTubeAudioTitlePrompt(true);
+                                            await new Promise(resolve => setTimeout(resolve, 500));
                                             youtubeContentInput = promptInput + YouTubePrompt;
-                                            await callAPI(modelGemini, 'youtube');
+                                            await callAPI(modelo1, 'youtube');
                                             //console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
@@ -2394,7 +2395,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     setSpeechRate(youtubeSpeecRate);
                                                     setSpeechSilence(youtubeSpeechSilence);
                                                     // Need to wait for state updates to be applied
-                                                    await new Promise(resolve => setTimeout(resolve, 1000));
+                                                    await new Promise(resolve => setTimeout(resolve, 500));
 
                                                     generateYouTubeUploadInformation(firestoreResponseData);
                                                 }
@@ -2433,11 +2434,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setSpeechRate(storyTellingSpeechRate);
                                             setSpeechSilence(storyTellingSpeechSilence);
                                             // Need to wait for state updates to be applied
-                                            await new Promise(resolve => setTimeout(resolve, 1000));
+                                            await new Promise(resolve => setTimeout(resolve, 500));
 
                                             setIsGeneratingYouTubeBedtimeStory(true);
                                             //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
-                                            await callAPI(modelo1, 'bedtime_stories');
+                                            await callAPI(modelGemini, 'bedtime_stories');
                                             // console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
