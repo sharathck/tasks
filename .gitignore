@@ -23,3 +23,5 @@ docs/CNAME
 ./node_modules/.cache/default-development/205.pack
 ./node_modules/.cache/default-development/64.pack
 /path/to/large-file.ext
+/build
+.firebase/
