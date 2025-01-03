@@ -2532,7 +2532,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 >
                                     {isLyrics
                                         ? (<FaSpinner className="spinning" />)
-                                        : 'Gen AI Lyrics'}
+                                        : 'Lyrics'}
                                 </button>)
                                 }
                             </>
