@@ -1,4 +1,9 @@
 ### Lessons Learned
+- firebase deploy --only hosting;
+- setup deploy command with the code     
+```bash
+"deploy": "react-scripts build"
+```
 - React updates state variables asynchronously, if the value is udpated through UI, then React re-renders state variables but if the set method is used inside a method then it won't update the source valur immediately so, use the React Hook, useRef and useEffect to udpate the value to current value synchronously.
     const [temperature, setTemperature] = useState(0.7);
     const temperatureRef = useRef(temperature);
