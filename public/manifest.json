@@ -3,7 +3,7 @@
   "name": "Task List App",
   "icons": [
     {
-      "src": "todo.jpg"
+      "src": "ai.jpg"
     }
   ],
   "start_url": ".",
