@@ -2918,7 +2918,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         )}
                                     </div>
                                     <br />
-                                    {(((['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType))) && item.answer) && (<button
+                                    {(((['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || item.answer.includes('"Question"')) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
