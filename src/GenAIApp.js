@@ -1118,7 +1118,21 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setIsGeneratingImage_Dall_e_3(true);
                     if (generateGeminiImage === true) {
                         await callAPI(modelGeminiImage, 'image_ai_agent');
-                        console.log('Image generatedDocID:', generatedDocID);
+                        if (1 === 2) {
+                            console.log('Image generatedDocID:', generatedDocID);
+                            const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                            const ttsdocSnap = await getDoc(ttsdocRef);
+                            if (ttsdocSnap.exists()) {
+                                console.log('Image fetched data from Firestore:', ttsdocSnap.data().answer);
+                                const audioURL = ttsdocSnap.data().answer;
+                                console.log('Image URL:', audioURL);
+                                await handleDownload(audioURL, 'image');
+                            }
+                        }
+                    }
+                    await callAPI(modelImageDallE3, 'image_ai_agent');
+                    console.log('Image generatedDocID:', generatedDocID);
+                    if (1 === 2) {
                         const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
                         const ttsdocSnap = await getDoc(ttsdocRef);
                         if (ttsdocSnap.exists()) {
@@ -1127,16 +1141,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             console.log('Image URL:', audioURL);
                             await handleDownload(audioURL, 'image');
                         }
-                    }
-                    await callAPI(modelImageDallE3, 'image_ai_agent');
-                    console.log('Image generatedDocID:', generatedDocID);
-                    const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                    const ttsdocSnap = await getDoc(ttsdocRef);
-                    if (ttsdocSnap.exists()) {
-                        console.log('Image fetched data from Firestore:', ttsdocSnap.data().answer);
-                        const audioURL = ttsdocSnap.data().answer;
-                        console.log('Image URL:', audioURL);
-                        await handleDownload(audioURL, 'image');
                     }
                 }
                 setIsGeneratingImage_Dall_e_3(false);
@@ -1518,6 +1522,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 alert(errorData.error + 'Failed to generate content');
                 throw new Error(errorData.error || 'Failed to generate content.');
             }
+
             let data;
             data = await response.json();
             generatedDocID = data[0].results[0].docID;
@@ -2080,26 +2085,26 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsExplain(false);
     };
 
-        // Add handler function after handlehomeWork
-        const handleLyrics = async (message) => {
-            if (!message.trim()) {
-                alert('Please enter content to lyrics.');
-                return;
-            }
-            setIsLyrics(true);
-            setTemperature(1);
-            setTop_p(1);
-            // Need to wait for state updates to be applied
-            await new Promise(resolve => setTimeout(resolve, 500));
-            // Append the prompt to promptInput
-            lyricsInput = message + lyricsPrompt;
-            await callAPI(modelGemini, 'lyrics');
-            await callAPI(modelo1, 'lyrics');
-            await callAPI(modelGpto1Mini, 'lyrics');
-            updateConfiguration();
-            setIsLyrics(false);
-        };
-    
+    // Add handler function after handlehomeWork
+    const handleLyrics = async (message) => {
+        if (!message.trim()) {
+            alert('Please enter content to lyrics.');
+            return;
+        }
+        setIsLyrics(true);
+        setTemperature(1);
+        setTop_p(1);
+        // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // Append the prompt to promptInput
+        lyricsInput = message + lyricsPrompt;
+        await callAPI(modelGemini, 'lyrics');
+        await callAPI(modelo1, 'lyrics');
+        await callAPI(modelGpto1Mini, 'lyrics');
+        updateConfiguration();
+        setIsLyrics(false);
+    };
+
     return (
         <div>
             <div className={`main-content ${showEditPopup ? 'dimmed' : ''}`}>
@@ -2236,7 +2241,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                     )}
                     <br />
-                    {showPrint && ( <div className="button-section" data-title="Generative AI">
+                    {showPrint && (<div className="button-section" data-title="Generative AI">
                         {showTemp && (
                             <label style={{ marginLeft: '8px' }}>
                                 Temp:
@@ -2543,67 +2548,67 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     </div>
                     <br />
                     {showPrint && (
-                    <div className="button-section" data-title="Gen AI Audio - Text to Speech">
-                        {showVoiceSelect && (
-                            <VoiceSelect
-                                selectedVoice={voiceName} // Current selected voice
-                                onVoiceChange={setVoiceName} // Handler to update selected voice
-                            />
-                        )}
-                        {showPrint && (
-                            <button
-                                className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
-                                onClick={async () => {
-                                    try {
-                                        setIsLiveAudioPlayingPrompt(true);
-                                        await synthesizeSpeech(promptInput, "English");
-                                    } catch (error) {
-                                        console.error('Error playing audio:', error);
-                                    }
-                                    finally {
-                                        setIsLiveAudioPlayingPrompt(false);
-                                    }
-                                }}
-                            >
-                                <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
-                                    <FaPlay /> Speak
-                                </label>
-                            </button>
-                        )
-                        }
-                        {showTTS &&
-                            <label style={{ marginLeft: '8px' }}>
-                                Speech Rate:
-                                <input
-                                    type="text"
-                                    maxLength="5"
-                                    value={speechRate}
-                                    onChange={(e) => setSpeechRate(e.target.value)}
-                                    style={{ width: '50px', marginLeft: '5px' }}
+                        <div className="button-section" data-title="Gen AI Audio - Text to Speech">
+                            {showVoiceSelect && (
+                                <VoiceSelect
+                                    selectedVoice={voiceName} // Current selected voice
+                                    onVoiceChange={setVoiceName} // Handler to update selected voice
                                 />
-                            </label>
-                        }
-                        {showTTS &&
-                            <label style={{ marginLeft: '8px' }}>
-                                Speech Silence:
-                                <input
-                                    type="number"
-                                    value={speechSilence}
-                                    onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
-                                    style={{ width: '60px', marginLeft: '5px' }}
-                                />
-                            </label>
-                        }
-                        {showPrint && showTTS &&
-                            <button className="button"
-                                onClick={() => handleTTSChange()}
-                            >
-                                <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                    <FaCloudDownloadAlt />                                 {genai_audio_label || 'Audio'}
+                            )}
+                            {showPrint && (
+                                <button
+                                    className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
+                                    onClick={async () => {
+                                        try {
+                                            setIsLiveAudioPlayingPrompt(true);
+                                            await synthesizeSpeech(promptInput, "English");
+                                        } catch (error) {
+                                            console.error('Error playing audio:', error);
+                                        }
+                                        finally {
+                                            setIsLiveAudioPlayingPrompt(false);
+                                        }
+                                    }}
+                                >
+                                    <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
+                                        <FaPlay /> Speak
+                                    </label>
+                                </button>
+                            )
+                            }
+                            {showTTS &&
+                                <label style={{ marginLeft: '8px' }}>
+                                    Speech Rate:
+                                    <input
+                                        type="text"
+                                        maxLength="5"
+                                        value={speechRate}
+                                        onChange={(e) => setSpeechRate(e.target.value)}
+                                        style={{ width: '50px', marginLeft: '5px' }}
+                                    />
                                 </label>
-                            </button>
-                        }
-                    </div>
+                            }
+                            {showTTS &&
+                                <label style={{ marginLeft: '8px' }}>
+                                    Speech Silence:
+                                    <input
+                                        type="number"
+                                        value={speechSilence}
+                                        onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
+                                        style={{ width: '60px', marginLeft: '5px' }}
+                                    />
+                                </label>
+                            }
+                            {showPrint && showTTS &&
+                                <button className="button"
+                                    onClick={() => handleTTSChange()}
+                                >
+                                    <label className={isGeneratingTTS ? 'flashing' : ''}>
+                                        <FaCloudDownloadAlt />                                 {genai_audio_label || 'Audio'}
+                                    </label>
+                                </button>
+                            }
+                        </div>
                     )}
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
