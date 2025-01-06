@@ -7,6 +7,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { FaSignOutAlt, FaBackward, FaArrowLeft, FaAlignJustify } from 'react-icons/fa';
 import { auth, db } from './Firebase';
 import Practice from './Practice';
+import SignUp from './SignUp';
 
 import {
     signInWithEmailAndPassword,
@@ -31,6 +32,7 @@ function SigninApp() {
     const [user, setUser] = useState(null);
     const [showMainApp, setShowMainApp] = useState(false);
     const [showTTSQueueApp, setShowTTSQueueApp] = useState(false);
+    const [showSignUp, setShowSignUp] = useState(false);
     const MainApp = process.env.REACT_APP_MAIN_APP;
 
     // Listen for authentication state changes
@@ -138,15 +140,22 @@ function SigninApp() {
                 );
             }
         }
+    }
 
-
+    if (showSignUp) {
+        return <SignUp onBackToSignIn={() => setShowSignUp(false)} />;
     }
 
     return (
         <div>
             <div style={{ fontSize: '22px', width: '100%', margin: '0 auto' }}>
                 <br />
-                <p>Sign In</p>
+                <span style={{ fontSize: '16px', color: '#666' }}>First time user? Please click on </span>
+                <button className="signuppagebutton" onClick={() => setShowSignUp(true)}>
+                Sign Up
+                </button>
+                <br />                
+                <br />
                 <input
                     className="textinput"
                     type="email"
@@ -170,15 +179,14 @@ function SigninApp() {
                 <button className="signonpagebutton" onClick={handleSignInWithEmail}>
                     Sign In
                 </button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <button className="signuppagebutton" onClick={handleSignUpWithEmail}>
-                    Sign Up
-                </button>
-                <br />
-                <br />
+                &nbsp;&nbsp;
                 <button onClick={handleResetPassword}>
                     Did you forget Password?
                 </button>
+                <br />
+                <br />
+                
+                <span> Or </span>
                 <br />
                 <br />
                 <button className="signgooglepagebutton" onClick={handleSignInWithGoogle}>Sign In with Google</button>
