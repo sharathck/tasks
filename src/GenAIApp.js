@@ -2462,7 +2462,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                             setIsGeneratingYouTubeBedtimeStory(true);
                                             //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
-                                            await callAPI(modelGemini, 'bedtime_stories');
+                                            await callAPI(modelo1, 'bedtime_stories');
                                             // console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
