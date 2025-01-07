@@ -79,10 +79,13 @@ let lyricsPrompt = '';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
+    const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+    const [isGeneratingYouTubeMusic, setIsGeneratingYouTubeMusic] = useState(false);
     const [isExplain, setIsExplain] = useState(false);
     const [isLyrics, setIsLyrics] = useState(false);
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
     const [generateGeminiImage, setGenerateGeminiImage] = useState(false);
+    const [generateDalleImage, setGenerateDalleImage] = useState(false);
     const [isGeneratingYouTubeBedtimeStory, setIsGeneratingYouTubeBedtimeStory] = useState(false);
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
     const [showBigQueryModelSearch, setShowBigQueryModelSearch] = useState(false);
@@ -815,6 +818,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.generateGeminiImage !== undefined) {
                     setGenerateGeminiImage(data.generateGeminiImage);
                 }
+                if (data.generateDalleImage !== undefined) {
+                    setGenerateDalleImage(data.generateDalleImage);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -1012,7 +1018,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGeneratingGemini(true);
         youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
         youtubeSelected = true;
-        await callAPI(modelGemini, 'youtubeTitle');
+        await callAPI(modelo1, 'youtubeTitle');
         console.log('youtube Title Gen and Upload generatedDocID:', generatedDocID);
         const youtubeTitledocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
         const youtubeTitledocSnap = await getDoc(youtubeTitledocRef);
@@ -1071,7 +1077,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGemini(true);
         setIsGeneratingGemini(true);
         await generateAndDownloadYouTubeUploadInformation(firestoreResponseData);
-        if (invocation_source !== 'stories') {
+        if (invocation_source !== 'stories' && invocation_source !== 'youtube_own_content') {
             // Execute Image Search
             imagePromptInput = firestoreResponseData + imagesSearchPrompt;
             imageSelected = true;
@@ -1099,7 +1105,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             }
         }
         imagePromptsGenerationInput = firestoreResponseData + imageGenerationPrompt;
-        if (invocation_source === 'stories') {
+        if (invocation_source === 'stories' || invocation_source === 'youtube_own_content') {
             console.log('Invoking stories image generation', stories_image_generation_prompt);
             imagePromptsGenerationInput = firestoreResponseData + stories_image_generation_prompt;
         }
@@ -1130,16 +1136,18 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             }
                         }
                     }
-                    await callAPI(modelImageDallE3, 'image_ai_agent');
-                    console.log('Image generatedDocID:', generatedDocID);
-                    if (1 === 2) {
-                        const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                        const ttsdocSnap = await getDoc(ttsdocRef);
-                        if (ttsdocSnap.exists()) {
-                            console.log('Image fetched data from Firestore:', ttsdocSnap.data().answer);
-                            const audioURL = ttsdocSnap.data().answer;
-                            console.log('Image URL:', audioURL);
-                            await handleDownload(audioURL, 'image');
+                    if (generateDalleImage === true) {
+                        await callAPI(modelImageDallE3, 'image_ai_agent');
+                        console.log('Image generatedDocID:', generatedDocID);
+                        if (1 === 2) {
+                            const ttsdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                            const ttsdocSnap = await getDoc(ttsdocRef);
+                            if (ttsdocSnap.exists()) {
+                                console.log('Image fetched data from Firestore:', ttsdocSnap.data().answer);
+                                const audioURL = ttsdocSnap.data().answer;
+                                console.log('Image URL:', audioURL);
+                                await handleDownload(audioURL, 'image');
+                            }
                         }
                     }
                 }
@@ -2526,6 +2534,83 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         : 'Lyrics'}
                                 </button>)
                                 }
+                                <button
+                                    className={
+                                        (isGeneratingYouTubeMusic) ?
+                                            'button_selected' : 'musicButton'
+                                    }
+                                    onClick={async () => {
+                                        if (promptInput === undefined || promptInput.length < 5) {
+                                            alert('ERROR: prompt is blank.');
+                                            return;
+                                        }
+                                        setTemperature(1);
+                                        setTop_p(1);
+                                        // Need to wait for state updates to be applied
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                                        setIsGeneratingYouTubeMusic(true);
+                                        try {
+                                            await generateYouTubeUploadInformation(promptInput, 'youtube_own_content');
+                                            setIsGeneratingYouTubeMusic(false);
+                                        }
+                                        catch (error) {
+                                            console.error("Error fetching questions from Firestore:", error);
+                                            return null;
+                                        }
+                                    }}
+                                >
+                                    <label className={
+                                        (isGeneratingYouTubeMusic) ?
+                                            'flashing' : ''
+                                    }>
+                                        YouTube (Music)
+                                    </label>
+                                </button>
+                                <button
+                                    className={
+                                        (isGeneratingImages) ?
+                                            'button_selected' : 'musicButton'
+                                    }
+                                    onClick={async () => {
+                                        if (promptInput === undefined || promptInput.length < 5) {
+                                            alert('ERROR: prompt is blank.');
+                                            return;
+                                        }
+                                        setTemperature(1);
+                                        setTop_p(1);
+                                        // Need to wait for state updates to be applied
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                                        setIsGeneratingImages(true);
+                                        try {
+                                            const parts = promptInput.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
+                                            for (const part of parts) {
+                                                console.log('image prompt part:', part);
+                                                imageGenerationPromptInput = part;
+                                                setIsGeneratingImage_Dall_e_3(true);
+                                                if (generateGeminiImage === true) {
+                                                    await callAPI(modelGeminiImage, 'image_ai_agent');
+                                                }
+                                                if (generateDalleImage === true) {
+                                                    await callAPI(modelImageDallE3, 'image_ai_agent');
+                                                }
+                                            }
+                                            setIsGeneratingImages(false);
+                                        }
+                                        catch (error) {
+                                            console.error("Error fetching questions from Firestore:", error);
+                                            return null;
+                                        }
+                                    }}
+                                >
+                                    <label className={
+                                        (isGeneratingImages) ?
+                                            'flashing' : ''
+                                    }>
+                                        Generate Images
+                                    </label>
+                                </button>
                             </>
                         )}
                         {showAISearchButton && !ishomeWork && !isQuiz && (
@@ -2909,7 +2994,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         )}
                                     </div>
                                     <br />
-                                    {(((['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) || item.answer.includes('"Question"')) && item.answer) && (<button
+                                    {(((['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType))) && item.answer) && (<button
                                         className="button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);

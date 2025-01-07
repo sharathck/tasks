@@ -177,6 +177,16 @@
   padding: 5px 5px;
   font-size: 18px; /* make the button text extremely small */
 }
+.musicButton {
+  background-color: rgb(74, 141, 33);
+  border: 2px solid black;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 12px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 18px; /* make the button text extremely small */
+}
 .storiesButton {
   background-color: rgb(20, 195, 218);
   border: 2px solid black;
