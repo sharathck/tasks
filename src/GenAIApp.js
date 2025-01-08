@@ -3068,10 +3068,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     const blob = new Blob([plainText], { type: 'text/plain' });
                                                     const link = document.createElement('a');
                                                     link.href = URL.createObjectURL(blob);
-                                                    if (plainText.length > 105) {
-                                                        link.download = 'description.txt';
-                                                    } else {
+                                                    if (item.invocationType === 'youtubeTitle') {
                                                         link.download = 'title.txt';
+                                                    } else if (item.invocationType === 'youtubeDescription') {
+                                                        link.download = 'description.txt'; 
+                                                    } else {
+                                                        link.download = 'text.txt';
                                                     }
                                                     link.click();
                                                 }}
@@ -3088,7 +3090,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                                                 onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                             >
-                                                Download Text
+                                                {item.invocationType === 'youtubeTitle' ? 'Download YouTube Title' :
+                                                 item.invocationType === 'youtubeDescription' ? 'Download YouTube Description' :
+                                                 'Download Text'}
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
