@@ -291,7 +291,25 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const storyTellingSpeechRateRef = useRef(storyTellingSpeechRate);
     const storyTellingSpeechSilenceRef = useRef(storyTellingSpeechSilence);
     const promptInputRef = useRef(promptInput);
-
+  const [audioUrl, setAudioUrl] = useState('');
+  const audioPlayerRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(isPaused);
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+  useEffect(() => {
+    console.log('INSIDE audioUrl ', audioUrl);
+    if (audioPlayerRef.current) {
+      // Reload and attempt to play whenever the URL changes
+      audioPlayerRef.current.load();
+      audioPlayerRef.current
+        .play()
+        .catch(err => {
+          console.warn('Autoplay prevented', err);
+        });
+    }
+  }, [audioUrl]);
     // Update refs when state changes
     useEffect(() => {
         youtubeSpeecRateRef.current = youtubeSpeecRate;
@@ -902,6 +920,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
     // Function to synthesize speech
     const synthesizeSpeech = async (articles, language) => {
+        setIsLiveAudioPlaying(!isLiveAudioPlaying);
         // Clean the text by removing URLs and special characters
         const cleanedArticles = articles
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
@@ -913,51 +932,39 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim(); // Remove leading/trailing spaces
 
-        if (isiPhone) {
-            window.scrollTo(0, 0);
-            alert('Please go to top of the page to check status and listen to the audio');
-            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
-            return;
-        }
         try {
             try {
                 console.log('Synthesizing speech...' + cleanedArticles);
                 const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-                speechConfig.speechSynthesisVoiceName = voiceName;
-                if (language === "Spanish") {
-                    speechConfig.speechSynthesisVoiceName = "es-MX-DaliaNeural";
-                }
-                if (language === "Hindi") {
-                    speechConfig.speechSynthesisVoiceName = "hi-IN-SwaraNeural";
-                }
-                if (language === "Telugu") {
-                    speechConfig.speechSynthesisVoiceName = "te-IN-ShrutiNeural";
-                }
+                speechConfig.speechSynthesisOutputFormat = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
 
                 const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
-                const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+                const synthesizer = new speechsdk.SpeechSynthesizer(speechConfig, null); // No need to pass audioConfig here since we're capturing audio data
 
+                // Create chunks and synthesize them sequentially
                 const chunks = splitMessage(cleanedArticles);
+                const audioBlobs = [];
                 for (const chunk of chunks) {
                     await new Promise((resolve, reject) => {
-                        speechSynthesizer.speakTextAsync(chunk, result => {
-                            if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-                                console.log(`Speech synthesized to speaker for text: [${chunk}]`);
-                                resolve();
-                            } else if (result.reason === speechsdk.ResultReason.Canceled) {
-                                const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
-                                if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
-                                    console.error(`Error details: ${cancellationDetails.errorDetails}`);
-                                    reject(new Error(cancellationDetails.errorDetails));
+                        synthesizer.speakTextAsync(chunk,
+                            result => {
+                                if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                                    const audioData = result.audioData;
+                                    const blob = new Blob([audioData], { type: 'audio/mp3' });
+                                    audioBlobs.push(blob);
+                                    resolve();
                                 } else {
-                                    reject(new Error('Speech synthesis canceled'));
+                                    reject(new Error('Synthesis failed'));
                                 }
-                            }
-                        }, error => {
-                            console.error(`Error synthesizing speech: ${error}`);
-                            reject(error);
-                        });
+                            },
+                            error => reject(error)
+                        );
                     });
+                }
+
+                if (audioBlobs.length > 0) {
+                    const finalBlob = new Blob(audioBlobs, { type: 'audio/mp3' });
+                    setAudioUrl(URL.createObjectURL(finalBlob));
                 }
             } catch (error) {
                 console.error(`Error synthesizing speech: ${error}`);
@@ -973,6 +980,23 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
+  const handlePlayPause = async () => {
+    setIsPaused(!isPaused);
+    console.log('isPaused ', isPaused);
+    console.log('isPausedRef.current.value ', isPausedRef.current);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Check if there's a valid audio element and it's not paused
+    if (audioPlayerRef.current) {
+      if (!isPausedRef.current) {
+        audioPlayerRef.current.play()
+          .catch(err => console.warn('Playback prevented', err));
+      } else {
+        const currentTime = audioPlayerRef.current.currentTime;
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current.currentTime = currentTime;
+      }
+    }
+  };
     // Function to fetch more data for pagination
     const fetchMoreData = async () => {
         try {
@@ -2661,6 +2685,27 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 </button>
                             )
                             }
+                                                                        {audioUrl && (
+                                                <div>
+                                                  <br />
+                                                <button
+                                                  className={isPaused ? 'button_selected' : 'signoutbutton'}
+                                                  onClick={() => { handlePlayPause(); }}
+                                                  style={{ marginLeft: '10px' }}
+                                                >
+                                                  {isPaused ? 'Play' : 'Pause'}
+                                                </button>
+                                                </div>
+                                              )}
+                                              {audioUrl && (
+                                                <audio
+                                                  ref={audioPlayerRef}
+                                                  controls
+                                                  style={{ width: '50%', marginLeft: '10px', marginTop: '10px' }}
+                                                  src={audioUrl} // Add this prop
+                                                />
+                                              )
+                                              }
                             {showTTS &&
                                 <label style={{ marginLeft: '8px' }}>
                                     Speech Rate:
@@ -2906,8 +2951,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                             <FaPlay /> Speak
                                                         </label>
                                                     </button>
+                                                           
                                                 )}
-
+     {audioUrl && (
+                                                                    <div>
+                                                                      <br />
+                                                                    <button
+                                                                      className={isPaused ? 'button_selected' : 'signoutbutton'}
+                                                                      onClick={() => { handlePlayPause(); }}
+                                                                      style={{ marginLeft: '10px' }}
+                                                                    >
+                                                                      {isPaused ? 'Play' : 'Pause'}
+                                                                    </button>
+                                                                    </div>
+                                                                  )}
+                                                                  {audioUrl && (
+                                                                    <audio
+                                                                      ref={audioPlayerRef}
+                                                                      controls
+                                                                      style={{ width: '50%', marginLeft: '10px', marginTop: '10px' }}
+                                                                      src={audioUrl} // Add this prop
+                                                                    />
+                                                                  )
+                                                                  }
                                                 {showPrint && (<button
                                                     className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'}
                                                     onClick={async () => {
@@ -3071,7 +3137,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     if (item.invocationType === 'youtubeTitle') {
                                                         link.download = 'title.txt';
                                                     } else if (item.invocationType === 'youtubeDescription') {
-                                                        link.download = 'description.txt'; 
+                                                        link.download = 'description.txt';
                                                     } else {
                                                         link.download = 'text.txt';
                                                     }
@@ -3091,8 +3157,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                             >
                                                 {item.invocationType === 'youtubeTitle' ? 'Download YouTube Title' :
-                                                 item.invocationType === 'youtubeDescription' ? 'Download YouTube Description' :
-                                                 'Download Text'}
+                                                    item.invocationType === 'youtubeDescription' ? 'Download YouTube Description' :
+                                                        'Download Text'}
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
