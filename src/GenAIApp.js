@@ -937,7 +937,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 console.log('Synthesizing speech...' + cleanedArticles);
                 const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
                 speechConfig.speechSynthesisOutputFormat = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
-
+                speechConfig.speechSynthesisVoiceName = voiceName;
+                console.log('Voice name:', voiceName);
                 const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
                 const synthesizer = new speechsdk.SpeechSynthesizer(speechConfig, null); // No need to pass audioConfig here since we're capturing audio data
 
