@@ -54,6 +54,30 @@ color: orange;
 }
 
 
+.wide_app_button {
+  padding: 2px 2px;
+  margin-left: 8px;
+  border: 3px solid black;
+  background-color: #e8ebef;
+  color: rgb(23, 82, 192);
+  box-shadow: 4px 4px 8px rgba(34, 33, 33, 0.4);
+  cursor: pointer;
+  width: 20%;
+  font-size: 21px;
+}
+
+.wide_app_button_selected {
+  padding: 2px 2px;
+  margin-left: 7px;
+  font-size: 26px;
+  border: 1px solid black;
+  background-color: rgb(28, 159, 59);
+  color: white;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  font-size: 20px;
+}
+
 ul {
   list-style-type: none;
   padding: 0;

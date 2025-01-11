@@ -808,36 +808,26 @@ function App() {
             <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
             <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-            <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
-            {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (<FaVolumeUp />)}</button>}
+            {<button className={!isLiveAudioPlaying ? 'wide_app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
+              ? (<FaSpinner className="spinning" />)
+              : (<FaVolumeUp />)}</button>}
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
-            <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
-              <FaPlay />
-            </button>
             <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
               <FaAlignJustify />
             </button>
-            <button className={showGenAIApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+            <button className={showGenAIApp ? 'app_button_selected' : 'wide_app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
-            </button>
-            <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
-              <FaNotesMedical />
-            </button>
-            <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
-              <FaNewspaper />
             </button>
             {audioUrl && (
               <div>
                 <br />
-              <button
-                className={isPaused ? 'button_selected' : 'signoutbutton'}
-                onClick={() => { handlePlayPause(); }}
-                style={{ marginLeft: '10px' }}
-              >
-                {isPaused ? 'Play' : 'Pause'}
-              </button>
+                <button
+                  className={isPaused ? 'button_selected' : 'signoutbutton'}
+                  onClick={() => { handlePlayPause(); }}
+                  style={{ marginLeft: '10px' }}
+                >
+                  {isPaused ? 'Play' : 'Pause'}
+                </button>
               </div>
             )}
             {audioUrl && (
@@ -955,6 +945,16 @@ function App() {
                     <br />
                     <button className="button" onClick={showSharathTasks}>
                       {!sharedTasks ? 'Show Sharath Tasks' : 'Hide Sharath Tasks'}
+                    </button>
+                    <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+                      <FaPlay />
+                    </button>
+                    <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
+                    <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
+                      <FaNotesMedical />
+                    </button>
+                    <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
+                      <FaNewspaper />
                     </button>
                     <br />
                     <br />
