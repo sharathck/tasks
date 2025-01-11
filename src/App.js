@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper } from 'react-icons/fa';
+import { FaPlus, FaSpinner, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -78,7 +78,26 @@ function App() {
   const [showHomeworkApp, setShowHomeworkApp] = useState(false);  // Add this line
   const [showGenerateHomeworkApp, setShowGenerateHomeworkApp] = useState(false);  // Add this line
   const [currentDocId, setCurrentDocId] = useState(null);
-
+  const [isLiveAudioPlaying, setIsLiveAudioPlaying] = useState(false);
+  const [audioUrl, setAudioUrl] = useState('');
+  const audioPlayerRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(isPaused);
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+  useEffect(() => {
+    console.log('INSIDE audioUrl ', audioUrl);
+    if (audioPlayerRef.current) {
+      // Reload and attempt to play whenever the URL changes
+      audioPlayerRef.current.load();
+      audioPlayerRef.current
+        .play()
+        .catch(err => {
+          console.warn('Autoplay prevented', err);
+        });
+    }
+  }, [audioUrl]);
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
@@ -200,7 +219,8 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: message, uid: user.uid, source: 'ta', 
+        body: JSON.stringify({
+          message: message, uid: user.uid, source: 'ta',
           voice_name: voiceName,
           silence_break: speechSilence,
           prosody_rate: speechRate
@@ -244,13 +264,7 @@ function App() {
     auth.signOut();
   };
 
-  const splitMessage = (msg, chunkSize = 4000) => {
-    const chunks = [];
-    for (let i = 0; i < msg.length; i += chunkSize) {
-      chunks.push(msg.substring(i, i + chunkSize));
-    }
-    return chunks;
-  };
+
 
   const handleSearchButtonClick = () => {
     setShowSearchBox(prevShowSearchBox => {
@@ -266,37 +280,125 @@ function App() {
     });
   };
 
-  const synthesizeSpeech = async () => {
-    const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-    speechConfig.speechSynthesisVoiceName = voiceName;
+  // Helper function to split messages into chunks
+  const splitMessage = (msg, chunkSize = 2000) => {
+    const chunks = [];
+    let currentPos = 0;
+    while (currentPos < msg.length) {
+      let chunk = msg.substr(currentPos, chunkSize);
+      let splitPos = chunkSize;
 
-    const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
-    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
-
-    const cleanedArticles = articles
-    .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
-    .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-    .replace(/[#:\-*]/g, ' ') // Remove special characters
-    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-    .trim(); // Remove leading/trailing spaces
-
-    const chunks = splitMessage(cleanedArticles);
-    for (const chunk of chunks) {
-      try {
-        const result = await speechSynthesizer.speakTextAsync(chunk);
-        if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-          console.log(`Speech synthesized to speaker for text: [${chunk}]`);
-        } else if (result.reason === speechsdk.ResultReason.Canceled) {
-          const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
-          if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
-            console.error(`Error details: ${cancellationDetails.errorDetails}`);
+      // If we're not at the end, look for last period
+      if (currentPos + chunkSize < msg.length) {
+        const lastPeriod = chunk.lastIndexOf('.');
+        if (lastPeriod !== -1) {
+          splitPos = lastPeriod + 1; // Include the period
+        }
+        else {
+          const lastComma = chunk.lastIndexOf(',');
+          if (lastComma !== -1) {
+            splitPos = lastComma + 1; // Include the comma
           }
+          else {
+            const lastSpace = chunk.lastIndexOf(' ');
+            if (lastSpace !== -1) {
+              splitPos = lastSpace + 1; // Include the space
+            }
+            else {
+              const lastQuestion = chunk.lastIndexOf('?');
+              if (lastQuestion !== -1) {
+                splitPos = lastSpace + 1;
+              }
+            }
+          }
+        }
+      }
+
+      chunk = chunk.substr(0, splitPos);
+      chunks.push(chunk.trim());
+      currentPos += splitPos;
+    }
+
+    return chunks;
+  };
+
+  const synthesizeSpeech = async () => {
+    setIsLiveAudioPlaying(!isLiveAudioPlaying);
+    // Clean the text by removing URLs and special characters
+    const cleanedArticles = articles
+      .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/[#:\-*]/g, ' ')
+      .replace(/[&]/g, ' and ')
+      .replace(/[<>]/g, ' ')
+      //       .replace(/["]/g, '&quot;')
+      //       .replace(/[']/g, '&apos;')
+      .trim(); // Remove leading/trailing spaces
+
+    try {
+      try {
+        console.log('Synthesizing speech...' + cleanedArticles);
+        const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+        speechConfig.speechSynthesisOutputFormat = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
+
+        const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+        const synthesizer = new speechsdk.SpeechSynthesizer(speechConfig, null); // No need to pass audioConfig here since we're capturing audio data
+
+        // Create chunks and synthesize them sequentially
+        const chunks = splitMessage(cleanedArticles);
+        const audioBlobs = [];
+        for (const chunk of chunks) {
+          await new Promise((resolve, reject) => {
+            synthesizer.speakTextAsync(chunk,
+              result => {
+                if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                  const audioData = result.audioData;
+                  const blob = new Blob([audioData], { type: 'audio/mp3' });
+                  audioBlobs.push(blob);
+                  resolve();
+                } else {
+                  reject(new Error('Synthesis failed'));
+                }
+              },
+              error => reject(error)
+            );
+          });
+        }
+
+        if (audioBlobs.length > 0) {
+          const finalBlob = new Blob(audioBlobs, { type: 'audio/mp3' });
+          setAudioUrl(URL.createObjectURL(finalBlob));
         }
       } catch (error) {
         console.error(`Error synthesizing speech: ${error}`);
+      } finally {
+        setIsLiveAudioPlaying(false);
       }
     }
+    catch (error) {
+      console.error(`Error synthesizing speech: ${error}`);
+    }
+    finally {
+      setIsLiveAudioPlaying(false);
+    }
+  };
 
+  const handlePlayPause = async () => {
+    setIsPaused(!isPaused);
+    console.log('isPaused ', isPaused);
+    console.log('isPausedRef.current.value ', isPausedRef.current);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Check if there's a valid audio element and it's not paused
+    if (audioPlayerRef.current) {
+      if (!isPausedRef.current) {
+        audioPlayerRef.current.play()
+          .catch(err => console.warn('Playback prevented', err));
+      } else {
+        const currentTime = audioPlayerRef.current.currentTime;
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current.currentTime = currentTime;
+      }
+    }
   };
 
   const speakContent = async () => {
@@ -462,11 +564,11 @@ function App() {
     //   setReaderMode(true);
     //log the exact date and time
     const cleanedArticles = articles
-    .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
-    .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
-    .replace(/[#:\-*]/g, ' ') // Remove special characters
-    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-    .trim(); // Remove leading/trailing spaces
+      .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/[#:\-*]/g, ' ') // Remove special characters
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim(); // Remove leading/trailing spaces
 
     if (cleanedArticles.length > 2) {
       /* const chunks = [];
@@ -617,7 +719,7 @@ function App() {
     }
     setSharedTasks(!sharedTasks);
   }
-  
+
 
   // Add URL detection helper function
   const isValidUrl = (string) => {
@@ -633,7 +735,7 @@ function App() {
   const renderTaskText = (text) => {
     if (isValidUrl(text.trim())) {
       return (
-        <a 
+        <a
           href={text.trim()}
           target="_blank"
           rel="noopener noreferrer"
@@ -707,7 +809,9 @@ function App() {
             <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
             <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
-            {!isiPhone && <button className={showLiveTTS ? 'app_button_selected' : 'app_button'} onClick={synthesizeSpeech}><FaVolumeUp /></button>}
+            {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (<FaVolumeUp />)}</button>}
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
             <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
               <FaPlay />
@@ -724,6 +828,27 @@ function App() {
             <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
               <FaNewspaper />
             </button>
+            {audioUrl && (
+              <div>
+                <br />
+              <button
+                className={isPaused ? 'button_selected' : 'signoutbutton'}
+                onClick={() => { handlePlayPause(); }}
+                style={{ marginLeft: '10px' }}
+              >
+                {isPaused ? 'Play' : 'Pause'}
+              </button>
+              </div>
+            )}
+            {audioUrl && (
+              <audio
+                ref={audioPlayerRef}
+                controls
+                style={{ width: '50%', marginLeft: '10px', marginTop: '10px' }}
+                src={audioUrl} // Add this prop
+              />
+            )
+            }
             {showSearchBox && (
               <div> <input
                 type="text"
@@ -797,11 +922,11 @@ function App() {
                 <button className='app_button' onClick={generateDocx}><FaFileWord /></button>
                 <button className='app_button' onClick={generateText}><FaFileAlt /></button>
                 <button className={showSearchBox ? 'app_button_selected' : 'app_button'} onClick={handleSearchButtonClick}>
-              <FaSearch />
-            </button>
-            <button className="app_button_signoutbutton" onClick={handleSignOut}>
-               <FaSignOutAlt />
-               </button>
+                  <FaSearch />
+                </button>
+                <button className="app_button_signoutbutton" onClick={handleSignOut}>
+                  <FaSignOutAlt />
+                </button>
                 <br />
                 <br />
                 {/* Add the voice name input box */}
@@ -827,11 +952,11 @@ function App() {
                       {!sharedTasks ? 'Show Aarush Tasks' : 'Hide Aarush Tasks'}
                     </button>
                     <br />
-                    <br /> 
-                                        <button className="button" onClick={showSharathTasks}>
+                    <br />
+                    <button className="button" onClick={showSharathTasks}>
                       {!sharedTasks ? 'Show Sharath Tasks' : 'Hide Sharath Tasks'}
                     </button>
-                    <br />       
+                    <br />
                     <br />
                     <br />
                     <br />
