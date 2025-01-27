@@ -291,25 +291,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const storyTellingSpeechRateRef = useRef(storyTellingSpeechRate);
     const storyTellingSpeechSilenceRef = useRef(storyTellingSpeechSilence);
     const promptInputRef = useRef(promptInput);
-  const [audioUrl, setAudioUrl] = useState('');
-  const audioPlayerRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const isPausedRef = useRef(isPaused);
-  useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
-  useEffect(() => {
-    console.log('INSIDE audioUrl ', audioUrl);
-    if (audioPlayerRef.current) {
-      // Reload and attempt to play whenever the URL changes
-      audioPlayerRef.current.load();
-      audioPlayerRef.current
-        .play()
-        .catch(err => {
-          console.warn('Autoplay prevented', err);
-        });
-    }
-  }, [audioUrl]);
+
     // Update refs when state changes
     useEffect(() => {
         youtubeSpeecRateRef.current = youtubeSpeecRate;
@@ -331,6 +313,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showCerebras, setShowCerebras] = useState(false);
     const [modelCerebras, setModelCerebras] = useState('llama-c');
     const [labelCerebras, setLabelCerebras] = useState('Llama-C');
+
+    // Add new model "DeepSeek" state variables
+    const [isDeepSeek, setIsDeepSeek] = useState(false);
+    const [isGeneratingDeepSeek, setIsGeneratingDeepSeek] = useState(false);
+    const [showDeepSeek, setShowDeepSeek] = useState(false);
+    const [modelDeepSeek, setModelDeepSeek] = useState('DeepSeek');
+    const [labelDeepSeek, setLabelDeepSeek] = useState('DS');
+
+
     const [youtubeTitlePrompt, setYoutubeTitlePrompt] = useState(`### Give me the best YouTube Title for the above content`);
     const [youtubeDescriptionPrompt, setYoutubeDescriptionPrompt] = useState(`#### Give me the best YouTube description for the above content, I need exactly one response and don't include any other text or URLs in the response. ----- Text from below is only prompt purpose --- YouTube description should be engaging, detailed, informative, and YouTube search engine optimized and SEO friendly, it can contain special characters, emojis, and numbers to make it more appealing and expressive. Please use the emojis, icons to make it more visually appealing.   Use relevant tags to improve the visibility and reach of your video in Youtube video Description.   Use bullet points, numbered points, lists, and paragraphs to organize Youtube video description.  Bold, italicize, underline, and highlight important information in Youtube video description.   Also, please request users to subscribe and click on bell icon for latest content at the end. `);
     const youtubeDescriptionPromptRef = useRef(youtubeDescriptionPrompt);
@@ -839,6 +830,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.generateDalleImage !== undefined) {
                     setGenerateDalleImage(data.generateDalleImage);
                 }
+                if (data.isDeepSeek !== undefined) {
+                    setIsDeepSeek(data.isDeepSeek);
+                }
+                if (data.showDeepSeek !== undefined) {
+                    setShowDeepSeek(data.showDeepSeek);
+                }
+                if (data.labelDeepSeek !== undefined) {
+                    setLabelDeepSeek(data.labelDeepSeek);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -920,7 +920,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
     // Function to synthesize speech
     const synthesizeSpeech = async (articles, language) => {
-        setIsLiveAudioPlaying(!isLiveAudioPlaying);
         // Clean the text by removing URLs and special characters
         const cleanedArticles = articles
             .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
@@ -932,40 +931,51 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim(); // Remove leading/trailing spaces
 
+        if (isiPhone) {
+            window.scrollTo(0, 0);
+            alert('Please go to top of the page to check status and listen to the audio');
+            callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
+            return;
+        }
         try {
             try {
                 console.log('Synthesizing speech...' + cleanedArticles);
                 const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-                speechConfig.speechSynthesisOutputFormat = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
                 speechConfig.speechSynthesisVoiceName = voiceName;
-                console.log('Voice name:', voiceName);
-                const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
-                const synthesizer = new speechsdk.SpeechSynthesizer(speechConfig, null); // No need to pass audioConfig here since we're capturing audio data
-
-                // Create chunks and synthesize them sequentially
-                const chunks = splitMessage(cleanedArticles);
-                const audioBlobs = [];
-                for (const chunk of chunks) {
-                    await new Promise((resolve, reject) => {
-                        synthesizer.speakTextAsync(chunk,
-                            result => {
-                                if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-                                    const audioData = result.audioData;
-                                    const blob = new Blob([audioData], { type: 'audio/mp3' });
-                                    audioBlobs.push(blob);
-                                    resolve();
-                                } else {
-                                    reject(new Error('Synthesis failed'));
-                                }
-                            },
-                            error => reject(error)
-                        );
-                    });
+                if (language === "Spanish") {
+                    speechConfig.speechSynthesisVoiceName = "es-MX-DaliaNeural";
+                }
+                if (language === "Hindi") {
+                    speechConfig.speechSynthesisVoiceName = "hi-IN-SwaraNeural";
+                }
+                if (language === "Telugu") {
+                    speechConfig.speechSynthesisVoiceName = "te-IN-ShrutiNeural";
                 }
 
-                if (audioBlobs.length > 0) {
-                    const finalBlob = new Blob(audioBlobs, { type: 'audio/mp3' });
-                    setAudioUrl(URL.createObjectURL(finalBlob));
+                const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+                const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+                const chunks = splitMessage(cleanedArticles);
+                for (const chunk of chunks) {
+                    await new Promise((resolve, reject) => {
+                        speechSynthesizer.speakTextAsync(chunk, result => {
+                            if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                                console.log(`Speech synthesized to speaker for text: [${chunk}]`);
+                                resolve();
+                            } else if (result.reason === speechsdk.ResultReason.Canceled) {
+                                const cancellationDetails = speechsdk.SpeechSynthesisCancellationDetails.fromResult(result);
+                                if (cancellationDetails.reason === speechsdk.CancellationReason.Error) {
+                                    console.error(`Error details: ${cancellationDetails.errorDetails}`);
+                                    reject(new Error(cancellationDetails.errorDetails));
+                                } else {
+                                    reject(new Error('Speech synthesis canceled'));
+                                }
+                            }
+                        }, error => {
+                            console.error(`Error synthesizing speech: ${error}`);
+                            reject(error);
+                        });
+                    });
                 }
             } catch (error) {
                 console.error(`Error synthesizing speech: ${error}`);
@@ -981,23 +991,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
     };
 
-  const handlePlayPause = async () => {
-    setIsPaused(!isPaused);
-    console.log('isPaused ', isPaused);
-    console.log('isPausedRef.current.value ', isPausedRef.current);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Check if there's a valid audio element and it's not paused
-    if (audioPlayerRef.current) {
-      if (!isPausedRef.current) {
-        audioPlayerRef.current.play()
-          .catch(err => console.warn('Playback prevented', err));
-      } else {
-        const currentTime = audioPlayerRef.current.currentTime;
-        audioPlayerRef.current.pause();
-        audioPlayerRef.current.currentTime = currentTime;
-      }
-    }
-  };
     // Function to fetch more data for pagination
     const fetchMoreData = async () => {
         try {
@@ -1249,7 +1242,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek) {
             alert('Please select at least one model.');
             return;
         }
@@ -1347,6 +1340,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
             setIsGeneratingCerebras(true); // Set generating state to true
             callAPI(modelCerebras);
         }
+        if (isDeepSeek && showDeepSeek) {
+            setIsGeneratingDeepSeek(true);
+            callAPI(modelDeepSeek);
+        }
         updateConfiguration();
     };
 
@@ -1407,7 +1404,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     labelSambanova,
                     labelNova,
                     isCerebras,
-                    labelCerebras
+                    labelCerebras,
+                    isDeepSeek,
+                    labelDeepSeek
                 });
                 return;
             }
@@ -1461,7 +1460,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         labelSambanova,
                         labelNova,
                         isCerebras,
-                        labelCerebras
+                        labelCerebras,
+                        isDeepSeek,
+                        labelDeepSeek
                     }, { merge: true });
                 });
             }
@@ -1642,6 +1643,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelCerebras) {
                 setIsGeneratingCerebras(false);
             }
+            if (selectedModel === modelDeepSeek) {
+                setIsGeneratingDeepSeek(false);
+            }
             console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
         }
     };
@@ -1749,6 +1753,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGroq(status);
         setIsNova(status);
         setIsCerebras(status);
+        setIsDeepSeek(status);
     };
 
     // Add this helper function to handle LLM model selection
@@ -2273,6 +2278,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     )}
+                    {showDeepSeek && (
+                        <button
+                            className={isDeepSeek ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsDeepSeek, !isDeepSeek)}
+                        >
+                            <label className={isGeneratingDeepSeek ? 'flashing' : ''}>
+                                {labelDeepSeek}
+                            </label>
+                        </button>
+                    )}
                     <br />
                     {showPrint && (<div className="button-section" data-title="Generative AI">
                         {showTemp && (
@@ -2359,6 +2374,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
+                                    isGeneratingDeepSeek ||
                                     isExplain ||
                                     isLyrics
                                 }
@@ -2384,6 +2400,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
+                                    isGeneratingDeepSeek ||
                                     isExplain || isLyrics ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
@@ -2686,27 +2703,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 </button>
                             )
                             }
-                                                                        {audioUrl && (
-                                                <div>
-                                                  <br />
-                                                <button
-                                                  className={isPaused ? 'button_selected' : 'signoutbutton'}
-                                                  onClick={() => { handlePlayPause(); }}
-                                                  style={{ marginLeft: '10px' }}
-                                                >
-                                                  {isPaused ? 'Play' : 'Pause'}
-                                                </button>
-                                                </div>
-                                              )}
-                                              {audioUrl && (
-                                                <audio
-                                                  ref={audioPlayerRef}
-                                                  controls
-                                                  style={{ width: '50%', marginLeft: '10px', marginTop: '10px' }}
-                                                  src={audioUrl} // Add this prop
-                                                />
-                                              )
-                                              }
                             {showTTS &&
                                 <label style={{ marginLeft: '8px' }}>
                                     Speech Rate:
@@ -2854,6 +2850,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="groq-mixtral">Groq</option>
                     <option value="nova">Nova</option>
                     <option value="cerebras">Cerebras</option>
+                    <option value="DeepSeek">DeepSeek</option>
                 </select>
                 )}
                 {showEditPopup && (
@@ -2952,29 +2949,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                             <FaPlay /> Speak
                                                         </label>
                                                     </button>
-                                                           
                                                 )}
-     {audioUrl && (
-                                                                    <div>
-                                                                      <br />
-                                                                    <button
-                                                                      className={isPaused ? 'button_selected' : 'signoutbutton'}
-                                                                      onClick={() => { handlePlayPause(); }}
-                                                                      style={{ marginLeft: '10px' }}
-                                                                    >
-                                                                      {isPaused ? 'Play' : 'Pause'}
-                                                                    </button>
-                                                                    </div>
-                                                                  )}
-                                                                  {audioUrl && (
-                                                                    <audio
-                                                                      ref={audioPlayerRef}
-                                                                      controls
-                                                                      style={{ width: '50%', marginLeft: '10px', marginTop: '10px' }}
-                                                                      src={audioUrl} // Add this prop
-                                                                    />
-                                                                  )
-                                                                  }
+
                                                 {showPrint && (<button
                                                     className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'}
                                                     onClick={async () => {
@@ -3135,12 +3111,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     const blob = new Blob([plainText], { type: 'text/plain' });
                                                     const link = document.createElement('a');
                                                     link.href = URL.createObjectURL(blob);
-                                                    if (item.invocationType === 'youtubeTitle') {
-                                                        link.download = 'title.txt';
-                                                    } else if (item.invocationType === 'youtubeDescription') {
+                                                    if (plainText.length > 105) {
                                                         link.download = 'description.txt';
                                                     } else {
-                                                        link.download = 'text.txt';
+                                                        link.download = 'title.txt';
                                                     }
                                                     link.click();
                                                 }}
@@ -3157,9 +3131,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                                                 onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                             >
-                                                {item.invocationType === 'youtubeTitle' ? 'Download YouTube Title' :
-                                                    item.invocationType === 'youtubeDescription' ? 'Download YouTube Description' :
-                                                        'Download Text'}
+                                                Download Text
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
