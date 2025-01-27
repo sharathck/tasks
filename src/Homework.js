@@ -12,7 +12,7 @@ let textToSpeak = '';
 
 const Homework = ({ sourceDocumentID }) => {
     // Add new state variables for labels
-    const [copyUrlButtonLabel, setCopyUrlButtonLabel] = useState('Copy URL to Share');
+    const [copyUrlButtonLabel, setCopyUrlButtonLabel] = useState('Share');
     const [printGridButtonLabel, setPrintGridButtonLabel] = useState('Print');
     const [practiceNote, setPracticeNote] = useState('The student URL copied above does not require App Login. Students can access from any device without signing up.');
 
@@ -541,7 +541,7 @@ const Homework = ({ sourceDocumentID }) => {
                     className='show-answers-button'
                     onClick={handleShowAnswers}
                 >
-                    {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                    {showAnswers ? 'Hide Answers' : 'Answers'}
                 </button>
             </div>
             <div className="info-text" style={{
