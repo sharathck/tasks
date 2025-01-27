@@ -451,29 +451,20 @@ const Homework = ({ sourceDocumentID }) => {
                     </button>
                 )}
                 <div className="source-doc-container">
-                {<button onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
-                                ? (<FaSpinner className="spinning" />)
-                                : (<FaVolumeUp />)}</button>}
-                            {audioUrl && (
-                                <div>
-                                    <audio
-                                        ref={audioPlayerRef}
-                                        controls
-                                        style={{ width: '50%', marginLeft: '5px', marginTop: '10px' }}
-                                        src={audioUrl} // Add this prop
-                                    />
-                                </div>
-                            )
-                            }
-                            {audioUrl && (
-                                <button
-                                    className={isPaused ? 'button_selected' : 'signoutbutton'}
-                                    onClick={() => { handlePlayPause(); }}
-                                    style={{ marginLeft: '10px' }}
-                                >
-                                    {isPaused ? 'Play' : 'Pause'}
-                                </button>
-                            )}
+                    {<button onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
+                        ? (<FaSpinner className="spinning" />)
+                        : (<FaVolumeUp />)}</button>}
+                    {audioUrl && (
+                        <div>
+                            <audio
+                                ref={audioPlayerRef}
+                                controls
+                                style={{ width: '50%', marginLeft: '5px', marginTop: '10px' }}
+                                src={audioUrl} // Add this prop
+                            />
+                        </div>
+                    )
+                    }
                     <button
                         className="button"
                         onClick={() => {
@@ -536,13 +527,14 @@ const Homework = ({ sourceDocumentID }) => {
                     >
                         {copyUrlButtonLabel}
                     </button>
+                    <button
+                        className='show-answers-button'
+                        onClick={handleShowAnswers}
+                    >
+                        {showAnswers ? 'Hide Answers' : 'Answers'}
+                    </button>
                 </div>
-                <button
-                    className='show-answers-button'
-                    onClick={handleShowAnswers}
-                >
-                    {showAnswers ? 'Hide Answers' : 'Answers'}
-                </button>
+
             </div>
             <div className="info-text" style={{
                 fontSize: '12px',
@@ -550,6 +542,18 @@ const Homework = ({ sourceDocumentID }) => {
                 marginTop: '5px',
             }}>
                 {practiceNote}
+                {audioUrl && (
+                    <div>
+                        <br />
+                        <audio
+                            ref={audioPlayerRef}
+                            controls
+                            style={{ width: '80%', marginLeft: '5px', marginTop: '10px' }}
+                            src={audioUrl} // Add this prop
+                        />
+                    </div>
+                )
+                }
             </div>
             {showPinModal && (
                 <div className="pin-modal">
