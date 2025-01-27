@@ -1534,7 +1534,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     }
             }
             console.log('temp:', temperatureRef.current.valueOf(), 'top_p:', top_pRef.current.valueOf());
-
+            // if prompt dropdown selected is practice_questions then invocationType should be homeWork
+            if (selectedPrompt === 'practice_questions') {
+                invocationType = 'homeWork';
+            }
+            if (selectedPrompt === 'quiz_with_choices') {
+                invocationType = 'quiz_with_choices';
+            }
+            if (selectedPrompt === 'quiz') {
+                invocationType = 'quiz';
+            }
             // Single API call with the determined promptText
             response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
                 method: 'POST',
