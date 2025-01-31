@@ -2469,6 +2469,33 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         ? (<FaSpinner className="spinning" />)
                                         : ('Explain with Examples')}
                                 </button>
+                                <button
+                                    onClick={() => handlehomeWork(promptInput)}
+                                    className="practiceButton"
+                                >
+                                    {ishomeWork
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (practiceButtonLabel || 'Practice Questions')}
+                                </button>
+                                <button
+                                    onClick={() => handleQuiz(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isQuiz
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (quizButtonLabel || 'Trivia/Quiz')}
+                                </button>
+                                <button
+                                    onClick={() => handleMultipleChoiceQuiz(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isQuizMultipleChoice
+                                        ? (<FaSpinner className="spinning" />)
+                                        : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
+                                </button>
+                                &nbsp;&nbsp;&nbsp;
                                 {
                                     (showPrint && showYouTubeButton && <button
                                         className={
@@ -2528,32 +2555,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     )
                                 }
                                 &nbsp;
-                                <button
-                                    onClick={() => handlehomeWork(promptInput)}
-                                    className="practiceButton"
-                                >
-                                    {ishomeWork
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (practiceButtonLabel || 'Practice Questions')}
-                                </button>
-                                <button
-                                    onClick={() => handleQuiz(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
-                                >
-                                    {isQuiz
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (quizButtonLabel || 'Trivia/Quiz')}
-                                </button>
-                                <button
-                                    onClick={() => handleMultipleChoiceQuiz(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
-                                >
-                                    {isQuizMultipleChoice
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
-                                </button>
                                 {showPrint && (<button
                                     onClick={() => handleLyrics(promptInput)}
                                     className="practiceButton"
