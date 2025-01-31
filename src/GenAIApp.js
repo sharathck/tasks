@@ -73,9 +73,12 @@ let explainInput = '';
 let explainPrompt = '';
 let lyricsInput = '';
 let lyricsPrompt = '';
-
-
-
+let homeWorkTemperture = 0.1;
+let homeWorkTop_p = 0.2;
+let quizTemperture = 0.1;
+let quizTop_p = 0.1;
+let quizMultipleChoicesTemperture = 0.1;
+let quizMultipleChoicesTop_p = 0.2;
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -838,6 +841,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.labelDeepSeek !== undefined) {
                     setLabelDeepSeek(data.labelDeepSeek);
+                }
+                if (data.homeWorkTemperture !== undefined) {
+                    homeWorkTemperture = data.homeWorkTemperture;
+                }
+                if (data.homeWorkTop_p !== undefined) {
+                    homeWorkTop_p = data.homeWorkTop_p;  
+                }
+                if (data.quizTemperture !== undefined) {
+                    quizTemperture = data.quizTemperture;
+                }
+                if (data.quizTop_p !== undefined) {
+                    quizTop_p = data.quizTop_p;
+                }
+                if (data.quizMultipleChoicesTemperture !== undefined) {
+                    quizMultipleChoicesTemperture = data.quizMultipleChoicesTemperture;
+                }
+                if (data.quizMultipleChoicesTop_p !== undefined) {
+                    quizMultipleChoicesTop_p = data.quizMultipleChoicesTop_p;
                 }
             });
         } catch (error) {
@@ -1925,8 +1946,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             return;
         }
         setIshomeWork(true);
-        setTemperature(0.4);
-        setTop_p(0.5);
+        setTemperature(homeWorkTemperture);
+        setTop_p(homeWorkTop_p);
         // Need to wait for state updates to be applied
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
@@ -1942,8 +1963,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('Please enter a message.');
             return;
         }
-        setTemperature(0.3);
-        setTop_p(0.5);
+        setTemperature(quizTemperture);
+        setTop_p(quizTop_p);
         setIsQuiz(true);
         // Need to wait for state updates to be applied
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1961,8 +1982,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             alert('Please enter a message.');
             return;
         }
-        setTemperature(0.3);
-        setTop_p(0.5);
+        setTemperature(quizMultipleChoicesTemperture);
+        setTop_p(quizMultipleChoicesTop_p);
         setIsQuizMultipleChoice(true);
         // Append the prompt to promptInput
         await new Promise(resolve => setTimeout(resolve, 1000));
