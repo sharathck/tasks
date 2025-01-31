@@ -79,6 +79,10 @@ let quizTemperture = 0.1;
 let quizTop_p = 0.1;
 let quizMultipleChoicesTemperture = 0.1;
 let quizMultipleChoicesTop_p = 0.2;
+let modelQuiz = 'o-mini';
+let modelQuizChoices = 'o-mini';
+let modelHomeWork = 'o-mini';
+let modelExplain = 'o-mini';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -859,6 +863,18 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.quizMultipleChoicesTop_p !== undefined) {
                     quizMultipleChoicesTop_p = data.quizMultipleChoicesTop_p;
+                }
+                if (data.modelQuiz !== undefined) {
+                    modelQuiz = data.modelQuiz;
+                }
+                if (data.modelQuizChoices !== undefined) {
+                    modelQuizChoices = data.modelQuizChoices;
+                }
+                if (data.modelHomeWork !== undefined) {
+                    modelHomeWork = data.modelHomeWork;
+                }
+                if (data.modelExplain !== undefined) {
+                    modelExplain = data.modelExplain;
                 }
             });
         } catch (error) {
@@ -1952,7 +1968,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         homeWorkInput = message + intelligentQuestionsPrompt;
-        await callAPI(modelGemini, 'homeWork');
+        await callAPI(modelHomeWork, 'homeWork');
         updateConfiguration();
         setIshomeWork(false);
     };
@@ -1970,7 +1986,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         // Append the prompt to promptInput
         quizInput = message + quizPrompt;
-        await callAPI(modelGemini, 'quiz');
+        await callAPI(modelQuiz, 'quiz');
         updateConfiguration();
         setIsQuiz(false);
     };
@@ -1989,7 +2005,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         quizMultipleChoicesInput = message + quizMultipleChoicesPrompt;
         setIsGeneratingGemini(true);
-        await callAPI(modelGemini, 'quiz_with_choices');
+        await callAPI(modelQuizChoices, 'quiz_with_choices');
         updateConfiguration();
         setIsQuizMultipleChoice(false);
     };
@@ -2148,7 +2164,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await new Promise(resolve => setTimeout(resolve, 500));
         // Append the prompt to promptInput
         explainInput = message + explainPrompt;
-        await callAPI(modelGemini, 'explain');
+        await callAPI(modelExplain, 'explain');
         updateConfiguration();
         setIsExplain(false);
     };
