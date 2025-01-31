@@ -111,15 +111,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingAnthropic, setIsGeneratingAnthropic] = useState(false);
     const [isGeneratingo1Mini, setIsGeneratingo1Mini] = useState(false);
     const [isGeneratingImage_Dall_e_3, setIsGeneratingImage_Dall_e_3] = useState(false);
-    const [isGpt4oMini, setIsGpt4oMini] = useState(false);
-    const [isGeneratingGpt4oMini, setIsGeneratingGpt4oMini] = useState(false);
+    const [isGptMini, setIsGptMini] = useState(false);
+    const [isGeneratingGptMini, setIsGeneratingGptMini] = useState(false);
     const [isOpenAI, setIsOpenAI] = useState(false);
     const [isAnthropic, setIsAnthropic] = useState(true);
     const [isGemini, setIsGemini] = useState(true);
-    const [isGpto1Mini, setIsGpto1Mini] = useState(true);
+    const [isoMini, setIsoMini] = useState(true);
     const [isLlama, setIsLlama] = useState(false);
     const [isMistral, setIsMistral] = useState(false);
-    const [isGpt4Turbo, setIsGpt4Turbo] = useState(false);
+    const [isGptTurbo, setIsGptTurbo] = useState(false);
     const [isGeminiSearch, setIsGeminiSearch] = useState(true);
     const [isGeminiFlash, setIsGeminiFlash] = useState(false);
     const [isPerplexityFast, setIsPerplexityFast] = useState(false);
@@ -132,7 +132,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [iso1, setIso1] = useState(false); // New state for o1
     const [isGeneratingo1, setIsGeneratingo1] = useState(false);
     const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
-    const [isGeneratingGpt4Turbo, setIsGeneratingGpt4Turbo] = useState(false);
+    const [isGeneratingGptTurbo, setIsGeneratingGptTurbo] = useState(false);
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
     const [isGeneratingCodeStral, setIsGeneratingCodeStral] = useState(false);
     const [isGeneratingMistral, setIsGeneratingMistral] = useState(false);
@@ -153,10 +153,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showTemp, setShowTemp] = useState(false);
     const [showTop_p, setShowTop_p] = useState(false);
-    const [showGpt4Turbo, setShowGpt4Turbo] = useState(false);
+    const [showGptTurbo, setShowGptTurbo] = useState(false);
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
-    const [showGpt4oMini, setShowGpt4oMini] = useState(false);
+    const [showGptMini, setShowGptMini] = useState(false);
     const [showGeminiSearch, setShowGeminiSearch] = useState(false);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
     const [showPerplexityFast, setShowPerplexityFast] = useState(false);
@@ -164,23 +164,23 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showCodeStral, setShowCodeStral] = useState(false);
     const [showGemini, setShowGemini] = useState(false);
     const [showAnthropic, setShowAnthropic] = useState(false);
-    const [showOpenAI, setShowOpenAI] = useState(false);
-    const [showo1, setShowo1] = useState(false);
+    const [showGpt, setshowGpt] = useState(false);
+    const [showo, setshowo] = useState(false);
     const [showImageDallE3, setShowImageDallE3] = useState(false);
     const [showTTS, setShowTTS] = useState(false);
-    const [showo1Mini, setShowo1Mini] = useState(false);
+    const [showoMini, setshowoMini] = useState(false);
     const [showAutoPrompt, setShowAutoPrompt] = useState(false);
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
-    const [modelOpenAI, setModelOpenAI] = useState('gpt-4o');
-    const [modelGpto1Mini, setModelGpto1Mini] = useState('o1-mini');
-    const [modelo1, setModelo1] = useState('o1');
+    const [modelGpt, setModelGpt] = useState('gpt');
+    const [modeloMini, setModeloMini] = useState('o-mini');
+    const [modelo, setModelo] = useState('o');
     const [modelLlama, setModelLlama] = useState('llama');
     const [modelMistral, setModelMistral] = useState('mistral');
-    const [modelGpt4oMini, setModelGpt4oMini] = useState('gpt-4o-mini');
+    const [modelGptMini, setModelGptMini] = useState('gpt-mini');
     const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-flash');
-    const [modelGpt4Turbo, setModelGpt4Turbo] = useState('gpt-4-turbo');
+    const [modelGptTurbo, setModelGptTurbo] = useState('gpt-turbo');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
@@ -220,17 +220,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelNova, setModelNova] = useState('nova');
 
     // Add these state variables after other model state variables
-    const [labelOpenAI, setLabelOpenAI] = useState('ChatGPT');
+    const [labelGpt, setLabelGpt] = useState('ChatGPT');
     const [labelAnthropic, setLabelAnthropic] = useState('Claude');
     const [labelGemini, setLabelGemini] = useState('Gemini');
-    const [labelGpto1Mini, setLabelGpto1Mini] = useState('o1-mini');
+    const [labeloMini, setLabeloMini] = useState('o3-mini');
     const [labelMistral, setLabelMistral] = useState('Mistral');
     const [labelLlama, setLabelLlama] = useState('Llama(405B)');
-    const [labelGpt4Turbo, setLabelGpt4Turbo] = useState('Gpt4Turbo');
+    const [labelGptTurbo, setLabelGptTurbo] = useState('GptTurbo');
     const [labelGeminiSearch, setLabelGeminiSearch] = useState('SearchGenAI');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
-    const [labelGpt4oMini, setLabelGpt4oMini] = useState('Gpt4oMini');
-    const [labelo1, setLabelo1] = useState('o1');
+    const [labelGptMini, setLabelGptMini] = useState('GptMini');
+    const [labelo, setLabelo] = useState('o1');
     const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
     const [labelPerplexity, setLabelPerplexity] = useState('Plxty');
     const [labelCodestral, setLabelCodestral] = useState('CodeStral');
@@ -536,8 +536,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 console.log('Fully Array Data:', data);
                 console.log('Data:', data.temperature, data.top_p);
                 console.log('showGemini:', data.showGemini);
-                console.log('showOpenAI:', data.showOpenAI);
-                console.log('showGpt4Turbo:', data.showGpt4Turbo);
+                console.log('showGpt:', data.showGpt);
+                console.log('showGptTurbo:', data.showGptTurbo);
                 if (data.temperature !== undefined) {
                     setTemperature(data.temperature);
                 }
@@ -565,8 +565,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isOpenAI !== undefined) {
                     setIsOpenAI(data.isOpenAI);
                 }
-                if (data.isGpto1Mini !== undefined) {
-                    setIsGpto1Mini(data.isGpto1Mini);
+                if (data.isoMini !== undefined) {
+                    setIsoMini(data.isoMini);
                 }
                 if (data.iso1 !== undefined) {
                     setIso1(data.iso1);
@@ -583,11 +583,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isMistral !== undefined) {
                     setIsMistral(data.isMistral);
                 }
-                if (data.isGpt4Turbo !== undefined) {
-                    setIsGpt4Turbo(data.isGpt4Turbo);
+                if (data.isGptTurbo !== undefined) {
+                    setIsGptTurbo(data.isGptTurbo);
                 }
-                if (data.isGpt4oMini !== undefined) {
-                    setIsGpt4oMini(data.isGpt4oMini);
+                if (data.isGptMini !== undefined) {
+                    setIsGptMini(data.isGptMini);
                 }
                 if (data.isGeminiSearch !== undefined) {
                     setIsGeminiSearch(data.isGeminiSearch);
@@ -616,11 +616,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showGemini !== undefined) {
                     setShowGemini(data.showGemini);
                 }
-                if (data.showOpenAI !== undefined) {
-                    setShowOpenAI(data.showOpenAI);
+                if (data.showGpt !== undefined) {
+                    setshowGpt(data.showGpt);
                 }
-                if (data.showGpt4Turbo !== undefined) {
-                    setShowGpt4Turbo(data.showGpt4Turbo);
+                if (data.showGptTurbo !== undefined) {
+                    setShowGptTurbo(data.showGptTurbo);
                 }
                 if (data.showMistral !== undefined) {
                     setShowMistral(data.showMistral);
@@ -631,8 +631,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showPerplexity !== undefined) {
                     setShowPerplexity(data.showPerplexity);
                 }
-                if (data.showGpt4oMini !== undefined) {
-                    setShowGpt4oMini(data.showGpt4oMini);
+                if (data.showGptMini !== undefined) {
+                    setShowGptMini(data.showGptMini);
                 }
                 if (data.showGeminiSearch !== undefined) {
                     console.log('Setting showGeminiSearch:', data.showGeminiSearch);
@@ -647,11 +647,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showLlama !== undefined) {
                     setShowLlama(data.showLlama);
                 }
-                if (data.showo1 !== undefined) {
-                    setShowo1(data.showo1);
+                if (data.showo !== undefined) {
+                    setshowo(data.showo);
                 }
-                if (data.showo1Mini !== undefined) {
-                    setShowo1Mini(data.showo1Mini);
+                if (data.showoMini !== undefined) {
+                    setshowoMini(data.showoMini);
                 }
                 if (data.showClaudeHaiku !== undefined) {
                     setShowClaudeHaiku(data.showClaudeHaiku);
@@ -668,8 +668,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelGroq !== undefined) {
                     setLabelGroq(data.labelGroq);
                 }
-                if (data.labelOpenAI !== undefined) {
-                    setLabelOpenAI(data.labelOpenAI);
+                if (data.labelGpt !== undefined) {
+                    setLabelGpt(data.labelGpt);
                 }
                 if (data.labelAnthropic !== undefined) {
                     setLabelAnthropic(data.labelAnthropic);
@@ -677,8 +677,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelGemini !== undefined) {
                     setLabelGemini(data.labelGemini);
                 }
-                if (data.labelGpto1Mini !== undefined) {
-                    setLabelGpto1Mini(data.labelGpto1Mini);
+                if (data.labeloMini !== undefined) {
+                    setLabeloMini(data.labeloMini);
                 }
                 if (data.labelMistral !== undefined) {
                     setLabelMistral(data.labelMistral);
@@ -686,8 +686,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelLlama !== undefined) {
                     setLabelLlama(data.labelLlama);
                 }
-                if (data.labelGpt4Turbo !== undefined) {
-                    setLabelGpt4Turbo(data.labelGpt4Turbo);
+                if (data.labelGptTurbo !== undefined) {
+                    setLabelGptTurbo(data.labelGptTurbo);
                 }
                 if (data.labelGeminiSearch !== undefined) {
                     setLabelGeminiSearch(data.labelGeminiSearch);
@@ -695,11 +695,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelGeminiFlash !== undefined) {
                     setLabelGeminiFlash(data.labelGeminiFlash);
                 }
-                if (data.labelGpt4oMini !== undefined) {
-                    setLabelGpt4oMini(data.labelGpt4oMini);
+                if (data.labelGptMini !== undefined) {
+                    setLabelGptMini(data.labelGptMini);
                 }
-                if (data.labelo1 !== undefined) {
-                    setLabelo1(data.labelo1);
+                if (data.labelo !== undefined) {
+                    setLabelo(data.labelo);
                 }
                 if (data.labelPerplexityFast !== undefined) {
                     setLabelPerplexityFast(data.labelPerplexityFast);
@@ -1036,7 +1036,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsGeneratingGemini(true);
         youtubePromptInput = firestoreResponseData + youtubeTitlePrompt;
         youtubeSelected = true;
-        await callAPI(modelo1, 'youtubeTitle');
+        await callAPI(modelo, 'youtubeTitle');
         console.log('youtube Title Gen and Upload generatedDocID:', generatedDocID);
         const youtubeTitledocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
         const youtubeTitledocSnap = await getDoc(youtubeTitledocRef);
@@ -1052,7 +1052,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             link.click();
         }
         youtubeDescriptionPromptInput = firestoreResponseData + youtubeDescriptionPrompt;
-        await callAPI(modelo1, 'youtubeDescription');
+        await callAPI(modelo, 'youtubeDescription');
         console.log('youtube Description Gen and Upload generatedDocID:', generatedDocID);
         const youtubeDescrdocRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
         const youtubeDescrdocSnap = await getDoc(youtubeDescrdocRef);
@@ -1242,7 +1242,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isGpto1Mini && !iso1 && !isLlama && !isMistral && !isGpt4Turbo && !isGpt4oMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek) {
             alert('Please select at least one model.');
             return;
         }
@@ -1272,19 +1272,19 @@ const GenAIApp = ({ sourceImageInformation }) => {
             setIsGeneratingGemini(true); // Set generating state to true
             callAPI(modelGemini);
         }
-        if (isOpenAI && showOpenAI) {
+        if (isOpenAI && showGpt) {
             setIsGenerating(true); // Set generating state to true
-            callAPI(modelOpenAI);
+            callAPI(modelGpt);
         }
 
-        if (isGpto1Mini && showo1Mini) {
+        if (isoMini && showoMini) {
             setIsGeneratingo1Mini(true); // Set generating state to true
-            callAPI(modelGpto1Mini);
+            callAPI(modeloMini);
         }
 
-        if (iso1 && showo1) {
+        if (iso1 && showo) {
             setIsGeneratingo1(true); // Set generating state to true
-            callAPI(modelo1);
+            callAPI(modelo);
         }
 
         if (isLlama && showLlama) {
@@ -1297,9 +1297,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelMistral);
         }
 
-        if (isGpt4oMini && showGpt4oMini) {
-            setIsGeneratingGpt4oMini(true); // Set generating state to true
-            callAPI(modelGpt4oMini);
+        if (isGptMini && showGptMini) {
+            setIsGeneratingGptMini(true); // Set generating state to true
+            callAPI(modelGptMini);
         }
 
         if (isGeminiSearch && showGeminiSearch) {
@@ -1312,9 +1312,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelGeminiFlash);
         }
 
-        if (isGpt4Turbo && showGpt4Turbo) {
-            setIsGeneratingGpt4Turbo(true); // Set generating state to true
-            callAPI(modelGpt4Turbo);
+        if (isGptTurbo && showGptTurbo) {
+            setIsGeneratingGptTurbo(true); // Set generating state to true
+            callAPI(modelGptTurbo);
         }
 
         if (isPerplexityFast && showPerplexityFast) {
@@ -1361,10 +1361,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     isOpenAI,
                     isAnthropic,
                     isGemini,
-                    isGpto1Mini,
+                    isoMini,
                     isLlama,
                     isMistral,
-                    isGpt4Turbo,
+                    isGptTurbo,
                     isGeminiSearch,
                     isGeminiFlash,
                     isPerplexityFast,
@@ -1384,19 +1384,19 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     voiceName,
                     chunk_size,
                     silence_break,
-                    isGpt4oMini,
+                    isGptMini,
                     labelGroq,
-                    labelOpenAI,
+                    labelGpt,
                     labelAnthropic,
                     labelGemini,
-                    labelGpto1Mini,
+                    labeloMini,
                     labelLlama,
                     labelMistral,
-                    labelGpt4Turbo,
+                    labelGptTurbo,
                     labelGeminiSearch,
                     labelGeminiFlash,
-                    labelGpt4oMini,
-                    labelo1,
+                    labelGptMini,
+                    labelo,
                     labelPerplexityFast,
                     labelPerplexity,
                     labelCodestral,
@@ -1417,10 +1417,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         isOpenAI,
                         isAnthropic,
                         isGemini,
-                        isGpto1Mini,
+                        isoMini,
                         isLlama,
                         isMistral,
-                        isGpt4Turbo,
+                        isGptTurbo,
                         isGeminiSearch,
                         isGeminiFlash,
                         isPerplexityFast,
@@ -1440,19 +1440,19 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         voiceName,
                         chunk_size,
                         silence_break,
-                        isGpt4oMini,
+                        isGptMini,
                         labelGroq,
-                        labelOpenAI,
+                        labelGpt,
                         labelAnthropic,
                         labelGemini,
-                        labelGpto1Mini,
+                        labeloMini,
                         labelLlama,
                         labelMistral,
-                        labelGpt4Turbo,
+                        labelGptTurbo,
                         labelGeminiSearch,
                         labelGeminiFlash,
-                        labelGpt4oMini,
-                        labelo1,
+                        labelGptMini,
+                        labelo,
                         labelPerplexityFast,
                         labelPerplexity,
                         labelCodestral,
@@ -1592,7 +1592,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             setIsAISearch(false);
             console.log('Fetching data after generating content');
             fetchData(userID);
-            if (selectedModel === modelOpenAI) {
+            if (selectedModel === modelGpt) {
                 setIsGenerating(false);
             }
             if (selectedModel === modelAnthropic) {
@@ -1601,10 +1601,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelGemini) {
                 setIsGeneratingGemini(false);
             }
-            if (selectedModel === modelGpto1Mini) {
+            if (selectedModel === modeloMini) {
                 setIsGeneratingo1Mini(false);
             }
-            if (selectedModel === modelo1) {
+            if (selectedModel === modelo) {
                 setIsGeneratingo1(false);
             }
             if (selectedModel === modelImageDallE3) {
@@ -1616,11 +1616,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelLlama) {
                 setIsGeneratingLlama(false);
             }
-            if (selectedModel === modelGpt4Turbo) {
-                setIsGeneratingGpt4Turbo(false);
+            if (selectedModel === modelGptTurbo) {
+                setIsGeneratingGptTurbo(false);
             }
-            if (selectedModel === modelGpt4oMini) {
-                setIsGeneratingGpt4oMini(false);
+            if (selectedModel === modelGptMini) {
+                setIsGeneratingGptMini(false);
             }
             if (selectedModel === modelGeminiSearch) {
                 setIsGeneratingGeminiSearch(false);
@@ -1746,12 +1746,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsOpenAI(status);
         setIsAnthropic(status);
         setIsGemini(status);
-        setIsGpto1Mini(status);
+        setIsoMini(status);
         setIso1(status);
         setIsLlama(status);
         setIsMistral(status);
-        setIsGpt4Turbo(status);
-        setIsGpt4oMini(status);
+        setIsGptTurbo(status);
+        setIsGptMini(status);
         setIsGeminiSearch(status);
         setIsGeminiFlash(status);
         setIsPerplexityFast(status);
@@ -2146,8 +2146,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
         // Append the prompt to promptInput
         lyricsInput = message + lyricsPrompt;
         await callAPI(modelGemini, 'lyrics');
-        await callAPI(modelo1, 'lyrics');
-        await callAPI(modelGpto1Mini, 'lyrics');
+        await callAPI(modelo, 'lyrics');
+        await callAPI(modeloMini, 'lyrics');
         updateConfiguration();
         setIsLyrics(false);
     };
@@ -2177,10 +2177,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
                         </button>
                     )}
-                    {showOpenAI && (
+                    {showGpt && (
                         <button className={isOpenAI ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
-                            <label className={isGenerating ? 'flashing' : ''}>{labelOpenAI}</label>
+                            <label className={isGenerating ? 'flashing' : ''}>{labelGpt}</label>
                         </button>
                     )}
                     {showAnthropic && (
@@ -2195,10 +2195,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingGemini ? 'flashing' : ''}>{labelGemini}</label>
                         </button>
                     )}
-                    {showo1Mini && (
-                        <button className={isGpto1Mini ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGpto1Mini, !isGpto1Mini)}>
-                            <label className={isGeneratingo1Mini ? 'flashing' : ''}>{labelGpto1Mini}</label>
+                    {showoMini && (
+                        <button className={isoMini ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsoMini, !isoMini)}>
+                            <label className={isGeneratingo1Mini ? 'flashing' : ''}>{labeloMini}</label>
                         </button>
                     )}
                     {showMistral && (
@@ -2213,10 +2213,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingLlama ? 'flashing' : ''}>{labelLlama}</label>
                         </button>
                     )}
-                    {showGpt4Turbo && (
-                        <button className={isGpt4Turbo ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGpt4Turbo, !isGpt4Turbo)}>
-                            <label className={isGeneratingGpt4Turbo ? 'flashing' : ''}>{labelGpt4Turbo}</label>
+                    {showGptTurbo && (
+                        <button className={isGptTurbo ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGptTurbo, !isGptTurbo)}>
+                            <label className={isGeneratingGptTurbo ? 'flashing' : ''}>{labelGptTurbo}</label>
                         </button>
                     )}
                     {showGeminiSearch && (
@@ -2235,16 +2235,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     )}
-                    {showGpt4oMini && (
-                        <button className={isGpt4oMini ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGpt4oMini, !isGpt4oMini)}>
-                            <label className={isGeneratingGpt4oMini ? 'flashing' : ''}>{labelGpt4oMini}</label>
+                    {showGptMini && (
+                        <button className={isGptMini ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGptMini, !isGptMini)}>
+                            <label className={isGeneratingGptMini ? 'flashing' : ''}>{labelGptMini}</label>
                         </button>
                     )}
-                    {showo1 && (
+                    {showo && (
                         <button className={iso1 ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIso1, !iso1)}>
-                            <label className={isGeneratingo1 ? 'flashing' : ''}>{labelo1}</label>
+                            <label className={isGeneratingo1 ? 'flashing' : ''}>{labelo}</label>
                         </button>
                     )}
                     {showPerplexityFast && (
@@ -2371,13 +2371,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingTTS ||
                                     isGeneratingMistral ||
                                     isGeneratingLlama ||
-                                    isGeneratingGpt4Turbo ||
+                                    isGeneratingGptTurbo ||
                                     isGeneratingGeminiSearch ||
                                     isGeneratingGeminiFlash ||
                                     isGeneratingPerplexity ||
                                     isGeneratingPerplexityFast ||
                                     isGeneratingCodeStral ||
-                                    isGeneratingGpt4oMini ||
+                                    isGeneratingGptMini ||
                                     isGeneratingClaudeHaiku ||
                                     isGeneratingSambanova ||
                                     isGeneratingGroq ||
@@ -2397,13 +2397,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingTTS ||
                                     isGeneratingMistral ||
                                     isGeneratingLlama ||
-                                    isGeneratingGpt4Turbo ||
+                                    isGeneratingGptTurbo ||
                                     isGeneratingGeminiSearch ||
                                     isGeneratingGeminiFlash ||
                                     isGeneratingPerplexity ||
                                     isGeneratingPerplexityFast ||
                                     isGeneratingCodeStral ||
-                                    isGeneratingGpt4oMini ||
+                                    isGeneratingGptMini ||
                                     isGeneratingClaudeHaiku ||
                                     isGeneratingSambanova ||
                                     isGeneratingGroq ||
@@ -2449,7 +2449,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setIsGeneratingYouTubeAudioTitlePrompt(true);
                                             await new Promise(resolve => setTimeout(resolve, 500));
                                             youtubeContentInput = promptInput + YouTubePrompt;
-                                            await callAPI(modelo1, 'youtube');
+                                            await callAPI(modelo, 'youtube');
                                             //console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
@@ -2512,7 +2512,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                             setIsGeneratingYouTubeBedtimeStory(true);
                                             //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
-                                            await callAPI(modelo1, 'bedtime_stories');
+                                            await callAPI(modelo, 'bedtime_stories');
                                             // console.log(' generatedDocID', generatedDocID);
                                             if (!generatedDocID || generatedDocID.length < 5) {
                                                 alert('ERROR: generatedDocID is not set.');
@@ -2847,8 +2847,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="dall-e-3">Image</option>
                     <option value="Mistral-large-2407">Mistral</option>
                     <option value="meta-llama-3.1-405b-instruct">Llama</option>
-                    <option value="gpt-4-turbo">Gpt4Turbo</option>
-                    <option value="gpt-4o-mini">Gpt4oMini</option>
+                    <option value="gpt-4-turbo">GptTurbo</option>
+                    <option value="gpt-4o-mini">GptMini</option>
                     <option value="gemini-search">GeminiSearch</option>
                     <option value="gemini-flash">Gemini Flash</option>
                     <option value="perplexity-fast">PerplexityFast</option>
