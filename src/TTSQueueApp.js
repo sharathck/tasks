@@ -43,7 +43,6 @@ function TTSQueueApp() {
     const [showLiveTTS, setShowLiveTTS] = useState(false);
 
     const isiPhone = /iPhone/i.test(navigator.userAgent);
-    console.log(isiPhone);
     const todoCollection = collection(db, fireBaseTTSCollection)
 
     useEffect(() => {

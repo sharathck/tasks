@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaSpinner, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper } from 'react-icons/fa';
+import { FaPlus, FaSpinner, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper, FaSync } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -83,6 +83,7 @@ function App() {
   const audioPlayerRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(isPaused);
+  const [isAddingTask, setIsAddingTask] = useState(false);
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
@@ -413,42 +414,47 @@ function App() {
     setShowAudioPlayer(false);
     e.preventDefault();
     if (newTask.trim() !== '') {
-      let taskDesc = newTask.trim();
-      const taskParts = newTask.trim().split(' ');
-      let recurrence = taskParts.pop().toLowerCase();
-      recurrence = recurrence.toLowerCase();
-      const dueDate = new Date();
-      const trueRecurrences = ['daily', 'weekly', 'monthly', 'yearly'];
-      if (!trueRecurrences.includes(recurrence)) {
-        recurrence = 'ad-hoc';
-      } else {
-        taskDesc = taskParts.join(' ');
-      }
-      let newTaskDesc = taskDesc.split(' ');
-      const dayOfWeek = newTaskDesc.pop().toLowerCase();
-      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-      if (daysOfWeek.includes(dayOfWeek)) {
-        taskDesc = newTaskDesc.join(' ');
-        recurrence = 'weekly';
-        const currentDate = new Date();
-        let dayIndex = daysOfWeek.indexOf(dayOfWeek);
-        let dayDiff = dayIndex - currentDate.getDay();
-        if (dayDiff < 0) {
-          dayDiff -= 7;
+      setIsAddingTask(true); // Disable the add button
+      try {
+        let taskDesc = newTask.trim();
+        const taskParts = newTask.trim().split(' ');
+        let recurrence = taskParts.pop().toLowerCase();
+        recurrence = recurrence.toLowerCase();
+        const dueDate = new Date();
+        const trueRecurrences = ['daily', 'weekly', 'monthly', 'yearly'];
+        if (!trueRecurrences.includes(recurrence)) {
+          recurrence = 'ad-hoc';
+        } else {
+          taskDesc = taskParts.join(' ');
         }
-        dueDate.setDate(dueDate.getDate() + dayDiff);
-      }
+        let newTaskDesc = taskDesc.split(' ');
+        const dayOfWeek = newTaskDesc.pop().toLowerCase();
+        const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        if (daysOfWeek.includes(dayOfWeek)) {
+          taskDesc = newTaskDesc.join(' ');
+          recurrence = 'weekly';
+          const currentDate = new Date();
+          let dayIndex = daysOfWeek.indexOf(dayOfWeek);
+          let dayDiff = dayIndex - currentDate.getDay();
+          if (dayDiff < 0) {
+            dayDiff -= 7;
+          }
+          dueDate.setDate(dueDate.getDate() + dayDiff);
+        }
 
-      await addDoc(collection(db, fireBaseTasksCollection), {
-        task: taskDesc,
-        recurrence: recurrence,
-        status: false,
-        userId: user.uid,
-        createdDate: new Date(),
-        dueDate: dueDate,
-        uemail: user.email
-      });
-      setNewTask('');
+        await addDoc(collection(db, fireBaseTasksCollection), {
+          task: taskDesc,
+          recurrence: recurrence,
+          status: false,
+          userId: user.uid,
+          createdDate: new Date(),
+          dueDate: dueDate,
+          uemail: user.email
+        });
+        setNewTask('');
+      } finally {
+        setIsAddingTask(false); // Re-enable the add button
+      }
     }
     setShowCurrent(!showCurrent);
   };
@@ -750,6 +756,10 @@ function App() {
     return text;
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   if (showGenAIApp) {
     return (
       <GenAIApp user={user} />
@@ -801,24 +811,25 @@ function App() {
           </div>
         ) : (
           <div>
-            <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
-              <FaCheckDouble />
-            </button>
-            <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
-              <FaClock />
-            </button>
             <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
             <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+            &nbsp;
             {<button className={!isLiveAudioPlaying ? 'wide_app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
               ? (<FaSpinner className="spinning" />)
               : (<FaVolumeUp />)}</button>}
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
+            &nbsp;
             <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
               <FaAlignJustify />
             </button>
+            &nbsp;
             <button className={showGenAIApp ? 'app_button_selected' : 'wide_app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
+            </button>
+            &nbsp;&nbsp;
+            <button className="app_button" onClick={handleRefresh}>
+              <FaSync />
             </button>
             {audioUrl && (
               <div>
@@ -873,7 +884,7 @@ function App() {
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
                   />
-                  <button className="app_button_addbutton" type="submit">
+                  <button className="app_button_addbutton" type="submit" disabled={isAddingTask}>
                     <FaPlus />
                   </button>
                 </form>
@@ -948,6 +959,14 @@ function App() {
                     <button className="button" onClick={showSharathTasks}>
                       {!sharedTasks ? 'Show Sharath Tasks' : 'Hide Sharath Tasks'}
                     </button>
+                    <br />
+                    <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
+              <FaCheckDouble />
+            </button>
+            <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
+              <FaClock />
+            </button>
+
                     <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                       <FaPlay />
                     </button>
