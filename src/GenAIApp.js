@@ -120,7 +120,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
     const [isGeneratingAnthropic, setIsGeneratingAnthropic] = useState(false);
-    const [isGeneratingo1Mini, setIsGeneratingo1Mini] = useState(false);
+    const [isGeneratingoMini, setisGeneratingoMini] = useState(false);
     const [isGeneratingImage_Dall_e_3, setIsGeneratingImage_Dall_e_3] = useState(false);
     const [isGptMini, setIsGptMini] = useState(false);
     const [isGeneratingGptMini, setIsGeneratingGptMini] = useState(false);
@@ -141,7 +141,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
-    const [isGeneratingo1, setIsGeneratingo1] = useState(false);
+    const [isGeneratingo, setisGeneratingo] = useState(false);
     const [isGeneratingLlama, setIsGeneratingLlama] = useState(false);
     const [isGeneratingGptTurbo, setIsGeneratingGptTurbo] = useState(false);
     const [isGeneratingPerplexity, setIsGeneratingPerplexity] = useState(false);
@@ -332,6 +332,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelDeepSeek, setModelDeepSeek] = useState('DeepSeek');
     const [labelDeepSeek, setLabelDeepSeek] = useState('DS');
 
+    // Add new state variables with other model states
+    const [isGeminiFlashFast, setIsGeminiFlashFast] = useState(false);
+    const [isGeneratingGeminiFlashFast, setIsGeneratingGeminiFlashFast] = useState(false); 
+    const [showGeminiFlashFast, setShowGeminiFlashFast] = useState(false);
+    const [modelGeminiFlashFast, setModelGeminiFlashFast] = useState('gemini-flash-fast');
+    const [labelGeminiFlashFast, setLabelGeminiFlashFast] = useState('Gemini Fast');
 
     const [youtubeTitlePrompt, setYoutubeTitlePrompt] = useState(`### Give me the best YouTube Title for the above content`);
     const [youtubeDescriptionPrompt, setYoutubeDescriptionPrompt] = useState(`#### Give me the best YouTube description for the above content, I need exactly one response and don't include any other text or URLs in the response. ----- Text from below is only prompt purpose --- YouTube description should be engaging, detailed, informative, and YouTube search engine optimized and SEO friendly, it can contain special characters, emojis, and numbers to make it more appealing and expressive. Please use the emojis, icons to make it more visually appealing.   Use relevant tags to improve the visibility and reach of your video in Youtube video Description.   Use bullet points, numbered points, lists, and paragraphs to organize Youtube video description.  Bold, italicize, underline, and highlight important information in Youtube video description.   Also, please request users to subscribe and click on bell icon for latest content at the end. `);
@@ -880,6 +886,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.modelExplain !== undefined) {
                     modelExplain = data.modelExplain;
                 }
+                if (data.isGeminiFlashFast !== undefined) {
+                    setIsGeminiFlashFast(data.isGeminiFlashFast);
+                }
+                if (data.showGeminiFlashFast !== undefined) {
+                    setShowGeminiFlashFast(data.showGeminiFlashFast);
+                }
+                if (data.labelGeminiFlashFast !== undefined) {
+                    setLabelGeminiFlashFast(data.labelGeminiFlashFast); 
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -1283,7 +1298,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast) {
             alert('Please select at least one model.');
             return;
         }
@@ -1319,12 +1334,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         if (isoMini && showoMini) {
-            setIsGeneratingo1Mini(true); // Set generating state to true
+            setisGeneratingoMini(true); // Set generating state to true
             callAPI(modeloMini);
         }
 
         if (iso1 && showo) {
-            setIsGeneratingo1(true); // Set generating state to true
+            setisGeneratingo(true); // Set generating state to true
             callAPI(modelo);
         }
 
@@ -1384,6 +1399,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
         if (isDeepSeek && showDeepSeek) {
             setIsGeneratingDeepSeek(true);
             callAPI(modelDeepSeek);
+        }
+        if (isGeminiFlashFast && showGeminiFlashFast) {
+            setIsGeneratingGeminiFlashFast(true);
+            callAPI(modelGeminiFlashFast);
         }
         updateConfiguration();
     };
@@ -1447,7 +1466,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     isCerebras,
                     labelCerebras,
                     isDeepSeek,
-                    labelDeepSeek
+                    labelDeepSeek,
+                    isGeminiFlashFast,
+                    labelGeminiFlashFast
                 });
                 return;
             }
@@ -1503,7 +1524,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         isCerebras,
                         labelCerebras,
                         isDeepSeek,
-                        labelDeepSeek
+                        labelDeepSeek,
+                        isGeminiFlashFast,
+                        labelGeminiFlashFast
                     }, { merge: true });
                 });
             }
@@ -1646,10 +1669,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 setIsGeneratingGemini(false);
             }
             if (selectedModel === modeloMini) {
-                setIsGeneratingo1Mini(false);
+                setisGeneratingoMini(false);
             }
             if (selectedModel === modelo) {
-                setIsGeneratingo1(false);
+                setisGeneratingo(false);
             }
             if (selectedModel === modelImageDallE3) {
                 setIsGeneratingImage_Dall_e_3(false);
@@ -1698,6 +1721,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             }
             if (selectedModel === modelDeepSeek) {
                 setIsGeneratingDeepSeek(false);
+            }
+            if (selectedModel === modelGeminiFlashFast) {
+                setIsGeneratingGeminiFlashFast(false);
             }
             console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
         }
@@ -1807,6 +1833,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsNova(status);
         setIsCerebras(status);
         setIsDeepSeek(status);
+        setIsGeminiFlashFast(status);
     };
 
     // Add this helper function to handle LLM model selection
@@ -2263,7 +2290,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     {showoMini && (
                         <button className={isoMini ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsoMini, !isoMini)}>
-                            <label className={isGeneratingo1Mini ? 'flashing' : ''}>{labeloMini}</label>
+                            <label className={isGeneratingoMini ? 'flashing' : ''}>{labeloMini}</label>
                         </button>
                     )}
                     {showMistral && (
@@ -2309,7 +2336,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     {showo && (
                         <button className={iso1 ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIso1, !iso1)}>
-                            <label className={isGeneratingo1 ? 'flashing' : ''}>{labelo}</label>
+                            <label className={isGeneratingo ? 'flashing' : ''}>{labelo}</label>
                         </button>
                     )}
                     {showPerplexityFast && (
@@ -2359,6 +2386,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         >
                             <label className={isGeneratingDeepSeek ? 'flashing' : ''}>
                                 {labelDeepSeek}
+                            </label>
+                        </button>
+                    )}
+                    {showGeminiFlashFast && (
+                        <button
+                            className={isGeminiFlashFast ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGeminiFlashFast, !isGeminiFlashFast)}
+                        >
+                            <label className={isGeneratingGeminiFlashFast ? 'flashing' : ''}>
+                                {labelGeminiFlashFast}
                             </label>
                         </button>
                     )}
@@ -2430,8 +2467,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGenerating ||
                                     isGeneratingGemini ||
                                     isGeneratingAnthropic ||
-                                    isGeneratingo1Mini ||
-                                    isGeneratingo1 ||
+                                    isGeneratingoMini ||
+                                    isGeneratingo ||
                                     isGeneratingImage_Dall_e_3 ||
                                     isGeneratingTTS ||
                                     isGeneratingMistral ||
@@ -2450,14 +2487,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingCerebras ||
                                     isGeneratingDeepSeek ||
                                     isExplain ||
-                                    isLyrics
+                                    isLyrics ||
+                                    isGeneratingGeminiFlashFast
                                 }
                             >
                                 {isGenerating ||
                                     isGeneratingGemini ||
                                     isGeneratingAnthropic ||
-                                    isGeneratingo1Mini ||
-                                    isGeneratingo1 ||
+                                    isGeneratingoMini ||
+                                    isGeneratingo ||
                                     isGeneratingImage_Dall_e_3 ||
                                     isGeneratingTTS ||
                                     isGeneratingMistral ||
@@ -2475,7 +2513,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
                                     isGeneratingDeepSeek ||
-                                    isExplain || isLyrics ? (
+                                    isExplain || isLyrics || isGeneratingGeminiFlashFast ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
                                     'GenAI'
@@ -2935,6 +2973,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="nova">Nova</option>
                     <option value="cerebras">Cerebras</option>
                     <option value="DeepSeek">DeepSeek</option>
+                    <option value="gemini-flash-fast">Gemini Flash Fast</option>
                 </select>
                 )}
                 {showEditPopup && (
