@@ -95,7 +95,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isAnswer, setIsAnswer] = useState(false); // New state for "Answer with Steps"
     const [isLyrics, setIsLyrics] = useState(false);
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
-    const [generateGeminiImage, setGenerateGeminiImage] = useState(false);
+    const [generateGeminiImage, setGenerateGeminiImage] = useState(true);
     const [generateDalleImage, setGenerateDalleImage] = useState(false);
     const [isGeneratingYouTubeBedtimeStory, setIsGeneratingYouTubeBedtimeStory] = useState(false);
     const [showDedicatedDownloadButton, setShowDedicatedDownloadButton] = useState(false);
@@ -334,7 +334,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
     // Add new state variables with other model states
     const [isGeminiFlashFast, setIsGeminiFlashFast] = useState(false);
-    const [isGeneratingGeminiFlashFast, setIsGeneratingGeminiFlashFast] = useState(false); 
+    const [isGeneratingGeminiFlashFast, setIsGeneratingGeminiFlashFast] = useState(false);
     const [showGeminiFlashFast, setShowGeminiFlashFast] = useState(false);
     const [modelGeminiFlashFast, setModelGeminiFlashFast] = useState('gemini-flash-fast');
     const [labelGeminiFlashFast, setLabelGeminiFlashFast] = useState('Gemini Fast');
@@ -860,7 +860,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     homeWorkTemperture = data.homeWorkTemperture;
                 }
                 if (data.homeWorkTop_p !== undefined) {
-                    homeWorkTop_p = data.homeWorkTop_p;  
+                    homeWorkTop_p = data.homeWorkTop_p;
                 }
                 if (data.quizTemperture !== undefined) {
                     quizTemperture = data.quizTemperture;
@@ -893,7 +893,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setShowGeminiFlashFast(data.showGeminiFlashFast);
                 }
                 if (data.labelGeminiFlashFast !== undefined) {
-                    setLabelGeminiFlashFast(data.labelGeminiFlashFast); 
+                    setLabelGeminiFlashFast(data.labelGeminiFlashFast);
                 }
             });
         } catch (error) {
@@ -2522,7 +2522,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         )}
                     </div>
                     )}
-                    <br />
                     <div className="button-section" data-title="Gen AI Agents">
                         {(showhomeWorkButton && !isAISearch &&
                             <>
@@ -2640,7 +2639,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         : 'Lyrics'}
                                 </button>)
                                 }
-                                                                {
+                                {
                                     (showPrint && showYouTubeButton && <button
                                         className={
                                             (isGeneratingYouTubeAudioTitlePrompt) ?
@@ -2731,71 +2730,50 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         YouTube (Music)
                                     </label>
                                 </button>
-                                <button
-                                    className={
-                                        (isGeneratingImages) ?
-                                            'button_selected' : 'musicButton'
-                                    }
-                                    onClick={async () => {
-                                        if (promptInput === undefined || promptInput.length < 5) {
-                                            alert('ERROR: prompt is blank.');
-                                            return;
-                                        }
-                                        setTemperature(1);
-                                        setTop_p(1);
-                                        // Need to wait for state updates to be applied
-                                        await new Promise(resolve => setTimeout(resolve, 500));
-
-                                        setIsGeneratingImages(true);
-                                        try {
-                                            const parts = promptInput.match(/\[.*?\]/g)?.map(match => match.slice(1, -1)) || [];
-                                            for (const part of parts) {
-                                                console.log('image prompt part:', part);
-                                                imageGenerationPromptInput = part;
-                                                setIsGeneratingImage_Dall_e_3(true);
-                                                if (generateGeminiImage === true) {
-                                                    await callAPI(modelGeminiImage, 'image_ai_agent');
-                                                }
-                                                if (generateDalleImage === true) {
-                                                    await callAPI(modelImageDallE3, 'image_ai_agent');
-                                                }
-                                            }
-                                            setIsGeneratingImages(false);
-                                        }
-                                        catch (error) {
-                                            console.error("Error fetching questions from Firestore:", error);
-                                            return null;
-                                        }
-                                    }}
-                                >
-                                    <label className={
-                                        (isGeneratingImages) ?
-                                            'flashing' : ''
-                                    }>
-                                        Generate Images
-                                    </label>
-                                </button>
                             </>
                         )}
                         {showAISearchButton && !ishomeWork && !isQuiz && (
                             <button
                                 onClick={handleAISearch}
-                                className="generateButton"
-                                style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px', background: '#4285f4' }}
+                                className="searchButton"
                             >
                                 {isAISearch ? (<FaSpinner className="spinning" />) : (genai_search_label || 'GenAI Search')}
                             </button>
                         )}
                         {showImageDallE3 &&
                             <button className="imageButton"
-                                onClick={() => handleDall_e_3Change()}>
-                                <label className={isGeneratingImage_Dall_e_3 ? 'flashing' : ''}>
+                                onClick={async () => {
+                                    if (promptInput === undefined || promptInput.length < 5) {
+                                        alert('ERROR: prompt is blank.');
+                                        return;
+                                    }
+                                    setTemperature(1);
+                                    setTop_p(1);
+                                    // Need to wait for state updates to be applied
+                                    await new Promise(resolve => setTimeout(resolve, 500));
+                                    setIsGeneratingImages(true);
+                                    try {
+                                        imageGenerationPromptInput = promptInput;
+                                            if (generateDalleImage === true) {
+                                                await callAPI(modelImageDallE3, 'image_ai_agent');
+                                            }                                       
+                                            if (generateGeminiImage === true) {
+                                                await callAPI(modelGeminiImage, 'image_ai_agent');
+                                            }
+                                        setIsGeneratingImages(false);
+                                    }
+                                    catch (error) {
+                                        console.error("Error fetching questions from Firestore:", error);
+                                        setIsGeneratingImages(false);
+                                        return null;
+                                    }
+                                }}>
+                                <label className={isGeneratingImages ? 'flashing' : ''}>
                                     {genai_image_label || 'GenAI Image'}
                                 </label>
                             </button>
                         }
                     </div>
-                    <br />
                     {showPrint && (
                         <div className="button-section" data-title="Gen AI Audio - Text to Speech">
                             {showVoiceSelect && (
@@ -2859,6 +2837,26 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             }
                         </div>
                     )}
+                    <div className="button-section" data-title="Practice Questions - Explanation - All Grades">
+                        &nbsp;&nbsp;
+                        <button
+                            className="publicHomeWork"
+                            onClick={() => window.open('https://genai-all.com', '_blank')}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+                        >
+                            Public-HomeWork-All-Grades
+                        </button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button
+                            className="privateHomeWork"
+                            onClick={() => window.open('https://sharathck.github.io/edugenai', '_blank')}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+                        >
+                            Personal-HomeWork-All-Grades
+                        </button>
+                    </div>
                     {autoPrompt && selectedPrompt && showSourceDocument && (
                         <div style={{ marginTop: '10px', fontSize: '16px' }}>
                             Source document(s): <button
@@ -2869,7 +2867,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 className="sourceDocumentButton"
                             >
                                 {selectedPrompt}
-
                             </button>
                         </div>
                     )}
