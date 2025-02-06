@@ -71,6 +71,8 @@ let bedtime_stories_content_input = '';
 let story_teller_prompt = '';
 let explainInput = '';
 let explainPrompt = '';
+let answerInput = ''; // New variable for answer input
+let answerPrompt = ''; // New variable for answer prompt
 let lyricsInput = '';
 let lyricsPrompt = '';
 let homeWorkTemperture = 0.1;
@@ -83,12 +85,14 @@ let modelQuiz = 'o-mini';
 let modelQuizChoices = 'o-mini';
 let modelHomeWork = 'o-mini';
 let modelExplain = 'o-mini';
+let modelAnswer = 'o-mini'; // New variable for answer model
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
     const [isGeneratingImages, setIsGeneratingImages] = useState(false);
     const [isGeneratingYouTubeMusic, setIsGeneratingYouTubeMusic] = useState(false);
     const [isExplain, setIsExplain] = useState(false);
+    const [isAnswer, setIsAnswer] = useState(false); // New state for "Answer with Steps"
     const [isLyrics, setIsLyrics] = useState(false);
     const [fetchFromPublic, setFetchFromPublic] = useState(false);
     const [generateGeminiImage, setGenerateGeminiImage] = useState(false);
@@ -1562,6 +1566,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'lyrics':
                     promptText = lyricsInput;
                     break;
+                case 'answer':
+                    promptText = answerInput;
+                    break;
                 default:
                     if (autoPrompt) {
                         await searchPrompts();
@@ -2142,6 +2149,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'lyrics':
                         lyricsPrompt = data.fullText;
                         break;
+                    case 'answer':
+                        answerPrompt = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2167,6 +2177,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
         await callAPI(modelExplain, 'explain');
         updateConfiguration();
         setIsExplain(false);
+    };
+
+    // New handler function for "Answer with Steps"
+    const handleAnswer = async (message) => {
+        if (!message.trim()) {
+            alert('Please enter content to answer.');
+            return;
+        }
+        setIsAnswer(true);
+        setTemperature(0.2);
+        setTop_p(0.3);
+        // Need to wait for state updates to be applied
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // Append the prompt to promptInput
+        answerInput = message + answerPrompt;
+        await callAPI(modelAnswer, 'answer');
+        updateConfiguration();
+        setIsAnswer(false);
     };
 
     // Add handler function after handlehomeWork
@@ -2494,6 +2522,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     {isQuizMultipleChoice
                                         ? (<FaSpinner className="spinning" />)
                                         : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
+                                </button>
+                                <button
+                                    onClick={() => handleAnswer(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isAnswer
+                                        ? (<FaSpinner className="spinning" />)
+                                        : ('Answer with Steps')}
                                 </button>
                                 &nbsp;&nbsp;&nbsp;
                                 {
