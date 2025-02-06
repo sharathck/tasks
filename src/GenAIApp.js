@@ -2498,6 +2498,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         : ('Explain with Examples')}
                                 </button>
                                 <button
+                                    onClick={() => handleAnswer(promptInput)}
+                                    className="practiceButton"
+                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                                >
+                                    {isAnswer
+                                        ? (<FaSpinner className="spinning" />)
+                                        : ('Answer with Steps')}
+                                </button>
+                                <button
                                     onClick={() => handlehomeWork(promptInput)}
                                     className="practiceButton"
                                 >
@@ -2522,15 +2531,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     {isQuizMultipleChoice
                                         ? (<FaSpinner className="spinning" />)
                                         : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
-                                </button>
-                                <button
-                                    onClick={() => handleAnswer(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
-                                >
-                                    {isAnswer
-                                        ? (<FaSpinner className="spinning" />)
-                                        : ('Answer with Steps')}
                                 </button>
                                 &nbsp;&nbsp;&nbsp;
                                 {
