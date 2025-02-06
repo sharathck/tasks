@@ -2727,7 +2727,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         (isGeneratingYouTubeMusic) ?
                                             'flashing' : ''
                                     }>
-                                        YouTube (Music)
+                                        Title/Audio/Images
                                     </label>
                                 </button>
                             </>
