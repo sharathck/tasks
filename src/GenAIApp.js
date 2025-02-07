@@ -37,10 +37,13 @@ let promptSuggestion = 'NA';
 let autoPromptInput = '';
 let youtubePromptInput = '';
 let youtubeDescriptionPromptInput = '';
+let googleSearchPromptText = '';
 let googleSearchPromptInput = '';
 let youtubeSelected = false;
 let imageGenerationPromptInput = '';
 let stories_image_generation_prompt = '';
+let usaNewsPrompt = '';
+let techNewsPrompt = '';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -67,6 +70,7 @@ let genai_tasks_label = '';
 let genai_search_label = '';
 let genai_audio_label = '';
 let genai_autoprompt_label = '';
+let latest_info_label = '';
 let bedtime_stories_content_input = '';
 let story_teller_prompt = '';
 let explainInput = '';
@@ -86,6 +90,8 @@ let modelQuizChoices = 'o-mini';
 let modelHomeWork = 'o-mini';
 let modelExplain = 'o-mini';
 let modelAnswer = 'o-mini'; // New variable for answer model
+let newsSource = 'perplexity';
+let searchSource = 'perplexity';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -1580,6 +1586,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'google-search':
                     promptText = googleSearchPromptInput;
                     break;
+                case 'usa-news':
+                    promptText = usaNewsPrompt;
+                    break;
+                case 'tech-news':
+                    promptText = techNewsPrompt;
+                    break;
                 case 'quiz_with_choices':
                     promptText = quizMultipleChoicesInput;
                     break;
@@ -2044,34 +2056,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsQuizMultipleChoice(false);
     };
 
-
-    // Add handler for AI Search
-    const handleAISearch = async () => {
-        if (!promptInput.trim()) {
-            alert('Please enter a prompt.');
-            return;
-        }
-        setIsAISearch(true);
-        // Ensure genaiPrompts is populated
-        if (genaiPrompts.length === 0) {
-            await fetchPrompts(uid); // Fetch prompts if not already loaded
-        }
-
-        // Correct the tag name and add null check
-        const prompt = genaiPrompts.find(prompt => prompt.tag === 'Search-GenAI');
-        let googleSearchPrompt = prompt ? prompt.fullText : '';
-
-        if (googleSearchPrompt === '') {
-            googleSearchPrompt = '  ####  prompt starts from here #####  search for current, up-to-date and latest news and information about above topic(s) from google search. --Provide response with maximum details possible in response. Use all max tokens available to the max in response.';
-        }
-        // Append the search prompt to promptInput
-        googleSearchPromptInput = promptInput + googleSearchPrompt;
-        setIsGeneratingGeminiSearch(true);
-        // Call the API with gemini-search model
-        await callAPI(modelGeminiSearch, 'google-search');
-        updateConfiguration();
-    };
-
     const fetchTexts = async () => {
         let q;
         try {
@@ -2178,6 +2162,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         break;
                     case 'answer':
                         answerPrompt = data.fullText;
+                        break;
+                    case 'latest_info_label':
+                        latest_info_label = data.fullText;
+                        break;
+                    case 'Search-GenAI':
+                        googleSearchPromptText = data.fullText;
+                        break;
+                    case 'USA_News':
+                        usaNewsPrompt = data.fullText;
+                        break;
+                    case 'Tech_News':
+                        techNewsPrompt = data.fullText;
+                        break;
+                    case 'newsSource':
+                        newsSource = data.fullText;
+                        break;
+                    case 'searchSource':
+                        searchSource = data.fullText;
                         break;
                     default:
                         break;
@@ -2732,14 +2734,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 </button>
                             </>
                         )}
-                        {showAISearchButton && !ishomeWork && !isQuiz && (
-                            <button
-                                onClick={handleAISearch}
-                                className="searchButton"
-                            >
-                                {isAISearch ? (<FaSpinner className="spinning" />) : (genai_search_label || 'GenAI Search')}
-                            </button>
-                        )}
                         {showImageDallE3 &&
                             <button className="imageButton"
                                 onClick={async () => {
@@ -2769,10 +2763,123 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 }}>
                                 <label className={isGeneratingImages ? 'flashing' : ''}>
-                                    {genai_image_label || 'GenAI Image'}
+                                    {genai_image_label || 'Latest Info'}
                                 </label>
                             </button>
                         }
+                        <button className="searchButton"
+                            onClick={async () => {
+                                if (promptInput === undefined || promptInput.length < 5) {
+                                    alert('ERROR: prompt is blank.');
+                                    return;
+                                }
+                                setTemperature(0.2);
+                                setTop_p(0.2);
+                                // Need to wait for state updates to be applied
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                googleSearchPromptInput = promptInput + googleSearchPromptText;
+                                setIsGeneratingGeminiSearch(true);
+                                setIsGeneratingPerplexity(true);
+                                try {
+                                    // Call Gemini Search first
+                                    if (searchSource === 'gemini' || searchSource === 'both') {
+                                        await callAPI(modelGeminiSearch, 'google-search');
+                                    }
+                                    if (searchSource !== 'gemini') {
+                                    // Then call Perplexity
+                                    await callAPI(modelPerplexity, 'google-search');
+                                    }
+                                }
+                                catch (error) {
+                                    console.error("Error fetching data:", error);
+                                }
+                                finally {
+                                    setIsGeneratingGeminiSearch(false); 
+                                    setIsGeneratingPerplexity(false);
+                                }
+                                }}>
+                                <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                    {latest_info_label || 'Latest Info'}
+                                </label>
+                            </button>
+                        
+                                <button className="newsButton"
+                                    onClick={async () => {
+                                        setTemperature(0.2);
+                                        setTop_p(0.2);
+                                        setPromptInput(usaNewsPrompt);
+                                        // Need to wait for state updates to be applied
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        try {
+                                            if (newsSource === 'perplexity') {
+                                                setIsGeneratingPerplexity(true);
+                                                await callAPI(modelPerplexity, 'usa-news');
+                                            }
+                                            else {
+                                                setIsGeneratingGeminiSearch(true);
+                                                await callAPI(modelGeminiSearch, 'usa-news');
+                                            }
+                                            // Get the generated news from Firestore
+                                            const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                            const docSnap = await getDoc(docRef);
+                                            if (docSnap.exists()) {
+                                                const newsContent = docSnap.data().answer;
+                                                // Generate audio for the news
+                                                await callTTSAPI(newsContent, process.env.REACT_APP_TTS_SSML_API_URL);
+                                            }
+                                        }
+                                        catch (error) {
+                                            console.error("Error fetching news:", error);
+                                            alert('Error generating news content');
+                                        }
+                                        finally {
+                                            setIsGeneratingPerplexity(false);
+                                            setIsGeneratingGeminiSearch(false);
+                                        }
+                                    }}>
+                                    <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                        USA News
+                                    </label>
+                                </button>
+                           
+                                <button className="techNewsButton"
+                                    onClick={async () => {
+                                        setTemperature(0.2);
+                                        setTop_p(0.2);
+                                        setPromptInput(techNewsPrompt);
+                                        // Need to wait for state updates to be applied
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        try {
+                                            if (newsSource === 'perplexity') {
+                                                setIsGeneratingPerplexity(true);
+                                                await callAPI(modelPerplexity, 'tech-news');
+                                            }
+                                            else {
+                                                setIsGeneratingGeminiSearch(true);
+                                                await callAPI(modelGeminiSearch, 'tech-news');
+                                            }
+                                            // Get the generated news from Firestore
+                                            const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                            const docSnap = await getDoc(docRef);
+                                            if (docSnap.exists()) {
+                                                const newsContent = docSnap.data().answer;
+                                                // Generate audio for the news
+                                                await callTTSAPI(newsContent, process.env.REACT_APP_TTS_SSML_API_URL);
+                                            }
+                                        }
+                                        catch (error) {
+                                            console.error("Error fetching news:", error);
+                                            alert('Error generating news content');
+                                        }
+                                        finally {
+                                            setIsGeneratingPerplexity(false);
+                                            setIsGeneratingGeminiSearch(false);
+                                        }
+                                    }}>
+                                    <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                        Tech News
+                                    </label>
+                                </button>
                     </div>
                     {showPrint && (
                         <div className="button-section" data-title="Gen AI Audio - Text to Speech">
