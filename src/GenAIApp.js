@@ -44,6 +44,7 @@ let imageGenerationPromptInput = '';
 let stories_image_generation_prompt = '';
 let usaNewsPrompt = '';
 let techNewsPrompt = '';
+let reviewsPromptInput = '';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -92,6 +93,7 @@ let modelExplain = 'o-mini';
 let modelAnswer = 'o-mini'; // New variable for answer model
 let newsSource = 'perplexity';
 let searchSource = 'perplexity';
+let reviewsPrompt = '';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -1586,6 +1588,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 case 'google-search':
                     promptText = googleSearchPromptInput;
                     break;
+                case 'reviews':
+                    promptText = reviewsPromptInput;
+                    break;
                 case 'usa-news':
                     promptText = usaNewsPrompt;
                     break;
@@ -2180,6 +2185,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         break;
                     case 'searchSource':
                         searchSource = data.fullText;
+                        break;
+                    case 'reviews':
+                        reviewsPrompt = data.fullText;
                         break;
                     default:
                         break;
@@ -2878,6 +2886,44 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }}>
                                     <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
                                         Tech News
+                                    </label>
+                                </button>
+                                <button className="reviewsButton"
+                                    onClick={async () => {
+                                        setTemperature(0.2);
+                                        setTop_p(0.2);
+                                        reviewsPromptInput = promptInput + reviewsPrompt;
+                                        // Need to wait for state updates to be applied
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        try {
+                                            if (newsSource === 'perplexity') {
+                                                setIsGeneratingPerplexity(true);
+                                                await callAPI(modelPerplexity, 'reviews');
+                                            }
+                                            else {
+                                                setIsGeneratingGeminiSearch(true);
+                                                await callAPI(modelGeminiSearch, 'reviews');
+                                            }
+                                            // Get the generated reviews from Firestore
+                                            const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                            const docSnap = await getDoc(docRef);
+                                            if (docSnap.exists()) {
+                                                const reviewsContent = docSnap.data().answer;
+                                                // Generate audio for the reviews
+                                                await callTTSAPI(reviewsContent, process.env.REACT_APP_TTS_SSML_API_URL);
+                                            }
+                                        }
+                                        catch (error) {
+                                            console.error("Error fetching reviews:", error);
+                                            alert('Error generating reviews content');
+                                        }
+                                        finally {
+                                            setIsGeneratingPerplexity(false);
+                                            setIsGeneratingGeminiSearch(false);
+                                        }
+                                    }}>
+                                    <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                        Reviews
                                     </label>
                                 </button>
                     </div>

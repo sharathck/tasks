@@ -647,3 +647,14 @@ form {
   color: #010a11;
   font-weight: bold;
 }
+
+.reviewsButton {
+  background-color: rgb(65, 139, 139);
+  border: 2px solid black;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 12px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 2px 2px;
+  font-size: 16px;
+}
