@@ -123,6 +123,17 @@
   padding: 6px 6px;
   font-size: 24px; /* make the button text extremely small */
 }
+.fastGenerateButton
+{
+  background-color: rgba(114, 77, 28, 0.825);
+  border: 2px solid black;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 12px;
+  box-shadow: 6px 6px 8px rgba(0, 0, 0, 0.8);
+  padding: 3px 3px;
+  font-size: 18px; /* make the button text extremely small */
+}
 
 .practiceButton
 {

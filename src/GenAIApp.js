@@ -9,7 +9,7 @@ import {
     signOut,
 } from 'firebase/auth';
 import App from './App';
-import { auth, db } from './Firebase';
+import { auth, db, vertexAI } from './Firebase';
 import VoiceSelect from './VoiceSelect';
 import Homework from "./Homework";
 import MarkdownIt from 'markdown-it';
@@ -18,6 +18,7 @@ import MdEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
 import youtubeIcon from './youtube.png';
 import tasksIcon from './todo.jpg';
+import { getGenerativeModel } from "firebase/vertexai";
 
 const speechKey = process.env.REACT_APP_AZURE_SPEECH_API_KEY;
 const serviceRegion = 'eastus';
@@ -45,6 +46,7 @@ let stories_image_generation_prompt = '';
 let usaNewsPrompt = '';
 let techNewsPrompt = '';
 let reviewsPromptInput = '';
+let firebaseAPI = false;
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -94,6 +96,7 @@ let modelAnswer = 'o-mini'; // New variable for answer model
 let newsSource = 'perplexity';
 let searchSource = 'perplexity';
 let reviewsPrompt = '';
+let vertexAIModelName = '';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -144,6 +147,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isPerplexityFast, setIsPerplexityFast] = useState(false);
     const [isPerplexity, setIsPerplexity] = useState(false);
     const [isCodestral, setIsCodestral] = useState(false);
+    const [isGeneratingGeminiFast, setIsGeneratingGeminiFast] = useState(false);
     const [isGeneratingGeminiSearch, setIsGeneratingGeminiSearch] = useState(false);
     const [isGeneratingGeminiFlash, setIsGeneratingGeminiFlash] = useState(false);
     const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
@@ -1628,34 +1632,68 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedPrompt === 'quiz') {
                 invocationType = 'quiz';
             }
-            // Single API call with the determined promptText
-            response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    prompt: promptText,
-                    model: selectedModel,
-                    uid: uid,
+
+            if (firebaseAPI === true) {
+                const generationConfig = {
                     temperature: temperatureRef.current.valueOf(),
-                    top_p: top_pRef.current.valueOf(),
+                    top_p: top_pRef.current.valueOf()
+                };
+                const model = getGenerativeModel(vertexAI, { model: vertexAIModelName, generationConfig });
+                const result = await model.generateContent(promptText);
+                const text = await result.response.text();
+                const now = new Date();
+                const formattedDateTime = now.toLocaleString('en-US', { 
+                    timeZone: 'America/Chicago',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/, '$3-$1-$2 $4:$5:$6');
+                console.log('Model Name :', vertexAIModelName,);
+                const docRef = await addDoc(collection(db, "genai", userID, "MyGenAI"), {
+                    question: promptText,
+                    inputPrompt: promptInput + ' ' + invocationType,
+                    answer: text,
+                    model: vertexAIModelName,
+                    createdDateTime: formattedDateTime,
                     invocationType: invocationType
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                alert(errorData.error + 'Failed to generate content');
-                throw new Error(errorData.error || 'Failed to generate content.');
+                });
+                generatedDocID = docRef.id;
             }
+            else {
+                // Single API call with the determined promptText
+                response = await fetch(process.env.REACT_APP_GENAI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: promptText,
+                        model: selectedModel,
+                        uid: uid,
+                        temperature: temperatureRef.current.valueOf(),
+                        top_p: top_pRef.current.valueOf(),
+                        invocationType: invocationType
+                    })
+                });
 
-            let data;
-            data = await response.json();
-            generatedDocID = data[0].results[0].docID;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(errorData.error + 'Failed to generate content');
+                    throw new Error(errorData.error || 'Failed to generate content.');
+                }
+
+                let data;
+                data = await response.json();
+                generatedDocID = data[0].results[0].docID;
+
+            }
             console.log('Generated Doc ID:', generatedDocID, '  invocationType:', invocationType);
             if (['homeWork', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
-                setCurrentDocId(data[0].results[0].docID);
+                setCurrentDocId(generatedDocID);
                 console.log('currenDocID:', currentDocId);
                 setShowhomeWorkApp(true);
             }
@@ -1668,6 +1706,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             searchQuery = '';
             invocationType = '';
             searchModel = 'All';
+            firebaseAPI = false;
             youtubeSelected = false;
             imageSelected = false;
             setIsYouTubeTitle(false);
@@ -2189,6 +2228,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'reviews':
                         reviewsPrompt = data.fullText;
                         break;
+                    case 'fastGenAI':
+                        vertexAIModelName = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2530,6 +2572,23 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 )}
                             </button>
                         )}
+                        <button
+                            onClick={async () => {
+                                setIsGeneratingGeminiFast(true);
+                                firebaseAPI = true;
+                                await callAPI(vertexAIModelName);
+                                setIsGeneratingGeminiFast(false);
+                                firebaseAPI = false;
+                            }}
+                            className="fastGenerateButton"
+                        >
+                            {isGeneratingGeminiFast ? (
+                                <FaSpinner className="spinning" />
+                            ) : (
+                                'Fast GenAI'
+                            )}
+                        </button>
+
                     </div>
                     )}
                     <div className="button-section" data-title="Gen AI Agents">
@@ -2756,12 +2815,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     setIsGeneratingImages(true);
                                     try {
                                         imageGenerationPromptInput = promptInput;
-                                            if (generateDalleImage === true) {
-                                                await callAPI(modelImageDallE3, 'image_ai_agent');
-                                            }                                       
-                                            if (generateGeminiImage === true) {
-                                                await callAPI(modelGeminiImage, 'image_ai_agent');
-                                            }
+                                        if (generateDalleImage === true) {
+                                            await callAPI(modelImageDallE3, 'image_ai_agent');
+                                        }
+                                        if (generateGeminiImage === true) {
+                                            await callAPI(modelGeminiImage, 'image_ai_agent');
+                                        }
                                         setIsGeneratingImages(false);
                                     }
                                     catch (error) {
@@ -2794,130 +2853,130 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         await callAPI(modelGeminiSearch, 'google-search');
                                     }
                                     if (searchSource !== 'gemini') {
-                                    // Then call Perplexity
-                                    await callAPI(modelPerplexity, 'google-search');
+                                        // Then call Perplexity
+                                        await callAPI(modelPerplexity, 'google-search');
                                     }
                                 }
                                 catch (error) {
                                     console.error("Error fetching data:", error);
                                 }
                                 finally {
-                                    setIsGeneratingGeminiSearch(false); 
+                                    setIsGeneratingGeminiSearch(false);
                                     setIsGeneratingPerplexity(false);
                                 }
-                                }}>
-                                <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                    {latest_info_label || 'Latest Info'}
-                                </label>
-                            </button>
-                        
-                                <button className="newsButton"
-                                    onClick={async () => {
-                                        setTemperature(0.2);
-                                        setTop_p(0.2);
-                                        setPromptInput(usaNewsPrompt);
-                                        // Need to wait for state updates to be applied
-                                        await new Promise(resolve => setTimeout(resolve, 500));
-                                        try {
-                                            if (newsSource === 'perplexity') {
-                                                setIsGeneratingPerplexity(true);
-                                                await callAPI(modelPerplexity, 'usa-news');
-                                            }
-                                            else {
-                                                setIsGeneratingGeminiSearch(true);
-                                                await callAPI(modelGeminiSearch, 'usa-news');
-                                            }
-                                            // Get the generated news from Firestore
-                                            const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                            const docSnap = await getDoc(docRef);
-                                            if (docSnap.exists()) {
-                                                const newsContent = docSnap.data().answer;
-                                                // Generate audio for the news
-                                                await callTTSAPI(newsContent, process.env.REACT_APP_TTS_SSML_API_URL);
-                                            }
-                                        }
-                                        catch (error) {
-                                            console.error("Error fetching news:", error);
-                                            alert('Error generating news content');
-                                        }
-                                        finally {
-                                            setIsGeneratingPerplexity(false);
-                                            setIsGeneratingGeminiSearch(false);
-                                        }
-                                    }}>
-                                    <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                        USA News
-                                    </label>
-                                </button>
-                           
-                                <button className="techNewsButton"
-                                    onClick={async () => {
-                                        setTemperature(0.2);
-                                        setTop_p(0.2);
-                                        setPromptInput(techNewsPrompt);
-                                        // Need to wait for state updates to be applied
-                                        await new Promise(resolve => setTimeout(resolve, 500));
-                                        try {
-                                            if (newsSource === 'perplexity') {
-                                                setIsGeneratingPerplexity(true);
-                                                await callAPI(modelPerplexity, 'tech-news');
-                                            }
-                                            else {
-                                                setIsGeneratingGeminiSearch(true);
-                                                await callAPI(modelGeminiSearch, 'tech-news');
-                                            }
-                                            // Get the generated news from Firestore
-                                            const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                            const docSnap = await getDoc(docRef);
-                                            if (docSnap.exists()) {
-                                                const newsContent = docSnap.data().answer;
-                                                // Generate audio for the news
-                                                await callTTSAPI(newsContent, process.env.REACT_APP_TTS_SSML_API_URL);
-                                            }
-                                        }
-                                        catch (error) {
-                                            console.error("Error fetching news:", error);
-                                            alert('Error generating news content');
-                                        }
-                                        finally {
-                                            setIsGeneratingPerplexity(false);
-                                            setIsGeneratingGeminiSearch(false);
-                                        }
-                                    }}>
-                                    <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                        Tech News
-                                    </label>
-                                </button>
-                                <button className="reviewsButton"
-                                    onClick={async () => {
-                                        setTemperature(0.2);
-                                        setTop_p(0.2);
-                                        reviewsPromptInput = promptInput + reviewsPrompt;
-                                        // Need to wait for state updates to be applied
-                                        await new Promise(resolve => setTimeout(resolve, 500));
-                                        try {
-                                            if (newsSource === 'perplexity') {
-                                                setIsGeneratingPerplexity(true);
-                                                await callAPI(modelPerplexity, 'reviews');
-                                            }
-                                            else {
-                                                setIsGeneratingGeminiSearch(true);
-                                                await callAPI(modelGeminiSearch, 'reviews');
-                                            }
-                                        }
-                                        catch (error) {
-                                            console.error("Error fetching reviews:", error);
-                                            alert('Error generating reviews content');
-                                        }
-                                        finally {
-                                            setIsGeneratingPerplexity(false);
-                                            setIsGeneratingGeminiSearch(false);
-                                        }
-                                    }}>
-                                    <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                        Reviews
-                                    </label>
-                                </button>
+                            }}>
+                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                {latest_info_label || 'Latest Info'}
+                            </label>
+                        </button>
+
+                        <button className="newsButton"
+                            onClick={async () => {
+                                setTemperature(0.2);
+                                setTop_p(0.2);
+                                setPromptInput(usaNewsPrompt);
+                                // Need to wait for state updates to be applied
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                try {
+                                    if (newsSource === 'perplexity') {
+                                        setIsGeneratingPerplexity(true);
+                                        await callAPI(modelPerplexity, 'usa-news');
+                                    }
+                                    else {
+                                        setIsGeneratingGeminiSearch(true);
+                                        await callAPI(modelGeminiSearch, 'usa-news');
+                                    }
+                                    // Get the generated news from Firestore
+                                    const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                    const docSnap = await getDoc(docRef);
+                                    if (docSnap.exists()) {
+                                        const newsContent = docSnap.data().answer;
+                                        // Generate audio for the news
+                                        await callTTSAPI(newsContent, process.env.REACT_APP_TTS_SSML_API_URL);
+                                    }
+                                }
+                                catch (error) {
+                                    console.error("Error fetching news:", error);
+                                    alert('Error generating news content');
+                                }
+                                finally {
+                                    setIsGeneratingPerplexity(false);
+                                    setIsGeneratingGeminiSearch(false);
+                                }
+                            }}>
+                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                USA News
+                            </label>
+                        </button>
+
+                        <button className="techNewsButton"
+                            onClick={async () => {
+                                setTemperature(0.2);
+                                setTop_p(0.2);
+                                setPromptInput(techNewsPrompt);
+                                // Need to wait for state updates to be applied
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                try {
+                                    if (newsSource === 'perplexity') {
+                                        setIsGeneratingPerplexity(true);
+                                        await callAPI(modelPerplexity, 'tech-news');
+                                    }
+                                    else {
+                                        setIsGeneratingGeminiSearch(true);
+                                        await callAPI(modelGeminiSearch, 'tech-news');
+                                    }
+                                    // Get the generated news from Firestore
+                                    const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                    const docSnap = await getDoc(docRef);
+                                    if (docSnap.exists()) {
+                                        const newsContent = docSnap.data().answer;
+                                        // Generate audio for the news
+                                        await callTTSAPI(newsContent, process.env.REACT_APP_TTS_SSML_API_URL);
+                                    }
+                                }
+                                catch (error) {
+                                    console.error("Error fetching news:", error);
+                                    alert('Error generating news content');
+                                }
+                                finally {
+                                    setIsGeneratingPerplexity(false);
+                                    setIsGeneratingGeminiSearch(false);
+                                }
+                            }}>
+                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                Tech News
+                            </label>
+                        </button>
+                        <button className="reviewsButton"
+                            onClick={async () => {
+                                setTemperature(0.2);
+                                setTop_p(0.2);
+                                reviewsPromptInput = promptInput + reviewsPrompt;
+                                // Need to wait for state updates to be applied
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                try {
+                                    if (newsSource === 'perplexity') {
+                                        setIsGeneratingPerplexity(true);
+                                        await callAPI(modelPerplexity, 'reviews');
+                                    }
+                                    else {
+                                        setIsGeneratingGeminiSearch(true);
+                                        await callAPI(modelGeminiSearch, 'reviews');
+                                    }
+                                }
+                                catch (error) {
+                                    console.error("Error fetching reviews:", error);
+                                    alert('Error generating reviews content');
+                                }
+                                finally {
+                                    setIsGeneratingPerplexity(false);
+                                    setIsGeneratingGeminiSearch(false);
+                                }
+                            }}>
+                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
+                                Reviews
+                            </label>
+                        </button>
                     </div>
                     {showPrint && (
                         <div className="button-section" data-title="Gen AI Audio - Text to Speech">

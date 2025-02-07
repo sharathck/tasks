@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
-import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore,  persistentLocalCache, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { getAuth} from 'firebase/auth';
+import { getVertexAI } from "firebase/vertexai";
 
 // Firebase configuration (replace with your environment configs)
 const firebaseConfig = {
@@ -16,3 +17,4 @@ const firebaseConfig = {
   const app = initializeApp(firebaseConfig, { localCache: persistentLocalCache(), cacheSizeBytes: CACHE_SIZE_UNLIMITED });
   export const db = getFirestore(app);
   export const auth = getAuth(app);
+  export const vertexAI = getVertexAI(app);
