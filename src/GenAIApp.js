@@ -2904,14 +2904,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 setIsGeneratingGeminiSearch(true);
                                                 await callAPI(modelGeminiSearch, 'reviews');
                                             }
-                                            // Get the generated reviews from Firestore
-                                            const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                            const docSnap = await getDoc(docRef);
-                                            if (docSnap.exists()) {
-                                                const reviewsContent = docSnap.data().answer;
-                                                // Generate audio for the reviews
-                                                await callTTSAPI(reviewsContent, process.env.REACT_APP_TTS_SSML_API_URL);
-                                            }
                                         }
                                         catch (error) {
                                             console.error("Error fetching reviews:", error);
