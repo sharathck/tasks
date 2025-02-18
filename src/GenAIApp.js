@@ -3459,9 +3459,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
-
+                                                    {item.svg_url?.length > 10 && (
+                                                        <img src={item.svg_url} alt="Generated" />
+                                                    )}
                                             {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
                                                 item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
+                                  
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
                                                         renderHTML={text => mdParser.render(text || '')} // Add default empty string
@@ -3481,6 +3484,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                             }
                                                         }}
                                                     />
+                                                    
                                                 )
                                             )}
 
