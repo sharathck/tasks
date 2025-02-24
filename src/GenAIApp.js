@@ -137,6 +137,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingGptMini, setIsGeneratingGptMini] = useState(false);
     const [isOpenAI, setIsOpenAI] = useState(false);
     const [isAnthropic, setIsAnthropic] = useState(true);
+    const [isClaudeThinking, setIsClaudeThinking] = useState(false);
     const [isGemini, setIsGemini] = useState(true);
     const [isoMini, setIsoMini] = useState(true);
     const [isLlama, setIsLlama] = useState(false);
@@ -186,6 +187,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showPerplexity, setShowPerplexity] = useState(false);
     const [showCodeStral, setShowCodeStral] = useState(false);
     const [showGemini, setShowGemini] = useState(false);
+    const [showClaudeThinking, setShowClaudeThinking] = useState(false);
     const [showAnthropic, setShowAnthropic] = useState(false);
     const [showGpt, setshowGpt] = useState(false);
     const [showo, setshowo] = useState(false);
@@ -199,6 +201,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modeloMini, setModeloMini] = useState('o-mini');
     const [modelo, setModelo] = useState('o');
     const [modelLlama, setModelLlama] = useState('llama');
+    const [modelClaudeThinking, setModelClaudeThinking] = useState('claude-thinking');
     const [modelMistral, setModelMistral] = useState('mistral');
     const [modelGptMini, setModelGptMini] = useState('gpt-mini');
     const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
@@ -343,6 +346,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showDeepSeek, setShowDeepSeek] = useState(false);
     const [modelDeepSeek, setModelDeepSeek] = useState('DeepSeek');
     const [labelDeepSeek, setLabelDeepSeek] = useState('DS');
+
+    const [labelClaudeThinking, setLabelClaudeThinking] = useState('Claude Think');
+    const [isGeneratingClaudeThinking, setIsGeneratingClaudeThinking] = useState(false);
+    
 
     // Add new state variables with other model states
     const [isGeminiFlashFast, setIsGeminiFlashFast] = useState(false);
@@ -907,6 +914,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelGeminiFlashFast !== undefined) {
                     setLabelGeminiFlashFast(data.labelGeminiFlashFast);
                 }
+                if (data.isClaudeThinking !== undefined) {
+                    setIsClaudeThinking(data.isClaudeThinking);
+                }
+                if (data.showClaudeThinking !== undefined) {
+                    setShowClaudeThinking(data.showClaudeThinking); 
+                }
+                if (data.labelClaudeThinking !== undefined) {
+                    setLabelClaudeThinking(data.labelClaudeThinking);
+                }
             });
         } catch (error) {
             console.error("Error fetching genAI parameters: ", error);
@@ -1310,7 +1326,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
             alert('Please select at least one model.');
             return;
         }
@@ -1328,6 +1344,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
         if (isClaudeHaiku && showClaudeHaiku) {
             setIsGeneratingClaudeHaiku(true); // Set generating state to true
             callAPI(modelClaudeHaiku);
+        }
+
+        if (isClaudeThinking && showClaudeThinking) {
+            setIsGeneratingClaudeThinking(true);
+            callAPI(modelClaudeThinking);
         }
 
         // Generate API calls for each selected model
@@ -1480,7 +1501,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     isDeepSeek,
                     labelDeepSeek,
                     isGeminiFlashFast,
-                    labelGeminiFlashFast
+                    labelGeminiFlashFast,
+                    isClaudeThinking,
+                    labelClaudeThinking,
                 });
                 return;
             }
@@ -1538,7 +1561,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         isDeepSeek,
                         labelDeepSeek,
                         isGeminiFlashFast,
-                        labelGeminiFlashFast
+                        labelGeminiFlashFast,
+                        isClaudeThinking,
+                        labelClaudeThinking,
                     }, { merge: true });
                 });
             }
@@ -1781,6 +1806,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelGeminiFlashFast) {
                 setIsGeneratingGeminiFlashFast(false);
             }
+            if (selectedModel === modelClaudeThinking) {
+                setIsGeneratingClaudeThinking(false);
+            }
             console.log('isGeneratingGeminiSearch:', isGeneratingGeminiSearch);
         }
     };
@@ -1890,6 +1918,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsCerebras(status);
         setIsDeepSeek(status);
         setIsGeminiFlashFast(status);
+        setIsClaudeThinking(status);
     };
 
     // Add this helper function to handle LLM model selection
@@ -2451,6 +2480,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     )}
+                    {showClaudeThinking && (
+                        <button 
+                            className={isClaudeThinking ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsClaudeThinking, !isClaudeThinking)}
+                        >
+                            <label className={isGeneratingClaudeThinking ? 'flashing' : ''}>
+                                {labelClaudeThinking}
+                            </label>
+                        </button>
+                    )}
                     <br />
                     {showPrint && (<div className="button-section" data-title="Generative AI">
                         {showTemp && (
@@ -2540,7 +2579,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingDeepSeek ||
                                     isExplain ||
                                     isLyrics ||
-                                    isGeneratingGeminiFlashFast
+                                    isGeneratingGeminiFlashFast ||
+                                    isGeneratingClaudeThinking
                                 }
                             >
                                 {isGenerating ||
@@ -2565,7 +2605,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
                                     isGeneratingDeepSeek ||
-                                    isExplain || isLyrics || isGeneratingGeminiFlashFast ? (
+                                    isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? (
                                     <FaSpinner className="spinning" />
                                 ) : (
                                     'GenAI'
@@ -3175,6 +3215,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="cerebras">Cerebras</option>
                     <option value="DeepSeek">DeepSeek</option>
                     <option value="gemini-flash-fast">Gemini Flash Fast</option>
+                    <option value="claude-thinking">Claude-Thinking</option>
                 </select>
                 )}
                 {showEditPopup && (
@@ -3459,12 +3500,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
-                                                    {item.svg_url?.length > 10 && (
-                                                        <img src={item.svg_url} alt="Generated" />
-                                                    )}
+
                                             {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
                                                 item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
-                                  
                                                     <MdEditor
                                                         value={item.answer || ''} // Add default empty string
                                                         renderHTML={text => mdParser.render(text || '')} // Add default empty string
@@ -3484,7 +3522,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                             }
                                                         }}
                                                     />
-                                                    
                                                 )
                                             )}
 
