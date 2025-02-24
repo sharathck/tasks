@@ -25,6 +25,7 @@ const serviceRegion = 'eastus';
 const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
 let searchQuery = '';
+let promptName = '';
 let invocationType = '';
 let searchModel = 'All';
 let userID = '';
@@ -349,7 +350,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
     const [labelClaudeThinking, setLabelClaudeThinking] = useState('Claude Think');
     const [isGeneratingClaudeThinking, setIsGeneratingClaudeThinking] = useState(false);
-    
+
 
     // Add new state variables with other model states
     const [isGeminiFlashFast, setIsGeminiFlashFast] = useState(false);
@@ -918,7 +919,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setIsClaudeThinking(data.isClaudeThinking);
                 }
                 if (data.showClaudeThinking !== undefined) {
-                    setShowClaudeThinking(data.showClaudeThinking); 
+                    setShowClaudeThinking(data.showClaudeThinking);
                 }
                 if (data.labelClaudeThinking !== undefined) {
                     setLabelClaudeThinking(data.labelClaudeThinking);
@@ -1581,7 +1582,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
         try {
             let response;
             let promptText = promptInput;
-
+            // Get prompt text from Firebase if promptName is not blank
+            let promptNameText = '';
+            console.log('Prompt Name:', promptName);
+            if (promptName) {
+                try {
+                    const promptsCollection = collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts');
+                    const q = query(promptsCollection, 
+                        where('tag', '==', promptName), 
+                        orderBy('modifiedDateTime', 'asc'),
+                        limit(1)
+                    );
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        promptNameText = querySnapshot.docs[0].data().fullText;
+                        console.log('Prompt Name Text:', promptNameText);
+                    }
+                } catch (error) {
+                    console.error('Error getting prompt text:', error);
+                }
+            }
+            if (promptNameText) {
+                promptText = promptText + '\n' + promptNameText;
+            }
             // Determine promptText based on invocation type
             switch (invocationType) {
                 case 'imageGeneration':
@@ -1667,7 +1690,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 const result = await model.generateContent(promptText);
                 const text = await result.response.text();
                 const now = new Date();
-                const formattedDateTime = now.toLocaleString('en-US', { 
+                const formattedDateTime = now.toLocaleString('en-US', {
                     timeZone: 'America/Chicago',
                     year: 'numeric',
                     month: '2-digit',
@@ -2340,16 +2363,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                    {showGroq && (
-                        <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
-                            <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
-                        </button>
-                    )}
-                    {showSambanova && (
-                        <button className={isSambanova ? 'button_selected' : 'button'} onClick={() => handleLLMChange(setIsSambanova, !isSambanova)}>
-                            <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
-                        </button>
-                    )}
                     {showGpt && (
                         <button className={isOpenAI ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
@@ -2368,10 +2381,21 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingGemini ? 'flashing' : ''}>{labelGemini}</label>
                         </button>
                     )}
-                    {showoMini && (
-                        <button className={isoMini ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsoMini, !isoMini)}>
-                            <label className={isGeneratingoMini ? 'flashing' : ''}>{labeloMini}</label>
+                    {showNova && (
+                        <button className={isNova ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsNova, !isNova)}>
+                            <label className={isGeneratingNova ? 'flashing' : ''}>{labelNova}</label>
+                        </button>
+                    )}
+
+                    {showCerebras && (
+                        <button
+                            className={isCerebras ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsCerebras, !isCerebras)}
+                        >
+                            <label className={isGeneratingCerebras ? 'flashing' : ''}>
+                                {labelCerebras}
+                            </label>
                         </button>
                     )}
                     {showMistral && (
@@ -2398,34 +2422,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingGeminiSearch ? 'flashing' : ''}>{labelGeminiSearch}</label>
                         </button>
                     )}
-                    {showGeminiFlash && (
-                        <button
-                            className={isGeminiFlash ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGeminiFlash, !isGeminiFlash)}
-                        >
-                            <label className={isGeneratingGeminiFlash ? 'flashing' : ''}>
-                                {labelGeminiFlash}
-                            </label>
-                        </button>
-                    )}
-                    {showGptMini && (
-                        <button className={isGptMini ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGptMini, !isGptMini)}>
-                            <label className={isGeneratingGptMini ? 'flashing' : ''}>{labelGptMini}</label>
-                        </button>
-                    )}
-                    {showo && (
-                        <button className={iso1 ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIso1, !iso1)}>
-                            <label className={isGeneratingo ? 'flashing' : ''}>{labelo}</label>
-                        </button>
-                    )}
-                    {showPerplexityFast && (
-                        <button className={isPerplexityFast ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsPerplexityFast, !isPerplexityFast)}>
-                            <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>{labelPerplexityFast}</label>
-                        </button>
-                    )}
                     {showPerplexity && (
                         <button className={isPerplexity ? 'button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsPerplexity, !isPerplexity)}>
@@ -2444,20 +2440,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>{labelClaudeHaiku}</label>
                         </button>
                     )}
-                    {showNova && (
-                        <button className={isNova ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsNova, !isNova)}>
-                            <label className={isGeneratingNova ? 'flashing' : ''}>{labelNova}</label>
+                    {showGroq && (
+                        <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
+                            <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
                         </button>
                     )}
-                    {showCerebras && (
-                        <button
-                            className={isCerebras ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsCerebras, !isCerebras)}
-                        >
-                            <label className={isGeneratingCerebras ? 'flashing' : ''}>
-                                {labelCerebras}
-                            </label>
+                    {showGptMini && (
+                        <button className={isGptMini ? 'button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGptMini, !isGptMini)}>
+                            <label className={isGeneratingGptMini ? 'flashing' : ''}>{labelGptMini}</label>
                         </button>
                     )}
                     {showDeepSeek && (
@@ -2480,17 +2471,136 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                         </button>
                     )}
-                    {showClaudeThinking && (
-                        <button 
-                            className={isClaudeThinking ? 'button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsClaudeThinking, !isClaudeThinking)}
-                        >
-                            <label className={isGeneratingClaudeThinking ? 'flashing' : ''}>
-                                {labelClaudeThinking}
+                    <div className="button-section" data-title="Thinking & Reasoning Models">
+                        {showGeminiFlash && (
+                            <button
+                                className={isGeminiFlash ? 'button_selected' : 'button'}
+                                onClick={() => handleLLMChange(setIsGeminiFlash, !isGeminiFlash)}
+                            >
+                                <label className={isGeneratingGeminiFlash ? 'flashing' : ''}>
+                                    {labelGeminiFlash}
+                                </label>
+                            </button>
+                        )}
+                        {showo && (
+                            <button className={iso1 ? 'button_selected' : 'button'}
+                                onClick={() => handleLLMChange(setIso1, !iso1)}>
+                                <label className={isGeneratingo ? 'flashing' : ''}>{labelo}</label>
+                            </button>
+                        )}
+                        {showPerplexityFast && (
+                            <button className={isPerplexityFast ? 'button_selected' : 'button'}
+                                onClick={() => handleLLMChange(setIsPerplexityFast, !isPerplexityFast)}>
+                                <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>{labelPerplexityFast}</label>
+                            </button>
+                        )}
+                        {showClaudeThinking && (
+                            <button
+                                className={isClaudeThinking ? 'button_selected' : 'button'}
+                                onClick={() => handleLLMChange(setIsClaudeThinking, !isClaudeThinking)}
+                            >
+                                <label className={isGeneratingClaudeThinking ? 'flashing' : ''}>
+                                    {labelClaudeThinking}
+                                </label>
+                            </button>
+                        )}
+                        {showoMini && (
+                            <button className={isoMini ? 'button_selected' : 'button'}
+                                onClick={() => handleLLMChange(setIsoMini, !isoMini)}>
+                                <label className={isGeneratingoMini ? 'flashing' : ''}>{labeloMini}</label>
+                            </button>
+                        )}
+                        {showSambanova && (
+                            <button className={isSambanova ? 'button_selected' : 'button'} onClick={() => handleLLMChange(setIsSambanova, !isSambanova)}>
+                                <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
+                            </button>
+                        )}
+                    </div>
+                    <div className="button-section" data-title="Predefined Prompts">
+                 
+                        {/* Add radio buttons for different options */}
+                        <div className="radio-options">
+                            <label className="radio-label">
+                                <input 
+                                    type="radio" 
+                                    name="contentType"
+                                    value="svg"
+                                    onChange={() => {
+                                        promptName = 'svg';
+                                    }}
+                                />
+                                SVG
                             </label>
-                        </button>
-                    )}
-                    <br />
+                            <label className="radio-label">
+                                <input 
+                                    type="radio" 
+                                    name="contentType"
+                                    value="explain"
+                                    onChange={() => {
+                                        promptName = 'explain';
+                                    }}
+                                />
+                                 Explain
+                            </label>
+                            <label className="radio-label">
+                                <input 
+                                    type="radio" 
+                                    name="contentType"
+                                    value="questions"
+                                    onChange={() => {
+                                        promptName = 'questions';
+                                    }}
+                                />
+                                 Questions
+                            </label>
+                            <label className="radio-label">
+                                <input 
+                                    type="radio" 
+                                    name="contentType"
+                                    value="quiz"
+                                    onChange={() => {
+                                        promptName = 'quiz';
+                                    }}
+                                />
+                                 Quiz
+                            </label>
+                            <label className="radio-label">
+                                <input 
+                                    type="radio" 
+                                    name="contentType"
+                                    value="lyrics"
+                                    onChange={() => {
+                                        promptName = 'lyrics';
+                                    }}
+                                />
+                                Lyrics
+                            </label>
+                            <label className="radio-label">
+                                <input 
+                                    type="radio" 
+                                    name="contentType"
+                                    value="answer"
+                                    onChange={() => {
+                                        promptName = 'answer';
+                                    }}
+                                />
+                                Answer
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio" 
+                                    name="contentType"
+                                    value="search"
+                                    onChange={() => {
+                                        promptName = '';
+                                    }}
+                                    defaultChecked // Add this to make it default
+                                />
+                                No Prompt
+                            </label>
+
+                        </div>
+                    </div>
                     {showPrint && (<div className="button-section" data-title="Generative AI">
                         {showTemp && (
                             <label style={{ marginLeft: '8px' }}>
@@ -3500,7 +3610,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             </button>
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
-
+                                            {item.showRawAnswer ? item.id : ''}
+                                                    {item.svg_url?.length > 10 && (
+                                                        <img src={item.svg_url} alt="Generated" />
+                                                    )}
                                             {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
                                                 item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
                                                     <MdEditor
