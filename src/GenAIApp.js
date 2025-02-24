@@ -2548,7 +2548,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     name="contentType"
                                     value="questions"
                                     onChange={() => {
-                                        promptName = 'questions';
+                                        promptName = 'practice_questions';
                                     }}
                                 />
                                  Questions
