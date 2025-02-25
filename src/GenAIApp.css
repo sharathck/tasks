@@ -114,7 +114,7 @@
 }
 .generateButton
 {
-  background-color: rgb(24, 68, 161);
+  background-color: rgb(137, 148, 172);
   border: 2px solid black;
   color: #fff;
   cursor: pointer;
@@ -581,8 +581,7 @@ form {
   border-radius: 10px;
   padding: 2px 2px;
   border: 2px solid black;
-  background-color: rgb(41, 155, 68);
-  color: rgb(244, 248, 231);
+  background-color: rgb(172, 203, 179);
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 }
 
@@ -590,7 +589,7 @@ form {
   margin-left: 8px;
   padding: 2px 2px;
   border: 1px solid black;
-  background-color: #eef0f3;
+  background-color: #f1f3f6;
   color: rgb(3, 22, 57);
   box-shadow: 2px 2px 8px rgba(34, 33, 33, 0.4);
   cursor: pointer;
@@ -605,14 +604,9 @@ form {
 }
 
 .button_selected {
-  font-size: 16px;
-  margin-left: 8px;
-  border-radius: 10px;
-  padding: 2px 2px;
-  border: 2px solid black;
-  background-color: rgb(41, 155, 68);
-  color: rgb(244, 248, 231);
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  border: 3px solid black;
+  background-color: rgb(196, 228, 204);
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
 }
 
 .button_delete_selected {

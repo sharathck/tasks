@@ -2663,7 +2663,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <button
                                 onClick={handleGenerate}
                                 className="action_button"
-                                style={{ backgroundColor: 'blue', color: 'white' }}
+                                style={{ backgroundColor: 'green', color: 'white' }}
                                 disabled={
                                     isGenerating ||
                                     isGeneratingGemini ||
@@ -3166,8 +3166,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         <button
                             className='action_button'
                             onClick={() => window.open('https://genai-all.com', '_blank')}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                         >
                             Public-HomeWork-All-Grades
                         </button>
@@ -3175,8 +3173,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         <button
                             className='action_button'
                             onClick={() => window.open('https://sharathck.github.io/edugenai', '_blank')}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                         >
                             Personal-HomeWork-All-Grades
                         </button>
@@ -3188,7 +3184,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     e.preventDefault();
                                     handleEditSource();
                                 }}
-                                className="sourceDocumentButton"
+                                className="action_button"
                             >
                                 {selectedPrompt}
                             </button>
@@ -3199,14 +3195,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                     {!GenAIParameter ? (
                         showBackToAppButton && (
-                            <button className='signupbutton' onClick={() => setShowMainApp(!showMainApp)}>
+                            <button className='action_button' onClick={() => setShowMainApp(!showMainApp)}>
                                 <img src={tasksIcon} alt={genai_tasks_label || 'Tasks'} height="26px" style={{ marginRight: '4px' }} />
                             </button>
                         )
                     ) : (
-                        <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                        <button className='action_button' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     )}
-                    <button className='signoutbutton' onClick={handleSignOut}><FaSignOutAlt /> </button>
+                    <button className='action_button' onClick={handleSignOut}><FaSignOutAlt /> </button>
                     {user && <span style={{ marginLeft: '5px' }}> {user.email}
                     </span>
                     }
@@ -3379,7 +3375,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             <>
                                                 {(!isiPhone && showPrint &&
                                                     <button
-                                                        className={isLiveAudioPlaying[item.id] ? 'button_selected' : 'button'}
+                                                        className={isLiveAudioPlaying[item.id] ? 'action_button_flashing' : 'action_button'}
                                                         onClick={async () => {
                                                             try {
                                                                 setIsLiveAudioPlaying(prev => ({ ...prev, [item.id]: true }));
@@ -3397,7 +3393,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 )}
 
                                                 {showPrint && (<button
-                                                    className={isGeneratingDownloadableAudio[item.id] ? 'button_selected' : 'button'}
+                                                    className={isGeneratingDownloadableAudio[item.id] ? 'action_button_flashing' : 'action_button'}
                                                     onClick={async () => {
                                                         setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
                                                         await callTTSAPI(item.answer, process.env.REACT_APP_TTS_SSML_API_URL)
@@ -3434,7 +3430,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             <button
                                                 edge="end"
                                                 aria-label="print answer"
-                                                className="button"
+                                                className="action_button"
                                                 onClick={() => {
                                                     const printWindow = window.open('', '', 'height=500,width=800');
                                                     const htmlContent = mdParser.render(item.answer);
@@ -3483,20 +3479,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     </div>
                                     <br />
                                     {(((['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType))) && item.answer) && (<button
-                                        className="button"
+                                        className="action_button"
                                         onClick={() => {
                                             setCurrentDocId(item.id);
                                             setShowhomeWorkApp(true);
-                                        }}
-                                        style={{
-                                            padding: '3px 3px',
-                                            fontSize: '18px',
-                                            backgroundColor: '#278cab',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.3s'
                                         }}
                                         onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                                         onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
@@ -3509,18 +3495,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             {isiPhone &&
                                                 (item.model === modelImageDallE3 || item.model === modelGeminiImage || item.model === 'azure-tts') && (
                                                     <button
-                                                        className="button"
+                                                        className="action_button"
                                                         onClick={() => handleDownload(item.answer, item.model)}
-                                                        style={{
-                                                            padding: '6px 6px',
-                                                            fontSize: '20px',
-                                                            backgroundColor: '#4CAF50',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '8px',
-                                                            cursor: 'pointer',
-                                                            transition: 'background-color 0.3s'
-                                                        }}
+                                                   
                                                         onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                                                         onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                                     >
@@ -3548,7 +3525,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button
+                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button className="action_button"
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
@@ -3563,18 +3540,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     }
                                                     link.click();
                                                 }}
-                                                style={{
-                                                    padding: '3px 3px',
-                                                    fontSize: '18px',
-                                                    backgroundColor: '#4CAF50',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '8px',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 0.3s'
-                                                }}
-                                                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                             >
                                                 Download Text
                                             </button>
