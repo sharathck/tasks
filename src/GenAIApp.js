@@ -199,17 +199,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelAnthropic, setModelAnthropic] = useState('claude');
     const [modelGemini, setModelGemini] = useState('gemini');
     const [modelGpt, setModelGpt] = useState('gpt');
-    const [modeloMini, setModeloMini] = useState('o-mini');
-    const [modelo, setModelo] = useState('o');
+    const [modeloMini, setModeloMini] = useState('o-mini-think');
+    const [modelo, setModelo] = useState('o-think');
     const [modelLlama, setModelLlama] = useState('llama');
-    const [modelClaudeThinking, setModelClaudeThinking] = useState('claude-thinking');
+    const [modelClaudeThinking, setModelClaudeThinking] = useState('claude-think');
     const [modelMistral, setModelMistral] = useState('mistral');
     const [modelGptMini, setModelGptMini] = useState('gpt-mini');
     const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
-    const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-flash');
+    const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-think');
     const [modelGptTurbo, setModelGptTurbo] = useState('gpt-turbo');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
-    const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-fast');
+    const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-think');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
     const [modelClaudeHaiku, setModelClaudeHaiku] = useState('claude-haiku');
@@ -231,7 +231,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isSambanova, setIsSambanova] = useState(false);
     const [isGeneratingSambanova, setIsGeneratingSambanova] = useState(false);
     const [showSambanova, setShowSambanova] = useState(false);
-    const [modelSambanova, setModelSambanova] = useState('sambanova');
+    const [modelSambanova, setModelSambanova] = useState('deepseek-think');
 
     // Add new state variables near other model state variables
     const [isGroq, setIsGroq] = useState(false);
