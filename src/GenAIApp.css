@@ -388,6 +388,7 @@ html, body {
 .flashing {
   animation: flash 1s infinite;
   font-weight: bold;
+  background-color: #aad0e3;
 }
 
 @keyframes flash {
