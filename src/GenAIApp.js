@@ -1671,16 +1671,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
             }
             console.log('temp:', temperatureRef.current.valueOf(), 'top_p:', top_pRef.current.valueOf());
             // if prompt dropdown selected is practice_questions then invocationType should be homeWork
-            if (selectedPrompt === 'practice_questions') {
+            if (selectedPrompt === 'practice_questions' || promptName === 'practice_questions') {
                 invocationType = 'homeWork';
             }
-            if (selectedPrompt === 'quiz_with_choices') {
+            if (selectedPrompt === 'quiz_with_choices' || promptName === 'quiz_with_choices') {
                 invocationType = 'quiz_with_choices';
             }
-            if (selectedPrompt === 'quiz') {
+            if (selectedPrompt === 'quiz' || promptName === 'quiz') {
                 invocationType = 'quiz';
             }
-
             if (firebaseAPI === true) {
                 const generationConfig = {
                     temperature: temperatureRef.current.valueOf(),
@@ -2364,25 +2363,25 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 </div>
                 <div style={{ marginBottom: '20px' }}>
                     {showGpt && (
-                        <button className={isOpenAI ? 'button_selected' : 'button'}
+                        <button className={isOpenAI ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
                             <label className={isGenerating ? 'flashing' : ''}>{labelGpt}</label>
                         </button>
                     )}
                     {showAnthropic && (
-                        <button className={isAnthropic ? 'button_selected' : 'button'}
+                        <button className={isAnthropic ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsAnthropic, !isAnthropic)}>
                             <label className={isGeneratingAnthropic ? 'flashing' : ''}>{labelAnthropic}</label>
                         </button>
                     )}
                     {showGemini && (
-                        <button className={isGemini ? 'button_selected' : 'button'}
+                        <button className={isGemini ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGemini, !isGemini)}>
                             <label className={isGeneratingGemini ? 'flashing' : ''}>{labelGemini}</label>
                         </button>
                     )}
                     {showNova && (
-                        <button className={isNova ? 'button_selected' : 'button'}
+                        <button className={isNova ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsNova, !isNova)}>
                             <label className={isGeneratingNova ? 'flashing' : ''}>{labelNova}</label>
                         </button>
@@ -2390,7 +2389,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                     {showCerebras && (
                         <button
-                            className={isCerebras ? 'button_selected' : 'button'}
+                            className={isCerebras ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsCerebras, !isCerebras)}
                         >
                             <label className={isGeneratingCerebras ? 'flashing' : ''}>
@@ -2399,43 +2398,43 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                     )}
                     {showMistral && (
-                        <button className={isMistral ? 'button_selected' : 'button'}
+                        <button className={isMistral ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsMistral, !isMistral)}>
                             <label className={isGeneratingMistral ? 'flashing' : ''}>{labelMistral}</label>
                         </button>
                     )}
                     {showLlama && (
-                        <button className={isLlama ? 'button_selected' : 'button'}
+                        <button className={isLlama ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsLlama, !isLlama)}>
                             <label className={isGeneratingLlama ? 'flashing' : ''}>{labelLlama}</label>
                         </button>
                     )}
                     {showGptTurbo && (
-                        <button className={isGptTurbo ? 'button_selected' : 'button'}
+                        <button className={isGptTurbo ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGptTurbo, !isGptTurbo)}>
                             <label className={isGeneratingGptTurbo ? 'flashing' : ''}>{labelGptTurbo}</label>
                         </button>
                     )}
                     {showGeminiSearch && (
-                        <button className={isGeminiSearch ? 'button_selected' : 'button'}
+                        <button className={isGeminiSearch ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGeminiSearch, !isGeminiSearch)}>
                             <label className={isGeneratingGeminiSearch ? 'flashing' : ''}>{labelGeminiSearch}</label>
                         </button>
                     )}
                     {showPerplexity && (
-                        <button className={isPerplexity ? 'button_selected' : 'button'}
+                        <button className={isPerplexity ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsPerplexity, !isPerplexity)}>
                             <label className={isGeneratingPerplexity ? 'flashing' : ''}>{labelPerplexity}</label>
                         </button>
                     )}
                     {showCodeStral && (
-                        <button className={isCodestral ? 'button_selected' : 'button'}
+                        <button className={isCodestral ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsCodestral, !isCodestral)}>
                             <label className={isGeneratingCodeStral ? 'flashing' : ''}>{labelCodestral}</label>
                         </button>
                     )}
                     {showClaudeHaiku && (
-                        <button className={isClaudeHaiku ? 'button_selected' : 'button'}
+                        <button className={isClaudeHaiku ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsClaudeHaiku, !isClaudeHaiku)}>
                             <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>{labelClaudeHaiku}</label>
                         </button>
@@ -2446,14 +2445,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                     )}
                     {showGptMini && (
-                        <button className={isGptMini ? 'button_selected' : 'button'}
+                        <button className={isGptMini ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGptMini, !isGptMini)}>
                             <label className={isGeneratingGptMini ? 'flashing' : ''}>{labelGptMini}</label>
                         </button>
                     )}
                     {showDeepSeek && (
                         <button
-                            className={isDeepSeek ? 'button_selected' : 'button'}
+                            className={isDeepSeek ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsDeepSeek, !isDeepSeek)}
                         >
                             <label className={isGeneratingDeepSeek ? 'flashing' : ''}>
@@ -2463,7 +2462,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     {showGeminiFlashFast && (
                         <button
-                            className={isGeminiFlashFast ? 'button_selected' : 'button'}
+                            className={isGeminiFlashFast ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsGeminiFlashFast, !isGeminiFlashFast)}
                         >
                             <label className={isGeneratingGeminiFlashFast ? 'flashing' : ''}>
@@ -2474,7 +2473,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Thinking & Reasoning Models">
                         {showGeminiFlash && (
                             <button
-                                className={isGeminiFlash ? 'button_selected' : 'button'}
+                                className={isGeminiFlash ? 'llm_button_selected' : 'button'}
                                 onClick={() => handleLLMChange(setIsGeminiFlash, !isGeminiFlash)}
                             >
                                 <label className={isGeneratingGeminiFlash ? 'flashing' : ''}>
@@ -2483,20 +2482,20 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </button>
                         )}
                         {showo && (
-                            <button className={iso1 ? 'button_selected' : 'button'}
+                            <button className={iso1 ? 'llm_button_selected' : 'button'}
                                 onClick={() => handleLLMChange(setIso1, !iso1)}>
                                 <label className={isGeneratingo ? 'flashing' : ''}>{labelo}</label>
                             </button>
                         )}
                         {showPerplexityFast && (
-                            <button className={isPerplexityFast ? 'button_selected' : 'button'}
+                            <button className={isPerplexityFast ? 'llm_button_selected' : 'button'}
                                 onClick={() => handleLLMChange(setIsPerplexityFast, !isPerplexityFast)}>
                                 <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>{labelPerplexityFast}</label>
                             </button>
                         )}
                         {showClaudeThinking && (
                             <button
-                                className={isClaudeThinking ? 'button_selected' : 'button'}
+                                className={isClaudeThinking ? 'llm_button_selected' : 'button'}
                                 onClick={() => handleLLMChange(setIsClaudeThinking, !isClaudeThinking)}
                             >
                                 <label className={isGeneratingClaudeThinking ? 'flashing' : ''}>
@@ -2505,13 +2504,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </button>
                         )}
                         {showoMini && (
-                            <button className={isoMini ? 'button_selected' : 'button'}
+                            <button className={isoMini ? 'llm_button_selected' : 'button'}
                                 onClick={() => handleLLMChange(setIsoMini, !isoMini)}>
                                 <label className={isGeneratingoMini ? 'flashing' : ''}>{labeloMini}</label>
                             </button>
                         )}
                         {showSambanova && (
-                            <button className={isSambanova ? 'button_selected' : 'button'} onClick={() => handleLLMChange(setIsSambanova, !isSambanova)}>
+                            <button className={isSambanova ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsSambanova, !isSambanova)}>
                                 <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
                             </button>
                         )}
@@ -2563,6 +2562,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }}
                                 />
                                 Quiz
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="quiz_with_choices"
+                                    onChange={() => {
+                                        promptName = 'quiz_with_choices';
+                                    }}
+                                />
+                                Quiz(Choices)
                             </label>
                             <label className="radio-label">
                                 <input
@@ -2655,7 +2665,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </button>
                         )}
                         {showAutoPrompt && (
-                            <button className={autoPrompt ? 'button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
+                            <button className={autoPrompt ? 'llm_button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
                                 {genai_autoprompt_label || 'AutoPrompt'}
                             </button>
                         )}
