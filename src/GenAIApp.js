@@ -1588,8 +1588,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (promptName) {
                 try {
                     const promptsCollection = collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts');
-                    const q = query(promptsCollection, 
-                        where('tag', '==', promptName), 
+                    const q = query(promptsCollection,
+                        where('tag', '==', promptName),
                         orderBy('modifiedDateTime', 'asc'),
                         limit(1)
                     );
@@ -2517,12 +2517,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         )}
                     </div>
                     <div className="button-section" data-title="Predefined Prompts">
-                 
+
                         {/* Add radio buttons for different options */}
                         <div className="radio-options">
                             <label className="radio-label">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="contentType"
                                     value="svg"
                                     onChange={() => {
@@ -2532,41 +2532,41 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 SVG
                             </label>
                             <label className="radio-label">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="contentType"
                                     value="explain"
                                     onChange={() => {
                                         promptName = 'explain';
                                     }}
                                 />
-                                 Explain
+                                Explain
                             </label>
                             <label className="radio-label">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="contentType"
                                     value="questions"
                                     onChange={() => {
                                         promptName = 'practice_questions';
                                     }}
                                 />
-                                 Questions
+                                Questions
                             </label>
                             <label className="radio-label">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="contentType"
                                     value="quiz"
                                     onChange={() => {
                                         promptName = 'quiz';
                                     }}
                                 />
-                                 Quiz
+                                Quiz
                             </label>
                             <label className="radio-label">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="contentType"
                                     value="lyrics"
                                     onChange={() => {
@@ -2576,8 +2576,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 Lyrics
                             </label>
                             <label className="radio-label">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="contentType"
                                     value="answer"
                                     onChange={() => {
@@ -2588,7 +2588,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </label>
                             <label className="radio-label">
                                 <input
-                                    type="radio" 
+                                    type="radio"
                                     name="contentType"
                                     value="search"
                                     onChange={() => {
@@ -2662,8 +2662,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
                             <button
                                 onClick={handleGenerate}
-                                className="generateButton"
-                                style={{ marginLeft: '16px', padding: '9px 9px', fontSize: '16px' }}
+                                className="action_button"
+                                style={{ backgroundColor: 'blue', color: 'white' }}
                                 disabled={
                                     isGenerating ||
                                     isGeneratingGemini ||
@@ -2730,13 +2730,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 setIsGeneratingGeminiFast(false);
                                 firebaseAPI = false;
                             }}
-                            className="fastGenerateButton"
+                            className= {
+                                (isGeneratingGeminiFast) ?
+                                    'action_button_flashing' : 'action_button'
+                            }
                         >
-                            {isGeneratingGeminiFast ? (
-                                <FaSpinner className="spinning" />
-                            ) : (
-                                'Fast GenAI'
-                            )}
+                                Fast GenAI
                         </button>
 
                     </div>
@@ -2746,54 +2745,54 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <>
                                 <button
                                     onClick={() => handleExplain(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightyellow', color: 'black', marginLeft: '10px' }}
+                                    className={
+                                        (isExplain) ?
+                                            'action_button_flashing' : 'action_button'
+                                    }
                                 >
-                                    {isExplain
-                                        ? (<FaSpinner className="spinning" />)
-                                        : ('Explain with Examples')}
+                                    Explain with Examples
                                 </button>
                                 <button
                                     onClick={() => handleAnswer(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                                    className={
+                                        (isAnswer) ?
+                                            'action_button_flashing' : 'action_button'
+                                    }
                                 >
-                                    {isAnswer
-                                        ? (<FaSpinner className="spinning" />)
-                                        : ('Answer with Steps')}
+                                    Answer with Steps
                                 </button>
                                 <button
                                     onClick={() => handlehomeWork(promptInput)}
-                                    className="practiceButton"
+                                    className={
+                                        (ishomeWork) ?
+                                            'action_button_flashing' : 'action_button'
+                                    }
                                 >
-                                    {ishomeWork
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (practiceButtonLabel || 'Practice Questions')}
+                                    {practiceButtonLabel || 'Practice Questions'}
                                 </button>
                                 <button
                                     onClick={() => handleQuiz(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightblue', color: 'black', marginLeft: '10px' }}
+                                    className={
+                                        (isQuiz) ?
+                                            'action_button_flashing' : 'action_button'
+                                    }
                                 >
-                                    {isQuiz
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (quizButtonLabel || 'Trivia/Quiz')}
+                                    {quizButtonLabel || 'Trivia/Quiz'}
                                 </button>
                                 <button
                                     onClick={() => handleMultipleChoiceQuiz(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'lightgreen', color: 'black', marginLeft: '10px' }}
+                                    className={
+                                        (isQuizMultipleChoice) ?
+                                            'action_button_flashing' : 'action_button'
+                                    }
                                 >
-                                    {isQuizMultipleChoice
-                                        ? (<FaSpinner className="spinning" />)
-                                        : (quiz_Multiple_Choices_Label || 'Quiz-Choices')}
+                                    {quiz_Multiple_Choices_Label || 'Quiz-Choices'}
                                 </button>
-                                &nbsp;&nbsp;&nbsp;
                                 {
                                     (showPrint && showYouTubeButton && <button
                                         className={
                                             (isGeneratingYouTubeAudioTitlePrompt) ?
-                                                'button_selected' : 'youtubeButton'
+                                                'action_button_flashing' : 'action_button'
                                         }
                                         onClick={async () => {
                                             //console.log('youtube prompt:', YouTubePrompt);
@@ -2838,32 +2837,24 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             }
 
                                         }}>
-                                        <label className={
-                                            (isGeneratingYouTubeAudioTitlePrompt) ?
-                                                'flashing' : ''
-                                        }>
-                                            {genai_youtube_label || 'YouTube'} <img src={youtubeIcon} alt="youtube" height="15px" style={{ marginRight: '4px' }} />
+                                        <label>
+                                            {genai_youtube_label || 'YouTube'} 
                                         </label>
                                     </button>
                                     )
                                 }
-                                &nbsp;
-                                {showPrint && (<button
-                                    onClick={() => handleLyrics(promptInput)}
-                                    className="practiceButton"
-                                    style={{ backgroundColor: 'brown', color: 'white', marginLeft: '10px' }}
-                                >
-                                    {isLyrics
-                                        ? (<FaSpinner className="spinning" />)
-                                        : 'Lyrics'}
-                                </button>)
-                                }
+                                {showPrint && (
+                                    <button
+                                        onClick={() => handleLyrics(promptInput)}
+                                        className={isLyrics ? 'action_button_flashing' : 'action_button'}
+                                    >
+                                        Lyrics
+                                    </button>
+                                )}
                                 {
-                                    (showPrint && showYouTubeButton && <button
-                                        className={
-                                            (isGeneratingYouTubeAudioTitlePrompt) ?
-                                                'button_selected' : 'storiesButton'
-                                        }
+                                    (showPrint && showYouTubeButton && 
+                                    <button
+                                        className={isGeneratingYouTubeBedtimeStory ? 'action_button_flashing' : 'action_button'}
                                         onClick={async () => {
                                             // console.log('Story Teller prompt:', story_teller_prompt);
                                             if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
@@ -2905,22 +2896,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 console.error("Error fetching questions from Firestore:", error);
                                                 return null;
                                             }
-                                        }
-                                        }>
-                                        <label className={
-                                            (isGeneratingYouTubeBedtimeStory) ?
-                                                'flashing' : ''
-                                        }>
-                                            {genai_stories_label || 'Bedtime Stories'}
-                                        </label>
+                                        }}
+                                    >
+                                        {genai_stories_label || 'Bedtime Stories'}
                                     </button>
                                     )
                                 }
                                 <button
-                                    className={
-                                        (isGeneratingYouTubeMusic) ?
-                                            'button_selected' : 'musicButton'
-                                    }
+                                    className={isGeneratingYouTubeMusic ? 'action_button_flashing' : 'action_button'}
                                     onClick={async () => {
                                         if (promptInput === undefined || promptInput.length < 5) {
                                             alert('ERROR: prompt is blank.');
@@ -2942,17 +2925,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         }
                                     }}
                                 >
-                                    <label className={
-                                        (isGeneratingYouTubeMusic) ?
-                                            'flashing' : ''
-                                    }>
-                                        Title/Audio/Images
-                                    </label>
+                                    Title/Audio/Images
                                 </button>
                             </>
                         )}
                         {showImageDallE3 &&
-                            <button className="imageButton"
+                            <button 
+                                className={isGeneratingImages ? 'action_button_flashing' : 'action_button'}
                                 onClick={async () => {
                                     if (promptInput === undefined || promptInput.length < 5) {
                                         alert('ERROR: prompt is blank.');
@@ -2979,12 +2958,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         return null;
                                     }
                                 }}>
-                                <label className={isGeneratingImages ? 'flashing' : ''}>
-                                    {genai_image_label || 'Latest Info'}
-                                </label>
+                                {genai_image_label || 'Latest Info'}
                             </button>
                         }
-                        <button className="searchButton"
+                        <button 
+                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 if (promptInput === undefined || promptInput.length < 5) {
                                     alert('ERROR: prompt is blank.');
@@ -3015,12 +2993,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     setIsGeneratingPerplexity(false);
                                 }
                             }}>
-                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                {latest_info_label || 'Latest Info'}
-                            </label>
+                            {latest_info_label || 'Latest Info'}
                         </button>
 
-                        <button className="newsButton"
+                        <button 
+                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 setTemperature(0.2);
                                 setTop_p(0.2);
@@ -3054,12 +3031,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     setIsGeneratingGeminiSearch(false);
                                 }
                             }}>
-                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                USA News
-                            </label>
+                            USA News
                         </button>
 
-                        <button className="techNewsButton"
+                        <button 
+                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 setTemperature(0.2);
                                 setTop_p(0.2);
@@ -3093,11 +3069,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     setIsGeneratingGeminiSearch(false);
                                 }
                             }}>
-                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                Tech News
-                            </label>
+                            Tech News
                         </button>
-                        <button className="reviewsButton"
+                        <button 
+                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 setTemperature(0.2);
                                 setTop_p(0.2);
@@ -3123,9 +3098,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     setIsGeneratingGeminiSearch(false);
                                 }
                             }}>
-                            <label className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'flashing' : ''}>
-                                Reviews
-                            </label>
+                            Reviews
                         </button>
                     </div>
                     {showPrint && (
@@ -3138,7 +3111,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             )}
                             {showPrint && (
                                 <button
-                                    className={isLiveAudioPlayingPrompt ? 'button_selected' : 'button'}
+                                    className={isLiveAudioPlayingPrompt ? 'action_button_flashing' : 'action_button'}
                                     onClick={async () => {
                                         try {
                                             setIsLiveAudioPlayingPrompt(true);
@@ -3151,9 +3124,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         }
                                     }}
                                 >
-                                    <label className={isLiveAudioPlayingPrompt ? 'flashing' : ''}>
-                                        <FaPlay /> Speak
-                                    </label>
+                                    <FaPlay /> Speak
                                 </button>
                             )
                             }
@@ -3181,12 +3152,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 </label>
                             }
                             {showPrint && showTTS &&
-                                <button className="button"
+                                <button 
+                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
                                     onClick={() => handleTTSChange()}
                                 >
-                                    <label className={isGeneratingTTS ? 'flashing' : ''}>
-                                        <FaCloudDownloadAlt />                                 {genai_audio_label || 'Audio'}
-                                    </label>
+                                    <FaCloudDownloadAlt /> {genai_audio_label || 'Audio'}
                                 </button>
                             }
                         </div>
@@ -3194,7 +3164,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Practice Questions - Explanation - All Grades">
                         &nbsp;&nbsp;
                         <button
-                            className="publicHomeWork"
+                            className='action_button'
                             onClick={() => window.open('https://genai-all.com', '_blank')}
                             onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                             onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
@@ -3203,7 +3173,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                         &nbsp;&nbsp;&nbsp;&nbsp;
                         <button
-                            className="privateHomeWork"
+                            className='action_button'
                             onClick={() => window.open('https://sharathck.github.io/edugenai', '_blank')}
                             onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                             onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
@@ -3611,9 +3581,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             )}
                                             {item.showRawAnswer ? item.id : ''}
                                             {item.showRawAnswer ? item.id : ''}
-                                                    {item.svg_url?.length > 10 && (
-                                                        <img src={item.svg_url} alt="Generated" />
-                                                    )}
+                                            {item.svg_url?.length > 10 && (
+                                                <img src={item.svg_url} alt="Generated" />
+                                            )}
                                             {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
                                                 item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
                                                     <MdEditor
