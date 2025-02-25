@@ -2672,8 +2672,31 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
                             <button
                                 onClick={handleGenerate}
-                                className="action_button"
-                                style={{ backgroundColor: 'green', color: 'white' }}
+                                className={
+                                    isGenerating ||
+                                    isGeneratingGemini ||
+                                    isGeneratingAnthropic ||
+                                    isGeneratingoMini ||
+                                    isGeneratingo ||
+                                    isGeneratingImage_Dall_e_3 ||
+                                    isGeneratingTTS ||
+                                    isGeneratingMistral ||
+                                    isGeneratingLlama ||
+                                    isGeneratingGptTurbo ||
+                                    isGeneratingGeminiSearch ||
+                                    isGeneratingGeminiFlash ||
+                                    isGeneratingPerplexity ||
+                                    isGeneratingPerplexityFast ||
+                                    isGeneratingCodeStral ||
+                                    isGeneratingGptMini ||
+                                    isGeneratingClaudeHaiku ||
+                                    isGeneratingSambanova ||
+                                    isGeneratingGroq ||
+                                    isGeneratingNova ||
+                                    isGeneratingCerebras ||
+                                    isGeneratingDeepSeek ||
+                                    isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? 'action_button_flashing' : 'action_button'
+                                }
                                 disabled={
                                     isGenerating ||
                                     isGeneratingGemini ||
@@ -2703,33 +2726,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingClaudeThinking
                                 }
                             >
-                                {isGenerating ||
-                                    isGeneratingGemini ||
-                                    isGeneratingAnthropic ||
-                                    isGeneratingoMini ||
-                                    isGeneratingo ||
-                                    isGeneratingImage_Dall_e_3 ||
-                                    isGeneratingTTS ||
-                                    isGeneratingMistral ||
-                                    isGeneratingLlama ||
-                                    isGeneratingGptTurbo ||
-                                    isGeneratingGeminiSearch ||
-                                    isGeneratingGeminiFlash ||
-                                    isGeneratingPerplexity ||
-                                    isGeneratingPerplexityFast ||
-                                    isGeneratingCodeStral ||
-                                    isGeneratingGptMini ||
-                                    isGeneratingClaudeHaiku ||
-                                    isGeneratingSambanova ||
-                                    isGeneratingGroq ||
-                                    isGeneratingNova ||
-                                    isGeneratingCerebras ||
-                                    isGeneratingDeepSeek ||
-                                    isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? (
-                                    <FaSpinner className="spinning" />
-                                ) : (
-                                    'GenAI'
-                                )}
+                               <strong>GenAI</strong>
                             </button>
                         )}
                         <button
@@ -2747,7 +2744,69 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         >
                                 Fast GenAI
                         </button>
-
+                        <button 
+                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
+                            onClick={async () => {
+                                if (promptInput === undefined || promptInput.length < 5) {
+                                    alert('ERROR: prompt is blank.');
+                                    return;
+                                }
+                                setTemperature(0.2);
+                                setTop_p(0.2);
+                                // Need to wait for state updates to be applied
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                googleSearchPromptInput = promptInput + googleSearchPromptText;
+                                setIsGeneratingGeminiSearch(true);
+                                setIsGeneratingPerplexity(true);
+                                try {
+                                    // Call Gemini Search first
+                                    if (searchSource === 'gemini' || searchSource === 'both') {
+                                        await callAPI(modelGeminiSearch, 'google-search');
+                                    }
+                                    if (searchSource !== 'gemini') {
+                                        // Then call Perplexity
+                                        await callAPI(modelPerplexity, 'google-search');
+                                    }
+                                }
+                                catch (error) {
+                                    console.error("Error fetching data:", error);
+                                }
+                                finally {
+                                    setIsGeneratingGeminiSearch(false);
+                                    setIsGeneratingPerplexity(false);
+                                }
+                            }}>
+                            {latest_info_label || 'RealTime GenAI'}
+                        </button>
+                        <button 
+                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
+                            onClick={async () => {
+                                setTemperature(0.2);
+                                setTop_p(0.2);
+                                reviewsPromptInput = promptInput + reviewsPrompt;
+                                // Need to wait for state updates to be applied
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                try {
+                                    if (newsSource === 'perplexity') {
+                                        setIsGeneratingPerplexity(true);
+                                        await callAPI(modelPerplexity, 'reviews');
+                                    }
+                                    else {
+                                        setIsGeneratingGeminiSearch(true);
+                                        await callAPI(modelGeminiSearch, 'reviews');
+                                    }
+                                }
+                                catch (error) {
+                                    console.error("Error fetching reviews:", error);
+                                    alert('Error generating reviews content');
+                                }
+                                finally {
+                                    setIsGeneratingPerplexity(false);
+                                    setIsGeneratingGeminiSearch(false);
+                                }
+                            }}>
+                            GenAI Reviews
+                        </button>
                     </div>
                     )}
                     <div className="button-section" data-title="Gen AI Agents">
@@ -2968,44 +3027,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         return null;
                                     }
                                 }}>
-                                {genai_image_label || 'Latest Info'}
+                                {genai_image_label || 'GenAI Image'}
                             </button>
                         }
-                        <button 
-                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
-                            onClick={async () => {
-                                if (promptInput === undefined || promptInput.length < 5) {
-                                    alert('ERROR: prompt is blank.');
-                                    return;
-                                }
-                                setTemperature(0.2);
-                                setTop_p(0.2);
-                                // Need to wait for state updates to be applied
-                                await new Promise(resolve => setTimeout(resolve, 500));
-                                googleSearchPromptInput = promptInput + googleSearchPromptText;
-                                setIsGeneratingGeminiSearch(true);
-                                setIsGeneratingPerplexity(true);
-                                try {
-                                    // Call Gemini Search first
-                                    if (searchSource === 'gemini' || searchSource === 'both') {
-                                        await callAPI(modelGeminiSearch, 'google-search');
-                                    }
-                                    if (searchSource !== 'gemini') {
-                                        // Then call Perplexity
-                                        await callAPI(modelPerplexity, 'google-search');
-                                    }
-                                }
-                                catch (error) {
-                                    console.error("Error fetching data:", error);
-                                }
-                                finally {
-                                    setIsGeneratingGeminiSearch(false);
-                                    setIsGeneratingPerplexity(false);
-                                }
-                            }}>
-                            {latest_info_label || 'Latest Info'}
-                        </button>
-
                         <button 
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
@@ -3080,35 +3104,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 }
                             }}>
                             Tech News
-                        </button>
-                        <button 
-                            className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
-                            onClick={async () => {
-                                setTemperature(0.2);
-                                setTop_p(0.2);
-                                reviewsPromptInput = promptInput + reviewsPrompt;
-                                // Need to wait for state updates to be applied
-                                await new Promise(resolve => setTimeout(resolve, 500));
-                                try {
-                                    if (newsSource === 'perplexity') {
-                                        setIsGeneratingPerplexity(true);
-                                        await callAPI(modelPerplexity, 'reviews');
-                                    }
-                                    else {
-                                        setIsGeneratingGeminiSearch(true);
-                                        await callAPI(modelGeminiSearch, 'reviews');
-                                    }
-                                }
-                                catch (error) {
-                                    console.error("Error fetching reviews:", error);
-                                    alert('Error generating reviews content');
-                                }
-                                finally {
-                                    setIsGeneratingPerplexity(false);
-                                    setIsGeneratingGeminiSearch(false);
-                                }
-                            }}>
-                            Reviews
                         </button>
                     </div>
                     {showPrint && (
