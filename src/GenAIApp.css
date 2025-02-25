@@ -538,7 +538,18 @@ form {
   font-size: 18px;
 }
 
+.radio-options {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 15px;
+}
 
+.radio-label {
+  padding: 2px 2px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
 .action_button {
   margin-left: 8px;
   margin-right: 10px;

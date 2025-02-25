@@ -1742,7 +1742,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (['homeWork', 'quiz_with_choices', 'quiz'].includes(invocationType)) {
                 setCurrentDocId(generatedDocID);
                 console.log('currenDocID:', currentDocId);
-                setShowhomeWorkApp(true);
+                //setShowhomeWorkApp(true);
             }
             //console.log('Response:', data);
         } catch (error) {
@@ -2657,9 +2657,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         )}
                         {showEditPromptButton && (
                             <button
-                                className="signonpagebutton"
+                                className="action_button"
                                 onClick={() => handleEditPrompt()}
-                                style={{ padding: '10px', background: 'lightblue', fontSize: '16px' }}
+                                style={{  background: 'lightblue', fontSize: '16px' }}
                             >
                                 <FaEdit />
                             </button>
