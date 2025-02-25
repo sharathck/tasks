@@ -3341,7 +3341,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <div className="outputDetailsFormat" key={item.createdDateTime}>
                                 <div className="responseFormat">
                                     <h4 style={{ color: "brown" }}>
-                                        <span style={{ color: "#a3780a", fontWeight: "bold" }}> Prompt </span>
+                                        
+                                        <span style={{ color: "#a3780a", fontWeight: "bold" }}> Response </span>
+                                        {item.llm && item.llm !== 'default' && item.llm !== '' && (
+                                            <span style={{ color: "blue", fontSize: "16px" }}>({item.llm})</span>
+                                        )}
                                         @ <span style={{ color: "black", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
                                         &nbsp;
                                         on <span style={{ color: "grey", fontSize: "16px" }}>{new Date(item.createdDateTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
