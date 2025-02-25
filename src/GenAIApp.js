@@ -3494,8 +3494,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             setCurrentDocId(item.id);
                                             setShowhomeWorkApp(true);
                                         }}
-                                        onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                        onMouseOut={(e) => e.target.style.backgroundColor = '#278cab'}
                                     >
                                         {practicePageButtonLabel || 'Go to Questions/Quiz Page'}
                                     </button>
@@ -3507,9 +3505,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     <button
                                                         className="action_button"
                                                         onClick={() => handleDownload(item.answer, item.model)}
-                                                   
-                                                        onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                                                        onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
                                                     >
                                                         {isDownloading ? (
                                                             <FaSpinner className="spinning" />
