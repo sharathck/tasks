@@ -2521,36 +2521,35 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Predefined Prompts">
 
                         {/* Add radio buttons for different options */}
-                            <label className="radio-label">
-                                <input
-                                    type="radio"
-                                    name="contentType"
-                                    value="explain"
-                                    onChange={() => {
-                                        promptName = 'explain';
-                                    }}
-                                />
-                                Explain
-                            </label>
+                        <div className="radio-options">                            <label className="radio-label">
+                            <input
+                                type="radio"
+                                name="contentType"
+                                value="explain"
+                                onChange={() => {
+                                    promptName = 'explain with examples';
+                                }}
+                            />
+                            Explain
+                        </label>
                             <label className="radio-label">
                                 <input
                                     type="radio"
                                     name="contentType"
                                     value="answer"
                                     onChange={() => {
-                                        promptName = 'answer';
+                                        promptName = 'answer with steps';
                                     }}
                                 />
                                 Answer
                             </label>
-                            <div className="radio-options">
                             <label className="radio-label">
                                 <input
                                     type="radio"
                                     name="contentType"
-                                    value="svg"
+                                    value="diagrams geometry trigonometry graphs..etc"
                                     onChange={() => {
-                                        promptName = 'diagrams-graphs';
+                                        promptName = 'svg';
                                     }}
                                 />
                                 SVG
@@ -2662,7 +2661,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <button
                                 className="action_button"
                                 onClick={() => handleEditPrompt()}
-                                style={{  background: 'lightblue', fontSize: '16px' }}
+                                style={{ background: 'lightblue', fontSize: '16px' }}
                             >
                                 <FaEdit />
                             </button>
@@ -2677,28 +2676,28 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 onClick={handleGenerate}
                                 className={
                                     isGenerating ||
-                                    isGeneratingGemini ||
-                                    isGeneratingAnthropic ||
-                                    isGeneratingoMini ||
-                                    isGeneratingo ||
-                                    isGeneratingImage_Dall_e_3 ||
-                                    isGeneratingTTS ||
-                                    isGeneratingMistral ||
-                                    isGeneratingLlama ||
-                                    isGeneratingGptTurbo ||
-                                    isGeneratingGeminiSearch ||
-                                    isGeneratingGeminiFlash ||
-                                    isGeneratingPerplexity ||
-                                    isGeneratingPerplexityFast ||
-                                    isGeneratingCodeStral ||
-                                    isGeneratingGptMini ||
-                                    isGeneratingClaudeHaiku ||
-                                    isGeneratingSambanova ||
-                                    isGeneratingGroq ||
-                                    isGeneratingNova ||
-                                    isGeneratingCerebras ||
-                                    isGeneratingDeepSeek ||
-                                    isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? 'action_button_flashing' : 'action_button'
+                                        isGeneratingGemini ||
+                                        isGeneratingAnthropic ||
+                                        isGeneratingoMini ||
+                                        isGeneratingo ||
+                                        isGeneratingImage_Dall_e_3 ||
+                                        isGeneratingTTS ||
+                                        isGeneratingMistral ||
+                                        isGeneratingLlama ||
+                                        isGeneratingGptTurbo ||
+                                        isGeneratingGeminiSearch ||
+                                        isGeneratingGeminiFlash ||
+                                        isGeneratingPerplexity ||
+                                        isGeneratingPerplexityFast ||
+                                        isGeneratingCodeStral ||
+                                        isGeneratingGptMini ||
+                                        isGeneratingClaudeHaiku ||
+                                        isGeneratingSambanova ||
+                                        isGeneratingGroq ||
+                                        isGeneratingNova ||
+                                        isGeneratingCerebras ||
+                                        isGeneratingDeepSeek ||
+                                        isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? 'action_button_flashing' : 'action_button'
                                 }
                                 style={{ backgroundColor: 'lightblue' }}
                                 disabled={
@@ -2730,7 +2729,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingClaudeThinking
                                 }
                             >
-                               <strong>GenAI</strong>
+                                <strong>GenAI</strong>
                             </button>
                         )}
                         <button
@@ -2741,14 +2740,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 setIsGeneratingGeminiFast(false);
                                 firebaseAPI = false;
                             }}
-                            className= {
+                            className={
                                 (isGeneratingGeminiFast) ?
                                     'action_button_flashing' : 'action_button'
                             }
                         >
-                                Fast GenAI
+                            Fast GenAI
                         </button>
-                        <button 
+                        <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 if (promptInput === undefined || promptInput.length < 5) {
@@ -2782,7 +2781,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             }}>
                             {latest_info_label || 'RealTime GenAI'}
                         </button>
-                        <button 
+                        <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 setTemperature(0.2);
@@ -2911,7 +2910,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
 
                                         }}>
                                         <label>
-                                            {genai_youtube_label || 'YouTube'} 
+                                            {genai_youtube_label || 'YouTube'}
                                         </label>
                                     </button>
                                     )
@@ -2925,54 +2924,54 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     </button>
                                 )}
                                 {
-                                    (showPrint && showYouTubeButton && 
-                                    <button
-                                        className={isGeneratingYouTubeBedtimeStory ? 'action_button_flashing' : 'action_button'}
-                                        onClick={async () => {
-                                            // console.log('Story Teller prompt:', story_teller_prompt);
-                                            if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
-                                                alert('ERROR: story_teller_prompt is blank.');
-                                                return;
-                                            }
-                                            bedtime_stories_content_input = promptInput + story_teller_prompt;
-                                            setTemperature(1);
-                                            setTop_p(1);
-                                            setSpeechRate(storyTellingSpeechRate);
-                                            setSpeechSilence(storyTellingSpeechSilence);
-                                            // Need to wait for state updates to be applied
-                                            await new Promise(resolve => setTimeout(resolve, 500));
-
-                                            setIsGeneratingYouTubeBedtimeStory(true);
-                                            //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
-                                            await callAPI(modelo, 'bedtime_stories');
-                                            // console.log(' generatedDocID', generatedDocID);
-                                            if (!generatedDocID || generatedDocID.length < 5) {
-                                                alert('ERROR: generatedDocID is not set.');
-                                                return;
-                                            }
-                                            try {
-                                                const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
-                                                const docSnap = await getDoc(docRef);
-
-                                                if (docSnap.exists()) {
-                                                    const firestoreResponseData = docSnap.data().answer;
-                                                    console.log('First fetched data from Firestore:', firestoreResponseData);
-                                                    if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
-                                                        alert('ERROR: Prompt response is not generated.');
-                                                        return;
-                                                    }
-                                                    generateYouTubeUploadInformation(firestoreResponseData, 'stories');
+                                    (showPrint && showYouTubeButton &&
+                                        <button
+                                            className={isGeneratingYouTubeBedtimeStory ? 'action_button_flashing' : 'action_button'}
+                                            onClick={async () => {
+                                                // console.log('Story Teller prompt:', story_teller_prompt);
+                                                if (story_teller_prompt === undefined || story_teller_prompt.length < 5) {
+                                                    alert('ERROR: story_teller_prompt is blank.');
+                                                    return;
                                                 }
-                                                return null;
-                                            }
-                                            catch (error) {
-                                                console.error("Error fetching questions from Firestore:", error);
-                                                return null;
-                                            }
-                                        }}
-                                    >
-                                        {genai_stories_label || 'Bedtime Stories'}
-                                    </button>
+                                                bedtime_stories_content_input = promptInput + story_teller_prompt;
+                                                setTemperature(1);
+                                                setTop_p(1);
+                                                setSpeechRate(storyTellingSpeechRate);
+                                                setSpeechSilence(storyTellingSpeechSilence);
+                                                // Need to wait for state updates to be applied
+                                                await new Promise(resolve => setTimeout(resolve, 500));
+
+                                                setIsGeneratingYouTubeBedtimeStory(true);
+                                                //console.log('bedtime_stories_content_input:', bedtime_stories_content_input);
+                                                await callAPI(modelo, 'bedtime_stories');
+                                                // console.log(' generatedDocID', generatedDocID);
+                                                if (!generatedDocID || generatedDocID.length < 5) {
+                                                    alert('ERROR: generatedDocID is not set.');
+                                                    return;
+                                                }
+                                                try {
+                                                    const docRef = doc(db, 'genai', user.uid, 'MyGenAI', generatedDocID);
+                                                    const docSnap = await getDoc(docRef);
+
+                                                    if (docSnap.exists()) {
+                                                        const firestoreResponseData = docSnap.data().answer;
+                                                        console.log('First fetched data from Firestore:', firestoreResponseData);
+                                                        if (firestoreResponseData === undefined || firestoreResponseData.length < 100) {
+                                                            alert('ERROR: Prompt response is not generated.');
+                                                            return;
+                                                        }
+                                                        generateYouTubeUploadInformation(firestoreResponseData, 'stories');
+                                                    }
+                                                    return null;
+                                                }
+                                                catch (error) {
+                                                    console.error("Error fetching questions from Firestore:", error);
+                                                    return null;
+                                                }
+                                            }}
+                                        >
+                                            {genai_stories_label || 'Bedtime Stories'}
+                                        </button>
                                     )
                                 }
                                 <button
@@ -3003,7 +3002,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             </>
                         )}
                         {showImageDallE3 &&
-                            <button 
+                            <button
                                 className={isGeneratingImages ? 'action_button_flashing' : 'action_button'}
                                 onClick={async () => {
                                     if (promptInput === undefined || promptInput.length < 5) {
@@ -3034,7 +3033,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 {genai_image_label || 'GenAI Image'}
                             </button>
                         }
-                        <button 
+                        <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 setTemperature(0.2);
@@ -3072,7 +3071,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             USA News
                         </button>
 
-                        <button 
+                        <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 setTemperature(0.2);
@@ -3161,7 +3160,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 </label>
                             }
                             {showPrint && showTTS &&
-                                <button 
+                                <button
                                     className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
                                     onClick={() => handleTTSChange()}
                                 >
@@ -3347,7 +3346,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <div className="outputDetailsFormat" key={item.createdDateTime}>
                                 <div className="responseFormat">
                                     <h4 style={{ color: "brown" }}>
-                                        
+
                                         <span style={{ color: "#a3780a", fontWeight: "bold" }}> Response </span>
                                         {item.llm && item.llm !== 'default' && item.llm !== '' && (
                                             <span style={{ color: "blue", fontSize: "16px" }}>({item.llm})</span>
