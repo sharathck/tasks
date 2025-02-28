@@ -29,7 +29,7 @@ let promptName = '';
 let invocationType = '';
 let searchModel = 'All';
 let userID = '';
-let dataLimit = 21;
+let dataLimit = 51;
 let youtubeContentInput = '';
 let generatedDocID = '';
 let ttsGeneratedDocID = '';
@@ -89,11 +89,11 @@ let quizTemperture = 0.1;
 let quizTop_p = 0.1;
 let quizMultipleChoicesTemperture = 0.1;
 let quizMultipleChoicesTop_p = 0.2;
-let modelQuiz = 'o-mini';
-let modelQuizChoices = 'o-mini';
-let modelHomeWork = 'o-mini';
-let modelExplain = 'o-mini';
-let modelAnswer = 'o-mini'; // New variable for answer model
+let modelQuiz = 'gpt';
+let modelQuizChoices = 'gpt';
+let modelHomeWork = 'gpt';
+let modelExplain = 'gpt';
+let modelAnswer = 'gpt'; // New variable for answer model
 let newsSource = 'perplexity';
 let searchSource = 'perplexity';
 let reviewsPrompt = '';
@@ -905,6 +905,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.modelExplain !== undefined) {
                     modelExplain = data.modelExplain;
+                }
+                if (data.modelExplain !== undefined) {
+                    modelAnswer = data.modelAnswer;
                 }
                 if (data.isGeminiFlashFast !== undefined) {
                     setIsGeminiFlashFast(data.isGeminiFlashFast);
@@ -2518,18 +2521,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Predefined Prompts">
 
                         {/* Add radio buttons for different options */}
-                        <div className="radio-options">
-                            <label className="radio-label">
-                                <input
-                                    type="radio"
-                                    name="contentType"
-                                    value="svg"
-                                    onChange={() => {
-                                        promptName = 'svg';
-                                    }}
-                                />
-                                SVG
-                            </label>
                             <label className="radio-label">
                                 <input
                                     type="radio"
@@ -2540,6 +2531,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }}
                                 />
                                 Explain
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="answer"
+                                    onChange={() => {
+                                        promptName = 'answer';
+                                    }}
+                                />
+                                Answer
+                            </label>
+                            <div className="radio-options">
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="svg"
+                                    onChange={() => {
+                                        promptName = 'diagrams-graphs';
+                                    }}
+                                />
+                                SVG
                             </label>
                             <label className="radio-label">
                                 <input
@@ -2584,17 +2598,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }}
                                 />
                                 Lyrics
-                            </label>
-                            <label className="radio-label">
-                                <input
-                                    type="radio"
-                                    name="contentType"
-                                    value="answer"
-                                    onChange={() => {
-                                        promptName = 'answer';
-                                    }}
-                                />
-                                Answer
                             </label>
                             <label className="radio-label">
                                 <input
@@ -2697,6 +2700,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingDeepSeek ||
                                     isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? 'action_button_flashing' : 'action_button'
                                 }
+                                style={{ backgroundColor: 'lightblue' }}
                                 disabled={
                                     isGenerating ||
                                     isGeneratingGemini ||
