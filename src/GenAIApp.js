@@ -246,7 +246,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showNova, setShowNova] = useState(false);
     const [modelNova, setModelNova] = useState('nova');
 
-    // Add these state variables after other model state variables
+    // Add these state variables near other state declarations
     const [labelGpt, setLabelGpt] = useState('ChatGPT');
     const [labelAnthropic, setLabelAnthropic] = useState('Claude');
     const [labelGemini, setLabelGemini] = useState('Gemini');
@@ -3180,6 +3180,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             onClick={() => window.open('https://sharathck.github.io/edugenai', '_blank')}
                         >
                             Personal-HomeWork-All-Grades
+                        </button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button
+                            className='action_button'
+                            onClick={() => window.open('https://sharathck.github.io/kidswork/', '_blank')}
+                        >
+                            Calculations + - x / %
                         </button>
                     </div>
                     {autoPrompt && selectedPrompt && showSourceDocument && (
