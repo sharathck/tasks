@@ -2530,7 +2530,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     promptName = 'explain';
                                 }}
                             />
-                            Explain
+                            Explain with Examples
                         </label>
                             <label className="radio-label">
                                 <input
@@ -2541,7 +2541,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         promptName = 'answer';
                                     }}
                                 />
-                                Answer
+                                Answer with Steps
                             </label>
                             <label className="radio-label">
                                 <input
@@ -2552,7 +2552,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         promptName = 'svg';
                                     }}
                                 />
-                                SVG
+                                Diagrams & Graphs
                             </label>
                             <label className="radio-label">
                                 <input
@@ -2591,12 +2591,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <input
                                     type="radio"
                                     name="contentType"
-                                    value="lyrics"
+                                    value="mom"
                                     onChange={() => {
-                                        promptName = 'lyrics';
+                                        promptName = 'mom';
                                     }}
                                 />
-                                Lyrics
+                                Minutes Of Meeting
                             </label>
                             <label className="radio-label">
                                 <input
