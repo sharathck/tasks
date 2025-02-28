@@ -2525,9 +2525,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <input
                                 type="radio"
                                 name="contentType"
-                                value="explain"
+                                value="explain with examples"
                                 onChange={() => {
-                                    promptName = 'explain with examples';
+                                    promptName = 'explain';
                                 }}
                             />
                             Explain
@@ -2536,9 +2536,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <input
                                     type="radio"
                                     name="contentType"
-                                    value="answer"
+                                    value="answer with steps"
                                     onChange={() => {
-                                        promptName = 'answer with steps';
+                                        promptName = 'answer';
                                     }}
                                 />
                                 Answer
