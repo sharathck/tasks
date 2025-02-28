@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
-import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint } from 'react-icons/fa';
+import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint, FaSyncAlt } from 'react-icons/fa';
 import './GenAIApp.css';
 import { collection, doc, where, addDoc, getDocs, getDoc, query, orderBy, startAfter, limit, updateDoc } from 'firebase/firestore';
 import {
@@ -129,6 +129,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [password, setPassword] = useState('');
     const [uid, setUid] = useState(null);
     const [promptInput, setPromptInput] = useState('');
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
     const [isGeneratingAnthropic, setIsGeneratingAnthropic] = useState(false);
@@ -3207,7 +3208,25 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     <br />
                     <br />
-
+                    <button 
+                        className={isRefreshing ? 'action_button_flashing' : 'action_button'}
+                        onClick={async () => {
+                            const currentUser = auth.currentUser;
+                            if (currentUser) {
+                                setIsRefreshing(true);
+                                await fetchData(currentUser.uid);
+                                await fetchPrompts(currentUser.uid);
+                                await fetchGenAIParameters(currentUser.uid);
+                                await fetchTexts();
+                                setIsRefreshing(false);
+                            } else {
+                                alert('No user is signed in');
+                            }
+                        }}
+                    >
+                        <FaSyncAlt /> Refresh
+                    </button>
+                    &nbsp;&nbsp;
                     {!GenAIParameter ? (
                         showBackToAppButton && (
                             <button className='action_button' onClick={() => setShowMainApp(!showMainApp)}>
