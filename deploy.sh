@@ -8,7 +8,7 @@ echo "Running the script to add stage all changes..."
 git add --all
 
 echo "Running the script to commit changes..."
-git commit -m "Deploying to Firebase"
+git commit -m "Deploying the latest build"
 
 echo "Running the script to push changes..."
 # Try using explicit remote reference and check for errors
@@ -26,8 +26,5 @@ git push origin main || {
   fi
 }
 
-# Deploy to Firebase regardless of git push result
-echo "Deploying to Firebase..."
-firebase deploy
 
 echo "Deployment process completed!"
