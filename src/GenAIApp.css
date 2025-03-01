@@ -389,6 +389,7 @@ html, body {
   animation: flash 1s infinite;
   font-weight: bold;
   background-color: #aad0e3;
+  border-radius: 10px;
 }
 
 @keyframes flash {
@@ -624,6 +625,16 @@ form {
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
   font-size: 16px;
   border-radius: 10px;
+}
+
+.llm_button {
+  padding: 1px 1px;
+  border: 3px solid black;
+  background-color: rgb(246, 250, 247);
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
+  font-size: 16px;
+  border-radius: 10px;
+  margin-left: 8px;
 }
 
 .llm_button_selected {
