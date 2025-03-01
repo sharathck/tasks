@@ -907,7 +907,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.modelExplain !== undefined) {
                     modelExplain = data.modelExplain;
                 }
-                if (data.modelExplain !== undefined) {
+                if (data.modelAnswer !== undefined) {
                     modelAnswer = data.modelAnswer;
                 }
                 if (data.isGeminiFlashFast !== undefined) {
