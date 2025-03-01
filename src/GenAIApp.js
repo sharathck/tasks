@@ -3582,27 +3582,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             {item.svg_url?.length > 10 && (
                                                 <img src={item.svg_url} alt="Generated" />
                                             )}
-                                            {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
-                                                item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
-                                                    <MdEditor
-                                                        value={item.answer || ''} // Add default empty string
-                                                        renderHTML={text => mdParser.render(text || '')} // Add default empty string
-                                                        readOnly={true}
-                                                        config={{
-                                                            view: {
-                                                                menu: false,
-                                                                md: false,
-                                                                html: true
-                                                            },
-                                                            canView: {
-                                                                menu: false,
-                                                                md: false,
-                                                                html: true,
-                                                                fullScreen: false,
-                                                                hideMenu: true
-                                                            }
-                                                        }}
-                                                    />
+                                            {(item.svg_url?.length < 10 || !item.svg_url) && (
+                                                item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
+                                                    item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
+                                                        <MdEditor
+                                                            value={item.answer || ''} // Add default empty string
+                                                            renderHTML={text => mdParser.render(text || '')} // Add default empty string
+                                                            readOnly={true}
+                                                            config={{
+                                                                view: {
+                                                                    menu: false,
+                                                                    md: false,
+                                                                    html: true
+                                                                },
+                                                                canView: {
+                                                                    menu: false,
+                                                                    md: false,
+                                                                    html: true,
+                                                                    fullScreen: false,
+                                                                    hideMenu: true
+                                                                }
+                                                            }}
+                                                        />
+                                                    )
                                                 )
                                             )}
 
