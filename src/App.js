@@ -84,6 +84,9 @@ function App() {
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(isPaused);
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [loopCount, setLoopCount] = useState(0);
+  const loopCountRef = useRef(0);
+  const MAX_LOOPS = 10;
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
@@ -92,11 +95,37 @@ function App() {
     if (audioPlayerRef.current) {
       // Reload and attempt to play whenever the URL changes
       audioPlayerRef.current.load();
+      setLoopCount(0); // Reset loop count when audio changes
+      
+      // Add ended event listener for looping
+      const handleAudioEnded = () => {
+        if (loopCountRef.current < MAX_LOOPS - 1) { // -1 because we already played it once
+          console.log(`Audio loop completed: ${loopCountRef.current + 1} of ${MAX_LOOPS}`);
+          setLoopCount(prevCount => prevCount + 1);
+          audioPlayerRef.current.currentTime = 0;
+          audioPlayerRef.current.play().catch(err => {
+            console.warn('Autoplay prevented on loop', err);
+          });
+        } else {
+          console.log('Finished all loops');
+          setLoopCount(0);
+        }
+      };
+      
+      audioPlayerRef.current.addEventListener('ended', handleAudioEnded);
+      
       audioPlayerRef.current
         .play()
         .catch(err => {
           console.warn('Autoplay prevented', err);
         });
+        
+      // Cleanup function to remove event listener
+      return () => {
+        if (audioPlayerRef.current) {
+          audioPlayerRef.current.removeEventListener('ended', handleAudioEnded);
+        }
+      };
     }
   }, [audioUrl]);
   useEffect(() => {
@@ -841,6 +870,11 @@ function App() {
                 >
                   {isPaused ? 'Play' : 'Pause'}
                 </button>
+                  {loopCount > 0 && (
+                  <span style={{ marginLeft: '10px', color: 'green' }}>
+                    Loop: {loopCount}/{MAX_LOOPS}
+                  </span>
+                )}
               </div>
             )}
             {audioUrl && (
