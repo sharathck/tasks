@@ -179,7 +179,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showTemp, setShowTemp] = useState(false);
     const [showTop_p, setShowTop_p] = useState(false);
-    const [showGptTurbo, setShowGptTurbo] = useState(false);
+    const [showGptTurbo, setShowGptTurbo] = useState(true);
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
     const [showGptMini, setShowGptMini] = useState(false);
@@ -658,7 +658,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setshowGpt(data.showGpt);
                 }
                 if (data.showGptTurbo !== undefined) {
-                    setShowGptTurbo(data.showGptTurbo);
+                   // setShowGptTurbo(data.showGptTurbo);
                 }
                 if (data.showMistral !== undefined) {
                     setShowMistral(data.showMistral);
