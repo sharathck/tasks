@@ -208,7 +208,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelGptMini, setModelGptMini] = useState('gpt-mini');
     const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-think');
-    const [modelGptTurbo, setModelGptTurbo] = useState('gpt-turbo');
+    const [modelGptTurbo, setModelGptTurbo] = useState('gpt-real-time');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-think');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
@@ -254,7 +254,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labeloMini, setLabeloMini] = useState('o3-mini');
     const [labelMistral, setLabelMistral] = useState('Mistral');
     const [labelLlama, setLabelLlama] = useState('Llama(405B)');
-    const [labelGptTurbo, setLabelGptTurbo] = useState('GptTurbo');
+    const [labelGptTurbo, setLabelGptTurbo] = useState('ChatGPT RealTime');
     const [labelGeminiSearch, setLabelGeminiSearch] = useState('SearchGenAI');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
     const [labelGptMini, setLabelGptMini] = useState('GptMini');
@@ -725,7 +725,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setLabelLlama(data.labelLlama);
                 }
                 if (data.labelGptTurbo !== undefined) {
-                    setLabelGptTurbo(data.labelGptTurbo);
+                 //   setLabelGptTurbo(data.labelGptTurbo);
                 }
                 if (data.labelGeminiSearch !== undefined) {
                     setLabelGeminiSearch(data.labelGeminiSearch);
