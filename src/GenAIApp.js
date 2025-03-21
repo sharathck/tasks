@@ -48,6 +48,7 @@ let usaNewsPrompt = '';
 let techNewsPrompt = '';
 let reviewsPromptInput = '';
 let firebaseAPI = false;
+let voiceInstructions = 'Voice Affect: Professional news reader quality pronunciation.\n\nTone: Confident and cheerful.\n\nPacing: Steady and measured.\n\nEmotion: Happy tone.\n\nPronunciation: Clear and precise, with an emphasis on storytelling, ensuring the words are easy to follow and pleasing to listen to.\n\nPauses: Use thoughtful pauses.';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -658,7 +659,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setshowGpt(data.showGpt);
                 }
                 if (data.showGptTurbo !== undefined) {
-                   // setShowGptTurbo(data.showGptTurbo);
+                    // setShowGptTurbo(data.showGptTurbo);
                 }
                 if (data.showMistral !== undefined) {
                     setShowMistral(data.showMistral);
@@ -725,7 +726,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setLabelLlama(data.labelLlama);
                 }
                 if (data.labelGptTurbo !== undefined) {
-                 //   setLabelGptTurbo(data.labelGptTurbo);
+                    //   setLabelGptTurbo(data.labelGptTurbo);
                 }
                 if (data.labelGeminiSearch !== undefined) {
                     setLabelGeminiSearch(data.labelGeminiSearch);
@@ -1903,6 +1904,68 @@ const GenAIApp = ({ sourceImageInformation }) => {
             updateConfiguration();
         }
     };
+
+    // Function to call the TTS API
+    const callGenAITTSAPI = async (message) => {
+
+        setIsGeneratingTTS(true); // Set generating state to true
+        const cleanedArticles = message
+            .replace(/https?:\/\/[^\s]+/g, '')
+            .replace(/http?:\/\/[^\s]+/g, '')
+            .replace(/[#:\-*]/g, ' ')
+            .replace(/[&]/g, ' and ')
+            .replace('```json', '')
+            .replace(/[<>]/g, ' ')
+            //       .replace(/["]/g, '&quot;')
+            //       .replace(/[']/g, '&apos;')
+            .trim();
+        console.log('Calling Gena AI TTS API with message:', cleanedArticles);
+        try {
+            const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: cleanedArticles,
+                    uid: uid,
+                    source: 'ai',
+                    voice_name: 'coral',
+                    chunk_size: 7900,
+                    instructions: voiceInstructions,
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error([`Network response was not ok: ${response.statusText}`]);
+            }
+            let data;
+            // Try to get docID with retry logic
+            let retries = 12;
+            while (retries > 0) {
+                data = await response.json();
+                if (data[0]?.docID) {
+                    // docID exists
+                    break;
+                }
+                // Wait 2 seconds before retrying
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                retries--;
+                if (retries === 0) {
+                    throw new Error('Failed to get document ID after multiple retries');
+                }
+            }
+            ttsGeneratedDocID = data[0].docID;
+        } catch (error) {
+            console.error('Error calling TTS API:', error);
+            alert([`Error: ${error.message}`]);
+        } finally {
+            setIsGeneratingTTS(false); // Reset generating state
+            // Optionally, refresh data
+            fetchData(uid);
+            updateConfiguration();
+        }
+    };
     // Handler for DALL·E 3 Checkbox Change
     const handleDall_e_3Change = async (checked) => {
         setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
@@ -2285,6 +2348,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         break;
                     case 'fastGenAI':
                         vertexAIModelName = data.fullText;
+                        break;
+                    case 'voice_instructions':
+                        voiceInstructions = data.fullText;
                         break;
                     default:
                         break;
@@ -3168,6 +3234,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     <FaCloudDownloadAlt /> {genai_audio_label || 'Audio'}
                                 </button>
                             }
+                            {showPrint && showTTS &&
+                                <button
+                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
+                                    onClick={() => callGenAITTSAPI(promptInput)}
+                                >
+                                    <FaCloudDownloadAlt /> Gen AI Audio
+                                </button>
+                            }
                         </div>
                     )}
                     <div className="button-section" data-title="Practice Questions - Explanation - All Grades">
@@ -3208,7 +3282,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     <br />
                     <br />
-                    <button 
+                    <button
                         className={isRefreshing ? 'action_button_flashing' : 'action_button'}
                         onClick={async () => {
                             const currentUser = auth.currentUser;
