@@ -3517,6 +3517,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     </label>
                                                 </button>
                                                 )}
+                                                {showPrint && (<button
+                                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
+                                                    onClick={() => callGenAITTSAPI(item.answer)}
+                                                >
+                                                    <FaCloudDownloadAlt /> Gen AI Audio
+                                                </button>
+                                                )}
                                             </>
                                         )}
                                         &nbsp; &nbsp; &nbsp;
