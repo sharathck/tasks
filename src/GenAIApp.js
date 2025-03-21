@@ -1920,6 +1920,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling Gena AI TTS API with message:', cleanedArticles);
+        let genaiVoiceName = 'coral';
+        if (voiceName.length < 9) {
+            genaiVoiceName = voiceName;
+        } 
         try {
             const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
                 method: 'POST',
@@ -1930,7 +1934,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     message: cleanedArticles,
                     uid: uid,
                     source: 'ai',
-                    voice_name: 'coral',
+                    voice_name: genaiVoiceName,
                     chunk_size: 7900,
                     instructions: voiceInstructions,
                 })
@@ -3519,7 +3523,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 )}
                                                 {showPrint && (<button
                                                     className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
-                                                    onClick={() => callGenAITTSAPI(item.answer)}
+                                                    onClick={() =>callGenAITTSAPI(item.answer)}
                                                 >
                                                     <FaCloudDownloadAlt /> Gen AI Audio
                                                 </button>
