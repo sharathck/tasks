@@ -24,7 +24,9 @@ const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
 const tasksLimit = 499;
 const fetchMoreTasksLimit = 500;
-
+let voiceInstructions = 'Voice Affect: Professional news reader quality pronunciation.\n\nTone: Confident and cheerful.\n\nPacing: Steady and measured.\n\nEmotion: Happy tone.\n\nPronunciation: Clear and precise, with an emphasis on storytelling, ensuring the words are easy to follow and pleasing to listen to.\n\nPauses: Use thoughtful pauses.';
+let ttsGeneratedDocID = '';
+let genaiVoiceName = 'coral';
 function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -285,6 +287,69 @@ function App() {
 
     }
   };
+
+const callGenAITTSAPI = async (message) => {
+
+    setIsGeneratingTTS(true); // Set generating state to true
+    const cleanedArticles = message
+        .replace(/https?:\/\/[^\s]+/g, '')
+        .replace(/http?:\/\/[^\s]+/g, '')
+        .replace(/[#:\-*]/g, ' ')
+        .replace(/[&]/g, ' and ')
+        .replace('```json', '')
+        .replace(/[<>]/g, ' ')
+        //       .replace(/["]/g, '&quot;')
+        //       .replace(/[']/g, '&apos;')
+        .trim();
+    console.log('Calling Gena AI TTS API with message:', cleanedArticles);
+    let genaiVoiceName = 'coral';
+    if (voiceName.length < 9) {
+        genaiVoiceName = voiceName;
+    } 
+    try {
+        const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: cleanedArticles,
+                uid: user.uid,
+                source: 'ta',
+                voice_name: 'coral',
+                chunk_size: 7900,
+                instructions: 'Voice Affect: You are reading task list of user, Professional news reader quality pronunciation.\n\nTone: Excited and motivated.\n\nPacing: Long Pause after each task for user to comprehend.\n\nEmotion: Excited tone.\n\nPronunciation: Clear and precise, with an emphasis on motivating user to complete tasks.\n\nPauses: Use long pause after each task.',
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error([`Network response was not ok: ${response.statusText}`]);
+        }
+        let data;
+        // Try to get docID with retry logic
+        let retries = 12;
+        while (retries > 0) {
+            data = await response.json();
+            if (data[0]?.docID) {
+                // docID exists
+                break;
+            }
+            // Wait 2 seconds before retrying
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            retries--;
+            if (retries === 0) {
+                throw new Error('Failed to get document ID after multiple retries');
+            }
+        }
+        ttsGeneratedDocID = data[0].docID;
+    } catch (error) {
+        console.error('Error calling TTS API:', error);
+        alert([`Error: ${error.message}`]);
+    } finally {
+        setIsGeneratingTTS(false); // Reset generating state
+        // Optionally, refresh data
+    }
+};
 
   const handleHideRecurrentTasks = async () => {
     setHideRecurrentTasks(!hideRecurrentTasks);
@@ -622,6 +687,18 @@ function App() {
     }
   };
 
+const generateGenAITTS = () => {
+    //   setReaderMode(true);
+    //log the exact date and time
+    const cleanedArticles = articles
+      .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/[#:\-*]/g, ' ') // Remove special characters
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim(); // Remove leading/trailing spaces
+      callGenAITTSAPI(cleanedArticles);
+  };
+  
   const fetchMoreFutureData = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -848,6 +925,8 @@ function App() {
               ? (<FaSpinner className="spinning" />)
               : (<FaVolumeUp />)}</button>}
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
+            &nbsp;
+            <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}>Speak</button>
             &nbsp;
             <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
               <FaAlignJustify />
