@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaSpinner, FaCheck, FaTrash, FaHeadphones, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper, FaSync } from 'react-icons/fa';
+import { FaPlus, FaSpinner, FaHeadphones, FaCheck, FaTrash, FaVolumeDown, FaEdit, FaSignOutAlt, FaFileWord, FaFileAlt, FaCalendar, FaTimes, FaPlay, FaSearch, FaReadme, FaArrowLeft, FaNotesMedical, FaCheckDouble, FaClock, FaAlignJustify, FaBrain, FaConfluence, FaVolumeUp, FaNewspaper, FaSync } from 'react-icons/fa';
 import './App.css';
 import { saveAs } from 'file-saver';
 import * as docx from 'docx';
@@ -98,7 +98,7 @@ function App() {
       // Reload and attempt to play whenever the URL changes
       audioPlayerRef.current.load();
       setLoopCount(0); // Reset loop count when audio changes
-      
+
       // Add ended event listener for looping
       const handleAudioEnded = () => {
         if (loopCountRef.current < MAX_LOOPS - 1) { // -1 because we already played it once
@@ -113,15 +113,15 @@ function App() {
           setLoopCount(0);
         }
       };
-      
+
       audioPlayerRef.current.addEventListener('ended', handleAudioEnded);
-      
+
       audioPlayerRef.current
         .play()
         .catch(err => {
           console.warn('Autoplay prevented', err);
         });
-        
+
       // Cleanup function to remove event listener
       return () => {
         if (audioPlayerRef.current) {
@@ -288,68 +288,68 @@ function App() {
     }
   };
 
-const callGenAITTSAPI = async (message) => {
+  const callGenAITTSAPI = async (message) => {
 
     setIsGeneratingTTS(true); // Set generating state to true
     const cleanedArticles = message
-        .replace(/https?:\/\/[^\s]+/g, '')
-        .replace(/http?:\/\/[^\s]+/g, '')
-        .replace(/[#:\-*]/g, ' ')
-        .replace(/[&]/g, ' and ')
-        .replace('```json', '')
-        .replace(/[<>]/g, ' ')
-        //       .replace(/["]/g, '&quot;')
-        //       .replace(/[']/g, '&apos;')
-        .trim();
+      .replace(/https?:\/\/[^\s]+/g, '')
+      .replace(/http?:\/\/[^\s]+/g, '')
+      .replace(/[#:\-*]/g, ' ')
+      .replace(/[&]/g, ' and ')
+      .replace('```json', '')
+      .replace(/[<>]/g, ' ')
+      //       .replace(/["]/g, '&quot;')
+      //       .replace(/[']/g, '&apos;')
+      .trim();
     console.log('Calling Gena AI TTS API with message:', cleanedArticles);
     let genaiVoiceName = 'coral';
     if (voiceName.length < 9) {
-        genaiVoiceName = voiceName;
-    } 
-    try {
-        const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: cleanedArticles,
-                uid: user.uid,
-                source: 'ta',
-                voice_name: 'coral',
-                chunk_size: 7900,
-                instructions: 'Voice Affect: You are reading task list of user, Professional news reader quality pronunciation.\n\nTone: Excited and motivated.\n\nPacing: Long Pause after each task for user to comprehend.\n\nEmotion: Excited tone.\n\nPronunciation: Clear and precise, with an emphasis on motivating user to complete tasks.\n\nPauses: Use long pause after each task.',
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error([`Network response was not ok: ${response.statusText}`]);
-        }
-        let data;
-        // Try to get docID with retry logic
-        let retries = 12;
-        while (retries > 0) {
-            data = await response.json();
-            if (data[0]?.docID) {
-                // docID exists
-                break;
-            }
-            // Wait 2 seconds before retrying
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            retries--;
-            if (retries === 0) {
-                throw new Error('Failed to get document ID after multiple retries');
-            }
-        }
-        ttsGeneratedDocID = data[0].docID;
-    } catch (error) {
-        console.error('Error calling TTS API:', error);
-        alert([`Error: ${error.message}`]);
-    } finally {
-        setIsGeneratingTTS(false); // Reset generating state
-        // Optionally, refresh data
+      genaiVoiceName = voiceName;
     }
-};
+    try {
+      const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: cleanedArticles,
+          uid: user.uid,
+          source: 'ta',
+          voice_name: 'coral',
+          chunk_size: 7900,
+          instructions: 'Voice Affect: You are reading task list of user, Professional news reader quality pronunciation.\n\nTone: Excited and motivated.\n\nPacing: Long Pause after each task for user to comprehend.\n\nEmotion: Excited tone.\n\nPronunciation: Clear and precise, with an emphasis on motivating user to complete tasks.\n\nPauses: Use long pause after each task.',
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error([`Network response was not ok: ${response.statusText}`]);
+      }
+      let data;
+      // Try to get docID with retry logic
+      let retries = 12;
+      while (retries > 0) {
+        data = await response.json();
+        if (data[0]?.docID) {
+          // docID exists
+          break;
+        }
+        // Wait 2 seconds before retrying
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        retries--;
+        if (retries === 0) {
+          throw new Error('Failed to get document ID after multiple retries');
+        }
+      }
+      ttsGeneratedDocID = data[0].docID;
+    } catch (error) {
+      console.error('Error calling TTS API:', error);
+      alert([`Error: ${error.message}`]);
+    } finally {
+      setIsGeneratingTTS(false); // Reset generating state
+      // Optionally, refresh data
+    }
+  };
 
   const handleHideRecurrentTasks = async () => {
     setHideRecurrentTasks(!hideRecurrentTasks);
@@ -687,7 +687,7 @@ const callGenAITTSAPI = async (message) => {
     }
   };
 
-const generateGenAITTS = () => {
+  const generateGenAITTS = () => {
     //   setReaderMode(true);
     //log the exact date and time
     const cleanedArticles = articles
@@ -696,9 +696,9 @@ const generateGenAITTS = () => {
       .replace(/[#:\-*]/g, ' ') // Remove special characters
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .trim(); // Remove leading/trailing spaces
-      callGenAITTSAPI(cleanedArticles);
+    callGenAITTSAPI(cleanedArticles);
   };
-  
+
   const fetchMoreFutureData = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -921,18 +921,21 @@ const generateGenAITTS = () => {
             <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
             {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
             &nbsp;
-            {<button className={!isLiveAudioPlaying ? 'wide_app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
+            {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
               ? (<FaSpinner className="spinning" />)
               : (<FaVolumeUp />)}</button>}
             {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
             &nbsp;
-            <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}>Speak</button>
+            <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}><FaVolumeDown /></button>
+            <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+              <FaPlay />
+            </button>
             &nbsp;
             <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
               <FaAlignJustify />
             </button>
             &nbsp;
-            <button className={showGenAIApp ? 'app_button_selected' : 'wide_app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+            <button className={showGenAIApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
             </button>
             &nbsp;&nbsp;
@@ -949,7 +952,7 @@ const generateGenAITTS = () => {
                 >
                   {isPaused ? 'Play' : 'Pause'}
                 </button>
-                  {loopCount > 0 && (
+                {loopCount > 0 && (
                   <span style={{ marginLeft: '10px', color: 'green' }}>
                     Loop: {loopCount}/{MAX_LOOPS}
                   </span>
@@ -1074,15 +1077,13 @@ const generateGenAITTS = () => {
                     </button>
                     <br />
                     <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
-              <FaCheckDouble />
-            </button>
-            <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
-              <FaClock />
-            </button>
-
-                    <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
-                      <FaPlay />
+                      <FaCheckDouble />
                     </button>
+                    <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
+                      <FaClock />
+                    </button>
+
+
                     <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
                     <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
                       <FaNotesMedical />
