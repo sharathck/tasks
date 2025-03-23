@@ -1921,30 +1921,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling Gena AI TTS API with message:', cleanedArticles);
-        console.log('promptName:', promptName);
         console.log('selectedPromptFullText:', selectedPromptFullText);
         let genaiVoiceName = 'shimmer';
         let promptNameText = '';
         if (voiceName.length < 9) {
             genaiVoiceName = voiceName;
         } 
-        if (promptName) {
-            try {
-                const promptsCollection = collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts');
-                const q = query(promptsCollection,
-                    where('tag', '==', promptName),
-                    orderBy('modifiedDateTime', 'asc'),
-                    limit(1)
-                );
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    promptNameText = querySnapshot.docs[0].data().fullText;
-                    console.log('Prompt Name Text:', promptNameText);
-                }
-            } catch (error) {
-                console.error('Error getting prompt text:', error);
-            }
-        }
         if (selectedPromptFullText && selectedPromptFullText.includes("Pronunciation:")) {
             genAIVoiceInstructions = selectedPromptFullText;
         }
