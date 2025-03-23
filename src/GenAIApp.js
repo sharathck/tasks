@@ -48,7 +48,7 @@ let usaNewsPrompt = '';
 let techNewsPrompt = '';
 let reviewsPromptInput = '';
 let firebaseAPI = false;
-let voiceInstructions = 'Voice Affect: Professional news reader quality pronunciation.\n\nTone: Confident and cheerful.\n\nPacing: Steady and measured.\n\nEmotion: Happy tone.\n\nPronunciation: Clear and precise, with an emphasis on storytelling, ensuring the words are easy to follow and pleasing to listen to.\n\nPauses: Use thoughtful pauses.';
+let voiceInstructions = 'Voice Affect: Professional news reader quality pronunciation.\n\nTone: Confident and cheerful.\n\nPacing: Steady and measured.\n\nEmotion: Happy tone.\n\nPronunciation: go easy on letter s in words so that you can avoid hissing sound.\n\nPauses: Use thoughtful pauses.';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -1909,6 +1909,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const callGenAITTSAPI = async (message) => {
 
         setIsGeneratingTTS(true); // Set generating state to true
+        let genAIVoiceInstructions = voiceInstructions;
         const cleanedArticles = message
             .replace(/https?:\/\/[^\s]+/g, '')
             .replace(/http?:\/\/[^\s]+/g, '')
@@ -1920,10 +1921,33 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling Gena AI TTS API with message:', cleanedArticles);
+        console.log('promptName:', promptName);
+        console.log('selectedPromptFullText:', selectedPromptFullText);
         let genaiVoiceName = 'shimmer';
+        let promptNameText = '';
         if (voiceName.length < 9) {
             genaiVoiceName = voiceName;
         } 
+        if (promptName) {
+            try {
+                const promptsCollection = collection(db, 'genai', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'prompts');
+                const q = query(promptsCollection,
+                    where('tag', '==', promptName),
+                    orderBy('modifiedDateTime', 'asc'),
+                    limit(1)
+                );
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    promptNameText = querySnapshot.docs[0].data().fullText;
+                    console.log('Prompt Name Text:', promptNameText);
+                }
+            } catch (error) {
+                console.error('Error getting prompt text:', error);
+            }
+        }
+        if (selectedPromptFullText && selectedPromptFullText.includes("Pronunciation:")) {
+            genAIVoiceInstructions = selectedPromptFullText;
+        }
         try {
             const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
                 method: 'POST',
@@ -1936,7 +1960,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     source: 'ai',
                     voice_name: genaiVoiceName,
                     chunk_size: 7900,
-                    instructions: voiceInstructions,
+                    instructions: genAIVoiceInstructions,
                 })
             });
 
