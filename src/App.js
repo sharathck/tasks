@@ -26,7 +26,7 @@ const tasksLimit = 499;
 const fetchMoreTasksLimit = 500;
 let voiceInstructions = 'Voice Affect: You are reading tasks list as Professional news reader quality pronunciation with very slow narration with very long pause after each task.\n\nTone: excited and motivating.\n\nPacing: slow pace with  Long pause after each task or period or sentence for user to comprehend.\n\nEmotion: Happy and cheerful.\n\nPronunciation: Clear and precise, ensuring the words are easy to follow and pleasing to listen to.\n\nPauses: very Long pause after each task or period or sentence for user to comprehend.';
 let ttsGeneratedDocID = '';
-let genaiVoiceName = 'coral';
+let genaiVoiceName = 'shimmer';
 function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -316,7 +316,7 @@ function App() {
           message: cleanedArticles,
           uid: user.uid,
           source: 'ta',
-          voice_name: 'coral',
+          voice_name: 'shimmer',
           chunk_size: 7900,
           instructions: voiceInstructions,
         })

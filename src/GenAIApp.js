@@ -1920,7 +1920,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             //       .replace(/[']/g, '&apos;')
             .trim();
         console.log('Calling Gena AI TTS API with message:', cleanedArticles);
-        let genaiVoiceName = 'coral';
+        let genaiVoiceName = 'shimmer';
         if (voiceName.length < 9) {
             genaiVoiceName = voiceName;
         } 
