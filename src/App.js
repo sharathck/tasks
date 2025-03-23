@@ -318,7 +318,7 @@ function App() {
           source: 'ta',
           voice_name: 'coral',
           chunk_size: 7900,
-          instructions: 'Voice Affect: You are reading task list of user, Professional news reader quality pronunciation.\n\nTone: Excited and motivated.\n\nPacing: Long Pause after each task for user to comprehend.\n\nEmotion: Excited tone.\n\nPronunciation: Clear and precise, with an emphasis on motivating user to complete tasks.\n\nPauses: Use long pause after each task.',
+          instructions: voiceInstructions,
         })
       });
 
