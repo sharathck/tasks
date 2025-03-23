@@ -24,7 +24,7 @@ const isiPhone = /iPhone/i.test(navigator.userAgent);
 console.log(isiPhone);
 const tasksLimit = 499;
 const fetchMoreTasksLimit = 500;
-let voiceInstructions = 'Voice Affect: You are reading tasks list as Professional news reader quality pronunciation with very slow narration with very long pause after each task.\n\nTone: excited and motivating.\n\nPacing: slow pace with  Long pause after each task or period or sentence for user to comprehend.\n\nEmotion: Happy and cheerful.\n\nPronunciation: Clear and precise, ensuring the words are easy to follow and pleasing to listen to.\n\nPauses: very Long pause after each task or period or sentence for user to comprehend.';
+let voiceInstructions = 'Voice Affect: Professional news reader quality. \n\nPacing: slow pace with very Long pause after each period or sentence for user to comprehend.\n\nPronunciation: go easy on letter s in words so that you can avoid hissing sound.\n\nPauses: very Long pause after each task or period or sentence for user to comprehend.';
 let ttsGeneratedDocID = '';
 let genaiVoiceName = 'shimmer';
 function App() {
