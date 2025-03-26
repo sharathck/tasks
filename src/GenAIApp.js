@@ -214,7 +214,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-think');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
-    const [modelClaudeHaiku, setModelClaudeHaiku] = useState('claude-haiku');
+    const [modelDeepSeekChat, setModelDeepSeekChat] = useState('deepseek-chat');
     const [modelGeminiImage, setModelGeminiImage] = useState('gemini-image');
     const [autoPrompt, setAutoPrompt] = useState(false);
     const [showSaveButton, setShowSaveButton] = useState(true);
@@ -223,17 +223,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const mdParser = new MarkdownIt(/* Markdown-it options */);
 
     // Add new state variables for Claude-Haiku
-    const [isClaudeHaiku, setIsClaudeHaiku] = useState(false);
-    const [isGeneratingClaudeHaiku, setIsGeneratingClaudeHaiku] = useState(false);
+    const [isDeepSeekChat, setIsDeepSeekChat] = useState(false);
+    const [isGeneratingDeepSeekChat, setIsGeneratingDeepSeekChat] = useState(false);
 
-    // Add showClaudeHaiku state variable
-    const [showClaudeHaiku, setShowClaudeHaiku] = useState(false); // Set to true or false as needed
+    // Add showDeepSeekChat state variable
+    const [showDeepSeekChat, setShowDeepSeekChat] = useState(false); // Set to true or false as needed
 
-    // Add new state variables for Sambanova
-    const [isSambanova, setIsSambanova] = useState(false);
-    const [isGeneratingSambanova, setIsGeneratingSambanova] = useState(false);
-    const [showSambanova, setShowSambanova] = useState(false);
-    const [modelSambanova, setModelSambanova] = useState('deepseek-think');
+    // Add new state variables for DeepSeekThink
+    const [isDeepSeekThink, setIsDeepSeekThink] = useState(false);
+    const [isGeneratingDeepSeekThink, setIsGeneratingDeepSeekThink] = useState(false);
+    const [showDeepSeekThink, setShowDeepSeekThink] = useState(false);
+    const [modelDeepSeekThink, setModelDeepSeekThink] = useState('deepseek-think');
 
     // Add new state variables near other model state variables
     const [isGroq, setIsGroq] = useState(false);
@@ -263,8 +263,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
     const [labelPerplexity, setLabelPerplexity] = useState('Plxty');
     const [labelCodestral, setLabelCodestral] = useState('CodeStral');
-    const [labelClaudeHaiku, setLabelClaudeHaiku] = useState('Claude-Haiku');
-    const [labelSambanova, setLabelSambanova] = useState('Llama(S)');
+    const [labelDeepSeekChat, setLabelDeepSeekChat] = useState('DeepSeek');
+    const [labelDeepSeekThink, setLabelDeepSeekThink] = useState('DeepSeek Think');
     const [labelNova, setLabelNova] = useState('Nova');
     const [isYouTubeTitle, setIsYouTubeTitle] = useState(false);
     const [isImagesSearch, setIsImagesSearch] = useState(false);
@@ -643,11 +643,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isCodestral !== undefined) {
                     setIsCodestral(data.isCodestral);
                 }
-                if (data.isClaudeHaiku !== undefined) {
-                    setIsClaudeHaiku(data.isClaudeHaiku);
+                if (data.isDeepSeekChat !== undefined) {
+                    setIsDeepSeekChat(data.isDeepSeekChat);
                 }
-                if (data.isSambanova !== undefined) {
-                    setIsSambanova(data.isSambanova);
+                if (data.isDeepSeekThink !== undefined) {
+                    setIsDeepSeekThink(data.isDeepSeekThink);
                 }
                 if (data.showAnthropic !== undefined) {
                     setShowAnthropic(data.showAnthropic);
@@ -692,11 +692,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showoMini !== undefined) {
                     setshowoMini(data.showoMini);
                 }
-                if (data.showClaudeHaiku !== undefined) {
-                    setShowClaudeHaiku(data.showClaudeHaiku);
+                if (data.showDeepSeekChat !== undefined) {
+                    setShowDeepSeekChat(data.showDeepSeekChat);
                 }
-                if (data.showSambanova !== undefined) {
-                    setShowSambanova(data.showSambanova);
+                if (data.showDeepSeekThink !== undefined) {
+                    setShowDeepSeekThink(data.showDeepSeekThink);
                 }
                 if (data.showGroq !== undefined) {
                     setShowGroq(data.showGroq);
@@ -749,11 +749,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelCodestral !== undefined) {
                     setLabelCodestral(data.labelCodestral);
                 }
-                if (data.labelClaudeHaiku !== undefined) {
-                    setLabelClaudeHaiku(data.labelClaudeHaiku);
+                if (data.labelDeepSeekChat !== undefined) {
+                    setLabelDeepSeekChat(data.labelDeepSeekChat);
                 }
-                if (data.labelSambanova !== undefined) {
-                    setLabelSambanova(data.labelSambanova);
+                if (data.labelDeepSeekThink !== undefined) {
+                    setLabelDeepSeekThink(data.labelDeepSeekThink);
                 }
                 if (data.labelNova !== undefined) {
                     setLabelNova(data.labelNova);
@@ -1332,7 +1332,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isDeepSeekChat && !isDeepSeekThink && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
             alert('Please select at least one model.');
             return;
         }
@@ -1342,14 +1342,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelGroq);
         }
 
-        if (isSambanova && showSambanova) {
-            setIsGeneratingSambanova(true); // Set generating state to true
-            callAPI(modelSambanova);
+        if (isDeepSeekThink && showDeepSeekThink) {
+            setIsGeneratingDeepSeekThink(true); // Set generating state to true
+            callAPI(modelDeepSeekThink);
         }
 
-        if (isClaudeHaiku && showClaudeHaiku) {
-            setIsGeneratingClaudeHaiku(true); // Set generating state to true
-            callAPI(modelClaudeHaiku);
+        if (isDeepSeekChat && showDeepSeekChat) {
+            setIsGeneratingDeepSeekChat(true); // Set generating state to true
+            callAPI(modelDeepSeekChat);
         }
 
         if (isClaudeThinking && showClaudeThinking) {
@@ -1469,9 +1469,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     isPerplexityFast,
                     isPerplexity,
                     isCodestral,
-                    isClaudeHaiku,
+                    isDeepSeekChat,
                     iso1,
-                    isSambanova, // Add this line
+                    isDeepSeekThink, // Add this line
                     isGroq,
                     isNova,
                     temperature,
@@ -1499,8 +1499,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     labelPerplexityFast,
                     labelPerplexity,
                     labelCodestral,
-                    labelClaudeHaiku,
-                    labelSambanova,
+                    labelDeepSeekChat,
+                    labelDeepSeekThink,
                     labelNova,
                     isCerebras,
                     labelCerebras,
@@ -1529,9 +1529,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         isPerplexityFast,
                         isPerplexity,
                         isCodestral,
-                        isClaudeHaiku,
+                        isDeepSeekChat,
                         iso1,
-                        isSambanova, // Add this line
+                        isDeepSeekThink, // Add this line
                         isGroq,
                         isNova,
                         temperature,
@@ -1559,8 +1559,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         labelPerplexityFast,
                         labelPerplexity,
                         labelCodestral,
-                        labelClaudeHaiku,
-                        labelSambanova,
+                        labelDeepSeekChat,
+                        labelDeepSeekThink,
                         labelNova,
                         isCerebras,
                         labelCerebras,
@@ -1812,11 +1812,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelCodestralApi) {
                 setIsGeneratingCodeStral(false);
             }
-            if (selectedModel === modelClaudeHaiku) {
-                setIsGeneratingClaudeHaiku(false);
+            if (selectedModel === modelDeepSeekChat) {
+                setIsGeneratingDeepSeekChat(false);
             }
-            if (selectedModel === modelSambanova) {
-                setIsGeneratingSambanova(false);
+            if (selectedModel === modelDeepSeekThink) {
+                setIsGeneratingDeepSeekThink(false);
             }
             if (selectedModel === modelGroq) {
                 setIsGeneratingGroq(false);
@@ -2010,8 +2010,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsPerplexityFast(status);
         setIsPerplexity(status);
         setIsCodestral(status);
-        setIsClaudeHaiku(status);
-        setIsSambanova(status);
+        setIsDeepSeekChat(status);
+        setIsDeepSeekThink(status);
         setIsGroq(status);
         setIsNova(status);
         setIsCerebras(status);
@@ -2513,10 +2513,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingCodeStral ? 'flashing' : ''}>{labelCodestral}</label>
                         </button>
                     )}
-                    {showClaudeHaiku && (
-                        <button className={isClaudeHaiku ? 'llm_button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsClaudeHaiku, !isClaudeHaiku)}>
-                            <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>{labelClaudeHaiku}</label>
+                    {showDeepSeekChat && (
+                        <button className={isDeepSeekChat ? 'llm_button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsDeepSeekChat, !isDeepSeekChat)}>
+                            <label className={isGeneratingDeepSeekChat ? 'flashing' : ''}>{labelDeepSeekChat}</label>
                         </button>
                     )}
                     {showGroq && (
@@ -2589,9 +2589,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <label className={isGeneratingoMini ? 'flashing' : ''}>{labeloMini}</label>
                             </button>
                         )}
-                        {showSambanova && (
-                            <button className={isSambanova ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsSambanova, !isSambanova)}>
-                                <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
+                        {showDeepSeekThink && (
+                            <button className={isDeepSeekThink ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsDeepSeekThink, !isDeepSeekThink)}>
+                                <label className={isGeneratingDeepSeekThink ? 'flashing' : ''}>{labelDeepSeekThink}</label>
                             </button>
                         )}
                     </div>
@@ -2768,8 +2768,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         isGeneratingPerplexityFast ||
                                         isGeneratingCodeStral ||
                                         isGeneratingGptMini ||
-                                        isGeneratingClaudeHaiku ||
-                                        isGeneratingSambanova ||
+                                        isGeneratingDeepSeekChat ||
+                                        isGeneratingDeepSeekThink ||
                                         isGeneratingGroq ||
                                         isGeneratingNova ||
                                         isGeneratingCerebras ||
@@ -2794,8 +2794,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingPerplexityFast ||
                                     isGeneratingCodeStral ||
                                     isGeneratingGptMini ||
-                                    isGeneratingClaudeHaiku ||
-                                    isGeneratingSambanova ||
+                                    isGeneratingDeepSeekChat ||
+                                    isGeneratingDeepSeekThink ||
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
@@ -3403,7 +3403,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="perplexity">Perplexity</option>
                     <option value="codestral">CodeStral</option>
                     <option value="Claude-Haiku">Claude-Haiku</option>
-                    <option value="sambanova-1">Sambanova</option>
+                    <option value="DeepSeekThink-1">DeepSeekThink</option>
                     <option value="groq-mixtral">Groq</option>
                     <option value="nova">Nova</option>
                     <option value="cerebras">Cerebras</option>
