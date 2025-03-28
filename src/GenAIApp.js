@@ -249,7 +249,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelNova, setModelNova] = useState('nova');
 
     // Add these state variables near other state declarations
-    const [labelGpt, setLabelGpt] = useState('ChatGPT');
+    const [labelGpt, setLabelGpt] = useState('GPT');
     const [labelAnthropic, setLabelAnthropic] = useState('Claude');
     const [labelGemini, setLabelGemini] = useState('Gemini');
     const [labeloMini, setLabeloMini] = useState('o3-mini');
@@ -258,7 +258,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labelGptTurbo, setLabelGptTurbo] = useState('ChatGPT RealTime');
     const [labelGeminiSearch, setLabelGeminiSearch] = useState('SearchGenAI');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
-    const [labelChatGptLatest, setLabelChatGptLatest] = useState('ChatGptLatest');
+    const [labelChatGptLatest, setLabelChatGptLatest] = useState('ChatGPT');
     const [labelo, setLabelo] = useState('o1');
     const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
     const [labelPerplexity, setLabelPerplexity] = useState('Plxty');
@@ -1926,7 +1926,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         let promptNameText = '';
         if (voiceName.length < 9) {
             genaiVoiceName = voiceName;
-        } 
+        }
         if (selectedPromptFullText && selectedPromptFullText.includes("Pronunciation:")) {
             genAIVoiceInstructions = selectedPromptFullText;
         }
@@ -2442,6 +2442,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
+                    {showChatGptLatest && (
+                        <button className={isChatGptLatest ? 'llm_button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsChatGptLatest, !isChatGptLatest)}>
+                            <label className={isGeneratingChatGptLatest ? 'flashing' : ''}>{labelChatGptLatest}</label>
+                        </button>
+                    )}
                     {showGpt && (
                         <button className={isOpenAI ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
@@ -2522,12 +2528,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     {showGroq && (
                         <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
                             <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
-                        </button>
-                    )}
-                    {showChatGptLatest && (
-                        <button className={isChatGptLatest ? 'llm_button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsChatGptLatest, !isChatGptLatest)}>
-                            <label className={isGeneratingChatGptLatest ? 'flashing' : ''}>{labelChatGptLatest}</label>
                         </button>
                     )}
                     {showDeepSeek && (
@@ -3529,7 +3529,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 )}
                                                 {showPrint && (<button
                                                     className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
-                                                    onClick={() =>callGenAITTSAPI(item.answer)}
+                                                    onClick={() => callGenAITTSAPI(item.answer)}
                                                 >
                                                     <FaCloudDownloadAlt /> Gen AI Audio
                                                 </button>
