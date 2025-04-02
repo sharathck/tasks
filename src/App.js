@@ -41,8 +41,8 @@ function App() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [showFuture, setShowFuture] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
-  const [showEditButtons, setShowEditButtons] = useState(false);
-  const [showDueDates, setShowDueDates] = useState(false);
+  const [showEditButtons, setShowEditButtons] = useState(true);
+  const [showDueDates, setShowDueDates] = useState(true);
   const [showMoreButton, setShowMoreButton] = useState(false);
   const [showMoreCompletedButton, setShowMoreCompletedButton] = useState(false);
   const [showMoreFutureButton, setShowMoreFutureButton] = useState(false);
@@ -1019,11 +1019,11 @@ function App() {
                               <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                             )}
                             {showDueDates && (
-                              <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                              <span style={{ color: 'orange', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             )}
                           </span>
                           {showEditButtons && (
-                            <button className='app_button' onClick={() => handleEditTask(task)}>
+                            <button className='small_app_button' onClick={() => handleEditTask(task)}>
                               <FaEdit style={{ color: 'blue', backgroundColor: 'whitesmoke' }} />
                             </button>
                           )}
@@ -1119,7 +1119,7 @@ function App() {
                         )}
                         &nbsp;
                         {showDueDates && (
-                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                          <span style={{ color: 'orange', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         )}
                         {showDeleteButtons && (
                           <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
@@ -1144,7 +1144,7 @@ function App() {
                         {renderTaskText(task.task)}
                         &nbsp;
                         {showDueDates && (
-                          <span style={{ color: 'orange' }}> - {task.dueDate.toDate().toLocaleDateString()} _ {task.dueDate.toDate().toLocaleTimeString()}</span>
+                          <span style={{ color: 'orange', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         )}
                         &nbsp;
                         {task.recurrence && task.recurrence !== 'ad-hoc' && (

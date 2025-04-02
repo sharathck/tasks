@@ -136,8 +136,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGeneratingAnthropic, setIsGeneratingAnthropic] = useState(false);
     const [isGeneratingoMini, setisGeneratingoMini] = useState(false);
     const [isGeneratingImage_Dall_e_3, setIsGeneratingImage_Dall_e_3] = useState(false);
-    const [isChatGptLatest, setIsChatGptLatest] = useState(false);
-    const [isGeneratingChatGptLatest, setIsGeneratingChatGptLatest] = useState(false);
+    const [isGptMini, setIsGptMini] = useState(false);
+    const [isGeneratingGptMini, setIsGeneratingGptMini] = useState(false);
     const [isOpenAI, setIsOpenAI] = useState(false);
     const [isAnthropic, setIsAnthropic] = useState(true);
     const [isClaudeThinking, setIsClaudeThinking] = useState(false);
@@ -183,7 +183,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showGptTurbo, setShowGptTurbo] = useState(true);
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
-    const [showChatGptLatest, setShowChatGptLatest] = useState(true);
+    const [showGptMini, setShowGptMini] = useState(false);
     const [showGeminiSearch, setShowGeminiSearch] = useState(false);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
     const [showPerplexityFast, setShowPerplexityFast] = useState(false);
@@ -206,7 +206,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelLlama, setModelLlama] = useState('llama');
     const [modelClaudeThinking, setModelClaudeThinking] = useState('claude-think');
     const [modelMistral, setModelMistral] = useState('mistral');
-    const [modelChatGptLatest, setModelChatGptLatest] = useState('chatgpt-latest');
+    const [modelGptMini, setModelGptMini] = useState('gpt-mini');
     const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-think');
     const [modelGptTurbo, setModelGptTurbo] = useState('gpt-real-time');
@@ -249,7 +249,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelNova, setModelNova] = useState('nova');
 
     // Add these state variables near other state declarations
-    const [labelGpt, setLabelGpt] = useState('GPT');
+    const [labelGpt, setLabelGpt] = useState('ChatGPT');
     const [labelAnthropic, setLabelAnthropic] = useState('Claude');
     const [labelGemini, setLabelGemini] = useState('Gemini');
     const [labeloMini, setLabeloMini] = useState('o3-mini');
@@ -258,7 +258,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labelGptTurbo, setLabelGptTurbo] = useState('ChatGPT RealTime');
     const [labelGeminiSearch, setLabelGeminiSearch] = useState('SearchGenAI');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
-    const [labelChatGptLatest, setLabelChatGptLatest] = useState('ChatGPT');
+    const [labelGptMini, setLabelGptMini] = useState('GptMini');
     const [labelo, setLabelo] = useState('o1');
     const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
     const [labelPerplexity, setLabelPerplexity] = useState('Plxty');
@@ -625,8 +625,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isGptTurbo !== undefined) {
                     setIsGptTurbo(data.isGptTurbo);
                 }
-                if (data.isChatGptLatest !== undefined) {
-                    setIsChatGptLatest(data.isChatGptLatest);
+                if (data.isGptMini !== undefined) {
+                    setIsGptMini(data.isGptMini);
                 }
                 if (data.isGeminiSearch !== undefined) {
                     setIsGeminiSearch(data.isGeminiSearch);
@@ -670,8 +670,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showPerplexity !== undefined) {
                     setShowPerplexity(data.showPerplexity);
                 }
-                if (data.showChatGptLatest !== undefined) {
-                    setShowChatGptLatest(data.showChatGptLatest);
+                if (data.showGptMini !== undefined) {
+                    setShowGptMini(data.showGptMini);
                 }
                 if (data.showGeminiSearch !== undefined) {
                     console.log('Setting showGeminiSearch:', data.showGeminiSearch);
@@ -734,8 +734,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelGeminiFlash !== undefined) {
                     setLabelGeminiFlash(data.labelGeminiFlash);
                 }
-                if (data.labelChatGptLatest !== undefined) {
-                    setLabelChatGptLatest(data.labelChatGptLatest);
+                if (data.labelGptMini !== undefined) {
+                    setLabelGptMini(data.labelGptMini);
                 }
                 if (data.labelo !== undefined) {
                     setLabelo(data.labelo);
@@ -1332,7 +1332,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isChatGptLatest && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isDeepSeekChat && !isDeepSeekThink && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isDeepSeekChat && !isDeepSeekThink && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
             alert('Please select at least one model.');
             return;
         }
@@ -1392,9 +1392,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelMistral);
         }
 
-        if (isChatGptLatest && showChatGptLatest) {
-            setIsGeneratingChatGptLatest(true); // Set generating state to true
-            callAPI(modelChatGptLatest);
+        if (isGptMini && showGptMini) {
+            setIsGeneratingGptMini(true); // Set generating state to true
+            callAPI(modelGptMini);
         }
 
         if (isGeminiSearch && showGeminiSearch) {
@@ -1483,7 +1483,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     voiceName,
                     chunk_size,
                     silence_break,
-                    isChatGptLatest,
+                    isGptMini,
                     labelGroq,
                     labelGpt,
                     labelAnthropic,
@@ -1494,7 +1494,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     labelGptTurbo,
                     labelGeminiSearch,
                     labelGeminiFlash,
-                    labelChatGptLatest,
+                    labelGptMini,
                     labelo,
                     labelPerplexityFast,
                     labelPerplexity,
@@ -1543,7 +1543,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         voiceName,
                         chunk_size,
                         silence_break,
-                        isChatGptLatest,
+                        isGptMini,
                         labelGroq,
                         labelGpt,
                         labelAnthropic,
@@ -1554,7 +1554,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         labelGptTurbo,
                         labelGeminiSearch,
                         labelGeminiFlash,
-                        labelChatGptLatest,
+                        labelGptMini,
                         labelo,
                         labelPerplexityFast,
                         labelPerplexity,
@@ -1794,8 +1794,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelGptTurbo) {
                 setIsGeneratingGptTurbo(false);
             }
-            if (selectedModel === modelChatGptLatest) {
-                setIsGeneratingChatGptLatest(false);
+            if (selectedModel === modelGptMini) {
+                setIsGeneratingGptMini(false);
             }
             if (selectedModel === modelGeminiSearch) {
                 setIsGeneratingGeminiSearch(false);
@@ -1926,7 +1926,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         let promptNameText = '';
         if (voiceName.length < 9) {
             genaiVoiceName = voiceName;
-        }
+        } 
         if (selectedPromptFullText && selectedPromptFullText.includes("Pronunciation:")) {
             genAIVoiceInstructions = selectedPromptFullText;
         }
@@ -2004,7 +2004,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsLlama(status);
         setIsMistral(status);
         setIsGptTurbo(status);
-        setIsChatGptLatest(status);
+        setIsGptMini(status);
         setIsGeminiSearch(status);
         setIsGeminiFlash(status);
         setIsPerplexityFast(status);
@@ -2442,12 +2442,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                    {showChatGptLatest && (
-                        <button className={isChatGptLatest ? 'llm_button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsChatGptLatest, !isChatGptLatest)}>
-                            <label className={isGeneratingChatGptLatest ? 'flashing' : ''}>{labelChatGptLatest}</label>
-                        </button>
-                    )}
                     {showGpt && (
                         <button className={isOpenAI ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
@@ -2528,6 +2522,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     {showGroq && (
                         <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
                             <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
+                        </button>
+                    )}
+                    {showGptMini && (
+                        <button className={isGptMini ? 'llm_button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsGptMini, !isGptMini)}>
+                            <label className={isGeneratingGptMini ? 'flashing' : ''}>{labelGptMini}</label>
                         </button>
                     )}
                     {showDeepSeek && (
@@ -2767,7 +2767,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         isGeneratingPerplexity ||
                                         isGeneratingPerplexityFast ||
                                         isGeneratingCodeStral ||
-                                        isGeneratingChatGptLatest ||
+                                        isGeneratingGptMini ||
                                         isGeneratingDeepSeekChat ||
                                         isGeneratingDeepSeekThink ||
                                         isGeneratingGroq ||
@@ -2793,7 +2793,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingPerplexity ||
                                     isGeneratingPerplexityFast ||
                                     isGeneratingCodeStral ||
-                                    isGeneratingChatGptLatest ||
+                                    isGeneratingGptMini ||
                                     isGeneratingDeepSeekChat ||
                                     isGeneratingDeepSeekThink ||
                                     isGeneratingGroq ||
@@ -3396,7 +3396,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="Mistral-large-2407">Mistral</option>
                     <option value="meta-llama-3.1-405b-instruct">Llama</option>
                     <option value="gpt-4-turbo">GptTurbo</option>
-                    <option value="gpt-4o-mini">ChatGptLatest</option>
+                    <option value="gpt-4o-mini">GptMini</option>
                     <option value="gemini-search">GeminiSearch</option>
                     <option value="gemini-flash">Gemini Flash</option>
                     <option value="perplexity-fast">PerplexityFast</option>
@@ -3529,7 +3529,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 )}
                                                 {showPrint && (<button
                                                     className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
-                                                    onClick={() => callGenAITTSAPI(item.answer)}
+                                                    onClick={() =>callGenAITTSAPI(item.answer)}
                                                 >
                                                     <FaCloudDownloadAlt /> Gen AI Audio
                                                 </button>
