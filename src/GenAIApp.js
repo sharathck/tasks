@@ -220,6 +220,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showSaveButton, setShowSaveButton] = useState(true);
     const [showSourceDocument, setShowSourceDocument] = useState(false);
     const [showYouTubeButton, setShowYouTubeButton] = useState(false);
+    const [showSimpleAIAgents, setShowSimpleAIAgents] = useState(false);
     const mdParser = new MarkdownIt(/* Markdown-it options */);
 
     // Add new state variables for Claude-Haiku
@@ -928,6 +929,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.labelClaudeThinking !== undefined) {
                     setLabelClaudeThinking(data.labelClaudeThinking);
+                }
+
+                if (data.showSimpleAIAgents !== undefined) {
+                    setShowSimpleAIAgents(data.showSimpleAIAgents);
                 }
             });
         } catch (error) {
@@ -2598,18 +2603,18 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Predefined Prompts">
 
                         {/* Add radio buttons for different options */}
-                        <div className="radio-options">                            
-                        <label className="radio-label">
-                            <input
-                                type="radio"
-                                name="contentType"
-                                value="explain with examples"
-                                onChange={() => {
-                                    promptName = 'explain';
-                                }}
-                            />
-                            Explain with Examples
-                        </label>
+                        <div className="radio-options">
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="explain with examples"
+                                    onChange={() => {
+                                        promptName = 'explain';
+                                    }}
+                                />
+                                Explain with Examples
+                            </label>
                             <label className="radio-label">
                                 <input
                                     type="radio"
@@ -2904,7 +2909,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Gen AI Agents">
                         {(showhomeWorkButton && !isAISearch &&
                             <>
-                                <button
+
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleExplain(promptInput)}
                                     className={
                                         (isExplain) ?
@@ -2912,8 +2918,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     Explain with Examples
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleAnswer(promptInput)}
                                     className={
                                         (isAnswer) ?
@@ -2921,8 +2927,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     Answer with Steps
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handlehomeWork(promptInput)}
                                     className={
                                         (ishomeWork) ?
@@ -2930,8 +2936,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     {practiceButtonLabel || 'Practice Questions'}
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleQuiz(promptInput)}
                                     className={
                                         (isQuiz) ?
@@ -2939,8 +2945,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     {quizButtonLabel || 'Trivia/Quiz'}
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleMultipleChoiceQuiz(promptInput)}
                                     className={
                                         (isQuizMultipleChoice) ?
@@ -2948,7 +2954,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     {quiz_Multiple_Choices_Label || 'Quiz-Choices'}
-                                </button>
+                                </button>)}
                                 {
                                     (showPrint && showYouTubeButton && <button
                                         className={
