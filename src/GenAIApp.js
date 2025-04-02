@@ -2598,7 +2598,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Predefined Prompts">
 
                         {/* Add radio buttons for different options */}
-                        <div className="radio-options">                            <label className="radio-label">
+                        <div className="radio-options">                            
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 name="contentType"
@@ -2630,6 +2631,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }}
                                 />
                                 Diagrams & Graphs
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="3D Models"
+                                    onChange={() => {
+                                        promptName = '3D_Model';
+                                    }}
+                                />
+                                3D Model
                             </label>
                             <label className="radio-label">
                                 <input
