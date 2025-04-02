@@ -1000,8 +1000,8 @@ function App() {
                             )}
                           </span>
                           {showEditButtons && (
-                            <button className='small_app_button' onClick={() => handleEditTask(task)}>
-                              <FaEdit style={{ color: 'blue', backgroundColor: 'whitesmoke' }} />
+                            <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => handleEditTask(task)}>
+                              edit
                             </button>
                           )}
                         </>
