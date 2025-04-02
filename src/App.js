@@ -917,35 +917,9 @@ function App() {
           </div>
         ) : (
           <div>
-            {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
-              ? (<FaSpinner className="spinning" />)
-              : (<FaVolumeUp />)}</button>}
-            {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
-            &nbsp;
-            <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}><FaVolumeDown /></button>
-            <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
-              <FaPlay />
-            </button>
-            &nbsp;
-            <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
-              <FaAlignJustify />
-            </button>
-            &nbsp;
-            <button className={showGenAIApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
-              <FaBrain />
-            </button>
-            &nbsp;
-            <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
-              <FaCheckDouble />
-            </button>
-            <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
-              <FaClock />
-            </button>&nbsp;
-            <button className="app_button" onClick={handleRefresh}>
-              <FaSync />
-            </button>
             {audioUrl && (
               <div>
+                <br />
                 <br />
                 <button
                   className={isPaused ? 'button_selected' : 'signoutbutton'}
@@ -959,6 +933,8 @@ function App() {
                     Loop: {loopCount}/{MAX_LOOPS}
                   </span>
                 )}
+                <br />
+                <br />
               </div>
             )}
             {audioUrl && (
@@ -983,7 +959,6 @@ function App() {
                   <FaTimes />
                 </button>
               </div>
-
             )}
             {isGeneratingTTS && <div> <br /> <p>Generating audio...</p> </div>}
             {answerData && (
@@ -1021,7 +996,7 @@ function App() {
                               <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                             )}
                             {showDueDates && (
-                              <span style={{ color: 'orange', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <span style={{ color: 'grey', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             )}
                           </span>
                           {showEditButtons && (
@@ -1058,6 +1033,48 @@ function App() {
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
                 <br />
                 <br />
+                {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
+                  ? (<FaSpinner className="spinning" />)
+                  : (<FaVolumeUp />)}</button>}
+                {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
+                &nbsp;
+                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}><FaVolumeDown /></button>
+                <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
+                  <FaPlay />
+                </button>
+                &nbsp;
+                <button className={showTTSQueueApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+                  <FaAlignJustify />
+                </button>
+                &nbsp;
+                <button className={showGenAIApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+                  <FaBrain />
+                </button>
+                &nbsp;
+                <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
+                  <FaCheckDouble />
+                </button>
+                <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
+                  <FaClock />
+                </button>&nbsp;
+                <br />
+                <br />
+                <button className="app_button" onClick={handleRefresh}>
+                  <FaSync />
+                </button>
+                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
+                <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
+                  <FaNotesMedical />
+                </button>
+                <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
+                  <FaNewspaper />
+                </button>
+                <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+                <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+                {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+                <br />
+                <br />
+                &nbsp;
                 {adminUser && (
                   <div>
                     <button className="button" onClick={showSharedTasks}>
@@ -1077,27 +1094,19 @@ function App() {
                     <button className="button" onClick={showSharathTasks}>
                       {!sharedTasks ? 'Show Sharath Tasks' : 'Hide Sharath Tasks'}
                     </button>
-                    <br />
-                    <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
-                    <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
-                      <FaNotesMedical />
-                    </button>
-                    <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
-                      <FaNewspaper />
-                    </button>
-                    <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
-                    <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-                    {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-                    &nbsp;
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
                   </div>
                 )}
+                <div>
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                </div>
               </div>
             )}
             {showCompleted && (
@@ -1117,7 +1126,7 @@ function App() {
                         )}
                         &nbsp;
                         {showDueDates && (
-                          <span style={{ color: 'orange', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span style={{ color: 'grey', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         )}
                         {showDeleteButtons && (
                           <button onClick={() => handleDeleteTask(task.id, task.task)} className='button_delete_selected'>
@@ -1142,7 +1151,7 @@ function App() {
                         {renderTaskText(task.task)}
                         &nbsp;
                         {showDueDates && (
-                          <span style={{ color: 'orange', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span style={{ color: 'grey', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         )}
                         &nbsp;
                         {task.recurrence && task.recurrence !== 'ad-hoc' && (
