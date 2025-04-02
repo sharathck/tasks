@@ -917,10 +917,6 @@ function App() {
           </div>
         ) : (
           <div>
-            <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
-            <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
-            {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
-            &nbsp;
             {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
               ? (<FaSpinner className="spinning" />)
               : (<FaVolumeUp />)}</button>}
@@ -938,7 +934,13 @@ function App() {
             <button className={showGenAIApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowGenAIApp(!showGenAIApp)}>
               <FaBrain />
             </button>
-            &nbsp;&nbsp;
+            &nbsp;
+            <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
+              <FaCheckDouble />
+            </button>
+            <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
+              <FaClock />
+            </button>&nbsp;
             <button className="app_button" onClick={handleRefresh}>
               <FaSync />
             </button>
@@ -1076,14 +1078,6 @@ function App() {
                       {!sharedTasks ? 'Show Sharath Tasks' : 'Hide Sharath Tasks'}
                     </button>
                     <br />
-                    <button className={showCompleted ? 'app_button_selected' : 'app_button'} onClick={() => setShowCompleted(!showCompleted)}>
-                      <FaCheckDouble />
-                    </button>
-                    <button className={showFuture ? 'app_button_selected' : 'app_button'} onClick={() => setShowFuture(!showFuture)}>
-                      <FaClock />
-                    </button>
-
-
                     <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
                     <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
                       <FaNotesMedical />
@@ -1091,6 +1085,10 @@ function App() {
                     <button className={showArticlesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowArticlesApp(!showArticlesApp)}>
                       <FaNewspaper />
                     </button>
+                    <button className={showDueDates ? 'app_button_selected' : 'app_button'} onClick={() => setShowDueDates(!showDueDates)}><FaCalendar /></button>
+                    <button className={showEditButtons ? 'app_button_selected' : 'app_button'} onClick={() => setShowEditButtons(!showEditButtons)}><FaEdit /></button>
+                    {showEditButtons && (showCompleted || showFuture) && <button className={showDeleteButtons ? 'button_delete_selected' : 'app_button'} onClick={() => setShowDeleteButtons(!showDeleteButtons)}><FaTrash /></button>}
+                    &nbsp;
                     <br />
                     <br />
                     <br />
