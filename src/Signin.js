@@ -113,7 +113,7 @@ function SigninApp() {
     if (user) {
         console.log('Signin component User is signed in:', user.uid);
         console.log('Hostname:', window.location.hostname);
-        if ((user.uid !== 'bTGBBpeYPmPJonItYpUOCYhdIlr1' && user.uid !== 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3') || window.location.hostname.includes('genai') || window.location.hostname.includes('localhost')) {
+        if ((user.uid !== 'bTGBBpeYPmPJonItYpUOCYhdIlr1' && user.uid !== 'qDzUX26K0dgtSMlN9PtCj6Q9L5J3') || window.location.hostname.includes('localhost')) {
             return (
                 <GenAIApp user={user} />
             );
