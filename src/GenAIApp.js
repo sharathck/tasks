@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
-import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint } from 'react-icons/fa';
+import { FaPlay, FaReadme, FaArrowLeft, FaSignOutAlt, FaSpinner, FaCloudDownloadAlt, FaEdit, FaMarkdown, FaEnvelopeOpenText, FaHeadphones, FaYoutube, FaPrint, FaSyncAlt } from 'react-icons/fa';
 import './GenAIApp.css';
 import { collection, doc, where, addDoc, getDocs, getDoc, query, orderBy, startAfter, limit, updateDoc } from 'firebase/firestore';
 import {
@@ -48,6 +48,7 @@ let usaNewsPrompt = '';
 let techNewsPrompt = '';
 let reviewsPromptInput = '';
 let firebaseAPI = false;
+let voiceInstructions = 'Voice Affect: Professional news reader quality pronunciation.\n\nTone: Confident and cheerful.\n\nPacing: Steady and measured.\n\nEmotion: Happy tone.\n\nPronunciation: go easy on letter s in words so that you can avoid hissing sound.\n\nPauses: Use thoughtful pauses.';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
 let autoPromptSeparator = '### all the text from below is strictly for reference and prompt purpose to answer the question asked above this line. ######### '
@@ -129,13 +130,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [password, setPassword] = useState('');
     const [uid, setUid] = useState(null);
     const [promptInput, setPromptInput] = useState('');
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
     const [isGeneratingAnthropic, setIsGeneratingAnthropic] = useState(false);
     const [isGeneratingoMini, setisGeneratingoMini] = useState(false);
     const [isGeneratingImage_Dall_e_3, setIsGeneratingImage_Dall_e_3] = useState(false);
-    const [isGptMini, setIsGptMini] = useState(false);
-    const [isGeneratingGptMini, setIsGeneratingGptMini] = useState(false);
+    const [isChatGPT, setIsChatGPT] = useState(false);
+    const [isGeneratingChatGPT, setIsGeneratingChatGPT] = useState(false);
     const [isOpenAI, setIsOpenAI] = useState(false);
     const [isAnthropic, setIsAnthropic] = useState(true);
     const [isClaudeThinking, setIsClaudeThinking] = useState(false);
@@ -178,10 +180,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [autoPromptLimit, setAutoPromptLimit] = useState(1);
     const [showTemp, setShowTemp] = useState(false);
     const [showTop_p, setShowTop_p] = useState(false);
-    const [showGptTurbo, setShowGptTurbo] = useState(false);
+    const [showGptTurbo, setShowGptTurbo] = useState(true);
     const [showMistral, setShowMistral] = useState(false);
     const [showLlama, setShowLlama] = useState(false);
-    const [showGptMini, setShowGptMini] = useState(false);
+    const [showChatGPT, setShowChatGPT] = useState(true);
     const [showGeminiSearch, setShowGeminiSearch] = useState(false);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
     const [showPerplexityFast, setShowPerplexityFast] = useState(false);
@@ -204,34 +206,35 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelLlama, setModelLlama] = useState('llama');
     const [modelClaudeThinking, setModelClaudeThinking] = useState('claude-think');
     const [modelMistral, setModelMistral] = useState('mistral');
-    const [modelGptMini, setModelGptMini] = useState('gpt-mini');
+    const [modelChatGPT, setModelChatGPT] = useState('chatgpt-latest');
     const [modelGeminiSearch, setModelGeminiSearch] = useState('gemini-search');
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-think');
-    const [modelGptTurbo, setModelGptTurbo] = useState('gpt-turbo');
+    const [modelGptTurbo, setModelGptTurbo] = useState('gpt-real-time');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
     const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-think');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
-    const [modelClaudeHaiku, setModelClaudeHaiku] = useState('claude-haiku');
+    const [modelDeepSeekChat, setModelDeepSeekChat] = useState('deepseek-chat');
     const [modelGeminiImage, setModelGeminiImage] = useState('gemini-image');
     const [autoPrompt, setAutoPrompt] = useState(false);
     const [showSaveButton, setShowSaveButton] = useState(true);
     const [showSourceDocument, setShowSourceDocument] = useState(false);
     const [showYouTubeButton, setShowYouTubeButton] = useState(false);
+    const [showSimpleAIAgents, setShowSimpleAIAgents] = useState(false);
     const mdParser = new MarkdownIt(/* Markdown-it options */);
 
     // Add new state variables for Claude-Haiku
-    const [isClaudeHaiku, setIsClaudeHaiku] = useState(false);
-    const [isGeneratingClaudeHaiku, setIsGeneratingClaudeHaiku] = useState(false);
+    const [isDeepSeekChat, setIsDeepSeekChat] = useState(false);
+    const [isGeneratingDeepSeekChat, setIsGeneratingDeepSeekChat] = useState(false);
 
-    // Add showClaudeHaiku state variable
-    const [showClaudeHaiku, setShowClaudeHaiku] = useState(false); // Set to true or false as needed
+    // Add showDeepSeekChat state variable
+    const [showDeepSeekChat, setShowDeepSeekChat] = useState(false); // Set to true or false as needed
 
-    // Add new state variables for Sambanova
-    const [isSambanova, setIsSambanova] = useState(false);
-    const [isGeneratingSambanova, setIsGeneratingSambanova] = useState(false);
-    const [showSambanova, setShowSambanova] = useState(false);
-    const [modelSambanova, setModelSambanova] = useState('deepseek-think');
+    // Add new state variables for DeepSeekThink
+    const [isDeepSeekThink, setIsDeepSeekThink] = useState(false);
+    const [isGeneratingDeepSeekThink, setIsGeneratingDeepSeekThink] = useState(false);
+    const [showDeepSeekThink, setShowDeepSeekThink] = useState(false);
+    const [modelDeepSeekThink, setModelDeepSeekThink] = useState('deepseek-think');
 
     // Add new state variables near other model state variables
     const [isGroq, setIsGroq] = useState(false);
@@ -253,16 +256,16 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labeloMini, setLabeloMini] = useState('o3-mini');
     const [labelMistral, setLabelMistral] = useState('Mistral');
     const [labelLlama, setLabelLlama] = useState('Llama(405B)');
-    const [labelGptTurbo, setLabelGptTurbo] = useState('GptTurbo');
+    const [labelGptTurbo, setLabelGptTurbo] = useState('ChatGPT RealTime');
     const [labelGeminiSearch, setLabelGeminiSearch] = useState('SearchGenAI');
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
-    const [labelGptMini, setLabelGptMini] = useState('GptMini');
+    const [labelChatGPT, setLabelChatGPT] = useState('ChatGPT');
     const [labelo, setLabelo] = useState('o1');
     const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
     const [labelPerplexity, setLabelPerplexity] = useState('Plxty');
     const [labelCodestral, setLabelCodestral] = useState('CodeStral');
-    const [labelClaudeHaiku, setLabelClaudeHaiku] = useState('Claude-Haiku');
-    const [labelSambanova, setLabelSambanova] = useState('Llama(S)');
+    const [labelDeepSeekChat, setLabelDeepSeekChat] = useState('DeepSeek');
+    const [labelDeepSeekThink, setLabelDeepSeekThink] = useState('DeepSeek Think');
     const [labelNova, setLabelNova] = useState('Nova');
     const [isYouTubeTitle, setIsYouTubeTitle] = useState(false);
     const [isImagesSearch, setIsImagesSearch] = useState(false);
@@ -623,8 +626,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isGptTurbo !== undefined) {
                     setIsGptTurbo(data.isGptTurbo);
                 }
-                if (data.isGptMini !== undefined) {
-                    setIsGptMini(data.isGptMini);
+                if (data.isChatGPT !== undefined) {
+                    setIsChatGPT(data.isChatGPT);
                 }
                 if (data.isGeminiSearch !== undefined) {
                     setIsGeminiSearch(data.isGeminiSearch);
@@ -641,11 +644,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isCodestral !== undefined) {
                     setIsCodestral(data.isCodestral);
                 }
-                if (data.isClaudeHaiku !== undefined) {
-                    setIsClaudeHaiku(data.isClaudeHaiku);
+                if (data.isDeepSeekChat !== undefined) {
+                    setIsDeepSeekChat(data.isDeepSeekChat);
                 }
-                if (data.isSambanova !== undefined) {
-                    setIsSambanova(data.isSambanova);
+                if (data.isDeepSeekThink !== undefined) {
+                    setIsDeepSeekThink(data.isDeepSeekThink);
                 }
                 if (data.showAnthropic !== undefined) {
                     setShowAnthropic(data.showAnthropic);
@@ -657,7 +660,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setshowGpt(data.showGpt);
                 }
                 if (data.showGptTurbo !== undefined) {
-                    setShowGptTurbo(data.showGptTurbo);
+                    // setShowGptTurbo(data.showGptTurbo);
                 }
                 if (data.showMistral !== undefined) {
                     setShowMistral(data.showMistral);
@@ -668,8 +671,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showPerplexity !== undefined) {
                     setShowPerplexity(data.showPerplexity);
                 }
-                if (data.showGptMini !== undefined) {
-                    setShowGptMini(data.showGptMini);
+                if (data.showChatGPT !== undefined) {
+                    setShowChatGPT(data.showChatGPT);
                 }
                 if (data.showGeminiSearch !== undefined) {
                     console.log('Setting showGeminiSearch:', data.showGeminiSearch);
@@ -690,11 +693,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showoMini !== undefined) {
                     setshowoMini(data.showoMini);
                 }
-                if (data.showClaudeHaiku !== undefined) {
-                    setShowClaudeHaiku(data.showClaudeHaiku);
+                if (data.showDeepSeekChat !== undefined) {
+                    setShowDeepSeekChat(data.showDeepSeekChat);
                 }
-                if (data.showSambanova !== undefined) {
-                    setShowSambanova(data.showSambanova);
+                if (data.showDeepSeekThink !== undefined) {
+                    setShowDeepSeekThink(data.showDeepSeekThink);
                 }
                 if (data.showGroq !== undefined) {
                     setShowGroq(data.showGroq);
@@ -724,7 +727,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     setLabelLlama(data.labelLlama);
                 }
                 if (data.labelGptTurbo !== undefined) {
-                    setLabelGptTurbo(data.labelGptTurbo);
+                    //   setLabelGptTurbo(data.labelGptTurbo);
                 }
                 if (data.labelGeminiSearch !== undefined) {
                     setLabelGeminiSearch(data.labelGeminiSearch);
@@ -732,8 +735,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelGeminiFlash !== undefined) {
                     setLabelGeminiFlash(data.labelGeminiFlash);
                 }
-                if (data.labelGptMini !== undefined) {
-                    setLabelGptMini(data.labelGptMini);
+                if (data.labelChatGPT !== undefined) {
+                    setLabelChatGPT(data.labelChatGPT);
                 }
                 if (data.labelo !== undefined) {
                     setLabelo(data.labelo);
@@ -747,11 +750,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelCodestral !== undefined) {
                     setLabelCodestral(data.labelCodestral);
                 }
-                if (data.labelClaudeHaiku !== undefined) {
-                    setLabelClaudeHaiku(data.labelClaudeHaiku);
+                if (data.labelDeepSeekChat !== undefined) {
+                    setLabelDeepSeekChat(data.labelDeepSeekChat);
                 }
-                if (data.labelSambanova !== undefined) {
-                    setLabelSambanova(data.labelSambanova);
+                if (data.labelDeepSeekThink !== undefined) {
+                    setLabelDeepSeekThink(data.labelDeepSeekThink);
                 }
                 if (data.labelNova !== undefined) {
                     setLabelNova(data.labelNova);
@@ -906,7 +909,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.modelExplain !== undefined) {
                     modelExplain = data.modelExplain;
                 }
-                if (data.modelExplain !== undefined) {
+                if (data.modelAnswer !== undefined) {
                     modelAnswer = data.modelAnswer;
                 }
                 if (data.isGeminiFlashFast !== undefined) {
@@ -926,6 +929,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 }
                 if (data.labelClaudeThinking !== undefined) {
                     setLabelClaudeThinking(data.labelClaudeThinking);
+                }
+
+                if (data.showSimpleAIAgents !== undefined) {
+                    setShowSimpleAIAgents(data.showSimpleAIAgents);
                 }
             });
         } catch (error) {
@@ -1330,7 +1337,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isGptMini && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isClaudeHaiku && !isSambanova && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptTurbo && !isChatGPT && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isDeepSeekChat && !isDeepSeekThink && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
             alert('Please select at least one model.');
             return;
         }
@@ -1340,14 +1347,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelGroq);
         }
 
-        if (isSambanova && showSambanova) {
-            setIsGeneratingSambanova(true); // Set generating state to true
-            callAPI(modelSambanova);
+        if (isDeepSeekThink && showDeepSeekThink) {
+            setIsGeneratingDeepSeekThink(true); // Set generating state to true
+            callAPI(modelDeepSeekThink);
         }
 
-        if (isClaudeHaiku && showClaudeHaiku) {
-            setIsGeneratingClaudeHaiku(true); // Set generating state to true
-            callAPI(modelClaudeHaiku);
+        if (isDeepSeekChat && showDeepSeekChat) {
+            setIsGeneratingDeepSeekChat(true); // Set generating state to true
+            callAPI(modelDeepSeekChat);
         }
 
         if (isClaudeThinking && showClaudeThinking) {
@@ -1390,9 +1397,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelMistral);
         }
 
-        if (isGptMini && showGptMini) {
-            setIsGeneratingGptMini(true); // Set generating state to true
-            callAPI(modelGptMini);
+        if (isChatGPT && showChatGPT) {
+            setIsGeneratingChatGPT(true); // Set generating state to true
+            callAPI(modelChatGPT);
         }
 
         if (isGeminiSearch && showGeminiSearch) {
@@ -1467,9 +1474,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     isPerplexityFast,
                     isPerplexity,
                     isCodestral,
-                    isClaudeHaiku,
+                    isDeepSeekChat,
                     iso1,
-                    isSambanova, // Add this line
+                    isDeepSeekThink, // Add this line
                     isGroq,
                     isNova,
                     temperature,
@@ -1481,7 +1488,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     voiceName,
                     chunk_size,
                     silence_break,
-                    isGptMini,
+                    isChatGPT,
                     labelGroq,
                     labelGpt,
                     labelAnthropic,
@@ -1492,13 +1499,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     labelGptTurbo,
                     labelGeminiSearch,
                     labelGeminiFlash,
-                    labelGptMini,
+                    labelChatGPT,
                     labelo,
                     labelPerplexityFast,
                     labelPerplexity,
                     labelCodestral,
-                    labelClaudeHaiku,
-                    labelSambanova,
+                    labelDeepSeekChat,
+                    labelDeepSeekThink,
                     labelNova,
                     isCerebras,
                     labelCerebras,
@@ -1527,9 +1534,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         isPerplexityFast,
                         isPerplexity,
                         isCodestral,
-                        isClaudeHaiku,
+                        isDeepSeekChat,
                         iso1,
-                        isSambanova, // Add this line
+                        isDeepSeekThink, // Add this line
                         isGroq,
                         isNova,
                         temperature,
@@ -1541,7 +1548,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         voiceName,
                         chunk_size,
                         silence_break,
-                        isGptMini,
+                        isChatGPT,
                         labelGroq,
                         labelGpt,
                         labelAnthropic,
@@ -1552,13 +1559,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         labelGptTurbo,
                         labelGeminiSearch,
                         labelGeminiFlash,
-                        labelGptMini,
+                        labelChatGPT,
                         labelo,
                         labelPerplexityFast,
                         labelPerplexity,
                         labelCodestral,
-                        labelClaudeHaiku,
-                        labelSambanova,
+                        labelDeepSeekChat,
+                        labelDeepSeekThink,
                         labelNova,
                         isCerebras,
                         labelCerebras,
@@ -1792,8 +1799,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelGptTurbo) {
                 setIsGeneratingGptTurbo(false);
             }
-            if (selectedModel === modelGptMini) {
-                setIsGeneratingGptMini(false);
+            if (selectedModel === modelChatGPT) {
+                setIsGeneratingChatGPT(false);
             }
             if (selectedModel === modelGeminiSearch) {
                 setIsGeneratingGeminiSearch(false);
@@ -1810,11 +1817,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelCodestralApi) {
                 setIsGeneratingCodeStral(false);
             }
-            if (selectedModel === modelClaudeHaiku) {
-                setIsGeneratingClaudeHaiku(false);
+            if (selectedModel === modelDeepSeekChat) {
+                setIsGeneratingDeepSeekChat(false);
             }
-            if (selectedModel === modelSambanova) {
-                setIsGeneratingSambanova(false);
+            if (selectedModel === modelDeepSeekThink) {
+                setIsGeneratingDeepSeekThink(false);
             }
             if (selectedModel === modelGroq) {
                 setIsGeneratingGroq(false);
@@ -1902,6 +1909,78 @@ const GenAIApp = ({ sourceImageInformation }) => {
             updateConfiguration();
         }
     };
+
+    // Function to call the TTS API
+    const callGenAITTSAPI = async (message) => {
+
+        setIsGeneratingTTS(true); // Set generating state to true
+        let genAIVoiceInstructions = voiceInstructions;
+        const cleanedArticles = message
+            .replace(/https?:\/\/[^\s]+/g, '')
+            .replace(/http?:\/\/[^\s]+/g, '')
+            .replace(/[#:\-*]/g, ' ')
+            .replace(/[&]/g, ' and ')
+            .replace('```json', '')
+            .replace(/[<>]/g, ' ')
+            //       .replace(/["]/g, '&quot;')
+            //       .replace(/[']/g, '&apos;')
+            .trim();
+        console.log('Calling Gena AI TTS API with message:', cleanedArticles);
+        console.log('selectedPromptFullText:', selectedPromptFullText);
+        let genaiVoiceName = 'shimmer';
+        let promptNameText = '';
+        if (voiceName.length < 9) {
+            genaiVoiceName = voiceName;
+        }
+        if (selectedPromptFullText && selectedPromptFullText.includes("Pronunciation:")) {
+            genAIVoiceInstructions = selectedPromptFullText;
+        }
+        try {
+            const response = await fetch(process.env.REACT_APP_TTS_GENAI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: cleanedArticles,
+                    uid: uid,
+                    source: 'ai',
+                    voice_name: genaiVoiceName,
+                    chunk_size: 7900,
+                    instructions: genAIVoiceInstructions,
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error([`Network response was not ok: ${response.statusText}`]);
+            }
+            let data;
+            // Try to get docID with retry logic
+            let retries = 12;
+            while (retries > 0) {
+                data = await response.json();
+                if (data[0]?.docID) {
+                    // docID exists
+                    break;
+                }
+                // Wait 2 seconds before retrying
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                retries--;
+                if (retries === 0) {
+                    throw new Error('Failed to get document ID after multiple retries');
+                }
+            }
+            ttsGeneratedDocID = data[0].docID;
+        } catch (error) {
+            console.error('Error calling TTS API:', error);
+            alert([`Error: ${error.message}`]);
+        } finally {
+            setIsGeneratingTTS(false); // Reset generating state
+            // Optionally, refresh data
+            fetchData(uid);
+            updateConfiguration();
+        }
+    };
     // Handler for DALL·E 3 Checkbox Change
     const handleDall_e_3Change = async (checked) => {
         setIsGeneratingImage_Dall_e_3(true); // Set generating state to true
@@ -1930,14 +2009,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsLlama(status);
         setIsMistral(status);
         setIsGptTurbo(status);
-        setIsGptMini(status);
+        setIsChatGPT(status);
         setIsGeminiSearch(status);
         setIsGeminiFlash(status);
         setIsPerplexityFast(status);
         setIsPerplexity(status);
         setIsCodestral(status);
-        setIsClaudeHaiku(status);
-        setIsSambanova(status);
+        setIsDeepSeekChat(status);
+        setIsDeepSeekThink(status);
         setIsGroq(status);
         setIsNova(status);
         setIsCerebras(status);
@@ -2285,6 +2364,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'fastGenAI':
                         vertexAIModelName = data.fullText;
                         break;
+                    case 'voice_instructions':
+                        voiceInstructions = data.fullText;
+                        break;
                     default:
                         break;
                 }
@@ -2365,10 +2447,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                    {showGpt && (
-                        <button className={isOpenAI ? 'llm_button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
-                            <label className={isGenerating ? 'flashing' : ''}>{labelGpt}</label>
+                    {showChatGPT && (
+                        <button className={isChatGPT ? 'llm_button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsChatGPT, !isChatGPT)}>
+                            <label className={isGeneratingChatGPT ? 'flashing' : ''}>{labelChatGPT}</label>
                         </button>
                     )}
                     {showAnthropic && (
@@ -2387,6 +2469,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         <button className={isNova ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsNova, !isNova)}>
                             <label className={isGeneratingNova ? 'flashing' : ''}>{labelNova}</label>
+                        </button>
+                    )}
+                    {showGpt && (
+                        <button className={isOpenAI ? 'llm_button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsOpenAI, !isOpenAI)}>
+                            <label className={isGenerating ? 'flashing' : ''}>{labelGpt}</label>
                         </button>
                     )}
 
@@ -2436,21 +2524,15 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingCodeStral ? 'flashing' : ''}>{labelCodestral}</label>
                         </button>
                     )}
-                    {showClaudeHaiku && (
-                        <button className={isClaudeHaiku ? 'llm_button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsClaudeHaiku, !isClaudeHaiku)}>
-                            <label className={isGeneratingClaudeHaiku ? 'flashing' : ''}>{labelClaudeHaiku}</label>
+                    {showDeepSeekChat && (
+                        <button className={isDeepSeekChat ? 'llm_button_selected' : 'button'}
+                            onClick={() => handleLLMChange(setIsDeepSeekChat, !isDeepSeekChat)}>
+                            <label className={isGeneratingDeepSeekChat ? 'flashing' : ''}>{labelDeepSeekChat}</label>
                         </button>
                     )}
                     {showGroq && (
                         <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
                             <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
-                        </button>
-                    )}
-                    {showGptMini && (
-                        <button className={isGptMini ? 'llm_button_selected' : 'button'}
-                            onClick={() => handleLLMChange(setIsGptMini, !isGptMini)}>
-                            <label className={isGeneratingGptMini ? 'flashing' : ''}>{labelGptMini}</label>
                         </button>
                     )}
                     {showDeepSeek && (
@@ -2512,26 +2594,27 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <label className={isGeneratingoMini ? 'flashing' : ''}>{labeloMini}</label>
                             </button>
                         )}
-                        {showSambanova && (
-                            <button className={isSambanova ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsSambanova, !isSambanova)}>
-                                <label className={isGeneratingSambanova ? 'flashing' : ''}>{labelSambanova}</label>
+                        {showDeepSeekThink && (
+                            <button className={isDeepSeekThink ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsDeepSeekThink, !isDeepSeekThink)}>
+                                <label className={isGeneratingDeepSeekThink ? 'flashing' : ''}>{labelDeepSeekThink}</label>
                             </button>
                         )}
                     </div>
                     <div className="button-section" data-title="Predefined Prompts">
 
                         {/* Add radio buttons for different options */}
-                        <div className="radio-options">                            <label className="radio-label">
-                            <input
-                                type="radio"
-                                name="contentType"
-                                value="explain with examples"
-                                onChange={() => {
-                                    promptName = 'explain';
-                                }}
-                            />
-                            Explain with Examples
-                        </label>
+                        <div className="radio-options">
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="explain with examples"
+                                    onChange={() => {
+                                        promptName = 'explain';
+                                    }}
+                                />
+                                Explain with Examples
+                            </label>
                             <label className="radio-label">
                                 <input
                                     type="radio"
@@ -2553,6 +2636,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }}
                                 />
                                 Diagrams & Graphs
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="3D Models"
+                                    onChange={() => {
+                                        promptName = '3D_Model';
+                                    }}
+                                />
+                                3D Model
                             </label>
                             <label className="radio-label">
                                 <input
@@ -2690,9 +2784,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         isGeneratingPerplexity ||
                                         isGeneratingPerplexityFast ||
                                         isGeneratingCodeStral ||
-                                        isGeneratingGptMini ||
-                                        isGeneratingClaudeHaiku ||
-                                        isGeneratingSambanova ||
+                                        isGeneratingChatGPT ||
+                                        isGeneratingDeepSeekChat ||
+                                        isGeneratingDeepSeekThink ||
                                         isGeneratingGroq ||
                                         isGeneratingNova ||
                                         isGeneratingCerebras ||
@@ -2716,9 +2810,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingPerplexity ||
                                     isGeneratingPerplexityFast ||
                                     isGeneratingCodeStral ||
-                                    isGeneratingGptMini ||
-                                    isGeneratingClaudeHaiku ||
-                                    isGeneratingSambanova ||
+                                    isGeneratingChatGPT ||
+                                    isGeneratingDeepSeekChat ||
+                                    isGeneratingDeepSeekThink ||
                                     isGeneratingGroq ||
                                     isGeneratingNova ||
                                     isGeneratingCerebras ||
@@ -2815,7 +2909,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <div className="button-section" data-title="Gen AI Agents">
                         {(showhomeWorkButton && !isAISearch &&
                             <>
-                                <button
+
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleExplain(promptInput)}
                                     className={
                                         (isExplain) ?
@@ -2823,8 +2918,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     Explain with Examples
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleAnswer(promptInput)}
                                     className={
                                         (isAnswer) ?
@@ -2832,8 +2927,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     Answer with Steps
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handlehomeWork(promptInput)}
                                     className={
                                         (ishomeWork) ?
@@ -2841,8 +2936,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     {practiceButtonLabel || 'Practice Questions'}
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleQuiz(promptInput)}
                                     className={
                                         (isQuiz) ?
@@ -2850,8 +2945,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     {quizButtonLabel || 'Trivia/Quiz'}
-                                </button>
-                                <button
+                                </button>)}
+                                {showSimpleAIAgents && (<button
                                     onClick={() => handleMultipleChoiceQuiz(promptInput)}
                                     className={
                                         (isQuizMultipleChoice) ?
@@ -2859,7 +2954,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     }
                                 >
                                     {quiz_Multiple_Choices_Label || 'Quiz-Choices'}
-                                </button>
+                                </button>)}
                                 {
                                     (showPrint && showYouTubeButton && <button
                                         className={
@@ -3167,6 +3262,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     <FaCloudDownloadAlt /> {genai_audio_label || 'Audio'}
                                 </button>
                             }
+                            {showPrint && showTTS &&
+                                <button
+                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
+                                    onClick={() => callGenAITTSAPI(promptInput)}
+                                >
+                                    <FaCloudDownloadAlt /> Gen AI Audio
+                                </button>
+                            }
                         </div>
                     )}
                     <div className="button-section" data-title="Practice Questions - Explanation - All Grades">
@@ -3207,7 +3310,25 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     )}
                     <br />
                     <br />
-
+                    <button
+                        className={isRefreshing ? 'action_button_flashing' : 'action_button'}
+                        onClick={async () => {
+                            const currentUser = auth.currentUser;
+                            if (currentUser) {
+                                setIsRefreshing(true);
+                                await fetchData(currentUser.uid);
+                                await fetchPrompts(currentUser.uid);
+                                await fetchGenAIParameters(currentUser.uid);
+                                await fetchTexts();
+                                setIsRefreshing(false);
+                            } else {
+                                alert('No user is signed in');
+                            }
+                        }}
+                    >
+                        <FaSyncAlt /> Refresh
+                    </button>
+                    &nbsp;&nbsp;
                     {!GenAIParameter ? (
                         showBackToAppButton && (
                             <button className='action_button' onClick={() => setShowMainApp(!showMainApp)}>
@@ -3293,14 +3414,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="Mistral-large-2407">Mistral</option>
                     <option value="meta-llama-3.1-405b-instruct">Llama</option>
                     <option value="gpt-4-turbo">GptTurbo</option>
-                    <option value="gpt-4o-mini">GptMini</option>
+                    <option value="gpt-4o-mini">ChatGPT</option>
                     <option value="gemini-search">GeminiSearch</option>
                     <option value="gemini-flash">Gemini Flash</option>
                     <option value="perplexity-fast">PerplexityFast</option>
                     <option value="perplexity">Perplexity</option>
                     <option value="codestral">CodeStral</option>
                     <option value="Claude-Haiku">Claude-Haiku</option>
-                    <option value="sambanova-1">Sambanova</option>
+                    <option value="DeepSeekThink-1">DeepSeekThink</option>
                     <option value="groq-mixtral">Groq</option>
                     <option value="nova">Nova</option>
                     <option value="cerebras">Cerebras</option>
@@ -3422,6 +3543,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     <label className={isGeneratingDownloadableAudio[item.id] ? 'flashing' : ''}>
                                                         <FaCloudDownloadAlt /> Audio
                                                     </label>
+                                                </button>
+                                                )}
+                                                {showPrint && (<button
+                                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
+                                                    onClick={() => callGenAITTSAPI(item.answer)}
+                                                >
+                                                    <FaCloudDownloadAlt /> Gen AI Audio
                                                 </button>
                                                 )}
                                             </>
@@ -3563,27 +3691,29 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             {item.svg_url?.length > 10 && (
                                                 <img src={item.svg_url} alt="Generated" />
                                             )}
-                                            {item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
-                                                item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
-                                                    <MdEditor
-                                                        value={item.answer || ''} // Add default empty string
-                                                        renderHTML={text => mdParser.render(text || '')} // Add default empty string
-                                                        readOnly={true}
-                                                        config={{
-                                                            view: {
-                                                                menu: false,
-                                                                md: false,
-                                                                html: true
-                                                            },
-                                                            canView: {
-                                                                menu: false,
-                                                                md: false,
-                                                                html: true,
-                                                                fullScreen: false,
-                                                                hideMenu: true
-                                                            }
-                                                        }}
-                                                    />
+                                            {(item.svg_url?.length < 10 || !item.svg_url) && (
+                                                item.showRawAnswer ? ((!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && item.answer) : (
+                                                    item.answer && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && (
+                                                        <MdEditor
+                                                            value={item.answer || ''} // Add default empty string
+                                                            renderHTML={text => mdParser.render(text || '')} // Add default empty string
+                                                            readOnly={true}
+                                                            config={{
+                                                                view: {
+                                                                    menu: false,
+                                                                    md: false,
+                                                                    html: true
+                                                                },
+                                                                canView: {
+                                                                    menu: false,
+                                                                    md: false,
+                                                                    html: true,
+                                                                    fullScreen: false,
+                                                                    hideMenu: true
+                                                                }
+                                                            }}
+                                                        />
+                                                    )
                                                 )
                                             )}
 
