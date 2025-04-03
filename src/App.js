@@ -917,6 +917,25 @@ function App() {
           </div>
         ) : (
           <div>
+                <button style={{ color: isLiveAudioPlaying ? 'orange' : 'grey', fontSize: '12px', border: isLiveAudioPlaying ? '3' : '0', backgroundColor: isLiveAudioPlaying ? 'black' : 'white' }} onClick={synthesizeSpeech}>Audio</button>
+                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowAudioApp(!showAudioApp)}>
+                  Queue
+                </button>
+                &nbsp;
+                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+                  Read
+                </button>
+                &nbsp;
+                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+                  Research
+                </button>
+                &nbsp;
+                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowCompleted(!showCompleted)}>
+                  Done
+                </button>
+                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowFuture(!showFuture)}>
+                  Future
+                </button>
             {audioUrl && (
               <div>
                 <br />
