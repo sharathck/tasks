@@ -514,13 +514,16 @@ function App() {
               .replace('<', ' ')
               .replace('>', ' ')
               .replace('"', '&quot;')
-              .replace("'", '&apos;');
+              .replace("'", '&apos;')
+              .replace('.', ` .<break time="${speechSilence}ms" />`);
+            ssml_chunk_clean = ssml_chunk_clean.replace(/([.?!])\s*(?=[A-Z])/g, `$1<break time="${speechSilence}ms" />`);
             let ssml_chunk_final = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" 
                 xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="string">
                 <voice name="${voiceName}">
-                ${ssml_chunk_clean.replace('.', `.<break time="${speechSilence}ms" />`).replace('"Answer"', `?<break time="${speechSilence}ms" />`)}
+                ${ssml_chunk_clean}
                 </voice>
             </speak>`;
+            console.log('SSML chunk:', ssml_chunk_final);
 
           await new Promise((resolve, reject) => {
             synthesizer.speakSsmlAsync(ssml_chunk_final,
