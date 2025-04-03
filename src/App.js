@@ -55,7 +55,7 @@ function App() {
   const [adminUser, setAdminUser] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [speechRate, setSpeechRate] = useState('0%');
-  const [speechSilence, setSpeechSilence] = useState(1900);
+  const [speechSilence, setSpeechSilence] = useState(3900);
   const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
   const [lastTask, setLastTask] = useState(null); // State for the limit of documents to show
   const urlParams = new URLSearchParams(window.location.search);
@@ -444,6 +444,7 @@ function App() {
         // Create chunks and synthesize them sequentially
         const chunks = splitMessage(cleanedArticles);
         const audioBlobs = [];
+
         for (const chunk of chunks) {
           await new Promise((resolve, reject) => {
             synthesizer.speakTextAsync(chunk,
@@ -459,6 +460,82 @@ function App() {
               },
               error => reject(error)
             );
+          });
+        }
+
+        if (audioBlobs.length > 0) {
+          const finalBlob = new Blob(audioBlobs, { type: 'audio/mp3' });
+          setAudioUrl(URL.createObjectURL(finalBlob));
+        }
+      } catch (error) {
+        console.error(`Error synthesizing speech: ${error}`);
+      } finally {
+        setIsLiveAudioPlaying(false);
+      }
+    }
+    catch (error) {
+      console.error(`Error synthesizing speech: ${error}`);
+    }
+    finally {
+      setIsLiveAudioPlaying(false);
+    }
+  };
+
+  const synthesizeSSMLSpeech = async () => {
+    setIsLiveAudioPlaying(!isLiveAudioPlaying);
+    // Clean the text by removing URLs and special characters
+    const cleanedArticles = articles
+      .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/[#:\-*]/g, ' ')
+      .replace(/[&]/g, ' and ')
+      .replace(/[<>]/g, ' ')
+      //       .replace(/["]/g, '&quot;')
+      //       .replace(/[']/g, '&apos;')
+      .trim(); // Remove leading/trailing spaces
+
+    try {
+      try {
+        console.log('Synthesizing speech...' + cleanedArticles);
+        const speechConfig = speechsdk.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+        speechConfig.speechSynthesisOutputFormat = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
+
+        speechConfig.speechSynthesisVoiceName = voiceName;
+        console.log('Voice name:', voiceName);
+        const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+        const synthesizer = new speechsdk.SpeechSynthesizer(speechConfig, null); // No need to pass audioConfig here since we're capturing audio data
+
+        // Create chunks and synthesize them sequentially
+        const chunks = splitMessage(cleanedArticles);
+        const audioBlobs = [];
+        for (const chunk of chunks) {
+
+            let ssml_chunk_clean = chunk.replace('&', ' and ')
+              .replace('<', ' ')
+              .replace('>', ' ')
+              .replace('"', '&quot;')
+              .replace("'", '&apos;');
+            let ssml_chunk_final = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" 
+                xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="string">
+                <voice name="${voiceName}">
+                ${ssml_chunk_clean.replace('.', `.<break time="${speechSilence}ms" />`).replace('"Answer"', `?<break time="${speechSilence}ms" />`)}
+                </voice>
+            </speak>`;
+
+          await new Promise((resolve, reject) => {
+            synthesizer.speakSsmlAsync(ssml_chunk_final,
+              result => {
+              if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                const audioData = result.audioData;
+                const blob = new Blob([audioData], { type: 'audio/mp3' });
+                audioBlobs.push(blob);
+                resolve();
+              } else {
+                reject(new Error('Synthesis failed'));
+              }
+              },
+              error => reject(error)
+            );                
           });
         }
 
@@ -917,7 +994,7 @@ function App() {
           </div>
         ) : (
           <div>
-                <button style={{ color: isLiveAudioPlaying ? 'orange' : 'grey', fontSize: '12px', border: isLiveAudioPlaying ? '3' : '0', backgroundColor: isLiveAudioPlaying ? 'black' : 'white' }} onClick={synthesizeSpeech}>Audio</button>
+                <button style={{ color: isLiveAudioPlaying ? 'orange' : 'grey', fontSize: '12px', border: isLiveAudioPlaying ? '3' : '0', backgroundColor: isLiveAudioPlaying ? 'black' : 'white' }} onClick={synthesizeSSMLSpeech}>Audio</button>
                 <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowAudioApp(!showAudioApp)}>
                   Queue
                 </button>
