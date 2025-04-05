@@ -3225,20 +3225,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     onVoiceChange={setVoiceName} // Handler to update selected voice
                                 />
                             )}
-
-                            // Add text field for speechSilence
-                            {showVoiceSelect && (
-                                <div style={{ marginTop: '10px' }}>
-                                    <label style={{ marginRight: '10px' }}>Speech Silence (ms):</label>
-                                    <input
-                                        type="number"
-                                        value={speechSilence}
-                                        onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
-                                        style={{ width: '80px', padding: '5px', fontSize: '14px' }}
-                                    />
-                                </div>
-                            )}
-
                             {showPrint && (
                                 <button
                                     className={isLiveAudioPlayingPrompt ? 'action_button_flashing' : 'action_button'}

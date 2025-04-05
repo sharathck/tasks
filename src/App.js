@@ -245,7 +245,7 @@ function App() {
     // replace -,*,#,_,`,~,=,^,>,< with empty string
     message = message.replace(/[-*#_`~=^><]/g, '');
     message = message.replace(/https?:\/\/[^\s]+/g, '')
-    message = message.replace(/http?:\/\/[^\s]+/g, '') 
+    message = message.replace(/http?:\/\/[^\s]+/g, '')
     message = message.replace(/[#:\-*]/g, ' ')
     message = message.trim();
     console.log('Calling TTS API with message:', message);
@@ -254,7 +254,7 @@ function App() {
     ttsVoiceName = voiceName;
     if (appUrl.includes('geminitts')) {
       ttsVoiceName = 'en-US-Chirp-HD-F';
-  }
+    }
     try {
       const response = await fetch(appUrl, {
         method: 'POST',
@@ -262,8 +262,8 @@ function App() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: message, 
-          uid: user.uid, 
+          message: message,
+          uid: user.uid,
           source: 'ta',
           chunk_size: 2100,
           voice_name: ttsVoiceName,
@@ -523,35 +523,35 @@ function App() {
         const audioBlobs = [];
         for (const chunk of chunks) {
 
-            let ssml_chunk_clean = chunk.replace('&', ' and ')
-              .replace('<', ' ')
-              .replace('>', ' ')
-              .replace('"', '&quot;')
-              .replace("'", '&apos;')
-              .replace('.', ` .<break time="${speechSilence}ms" />`);
-            ssml_chunk_clean = ssml_chunk_clean.replace(/([.?!])\s*(?=[A-Z])/g, `$1<break time="${speechSilence}ms" />`);
-            let ssml_chunk_final = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" 
+          let ssml_chunk_clean = chunk.replace('&', ' and ')
+            .replace('<', ' ')
+            .replace('>', ' ')
+            .replace('"', '&quot;')
+            .replace("'", '&apos;')
+            .replace('.', ` .<break time="${speechSilence}ms" />`);
+          ssml_chunk_clean = ssml_chunk_clean.replace(/([.?!])\s*(?=[A-Z])/g, `$1<break time="${speechSilence}ms" />`);
+          let ssml_chunk_final = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" 
                 xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="string">
                 <voice name="${voiceName}">
                 ${ssml_chunk_clean}
                 </voice>
             </speak>`;
-            console.log('SSML chunk:', ssml_chunk_final);
+          console.log('SSML chunk:', ssml_chunk_final);
 
           await new Promise((resolve, reject) => {
             synthesizer.speakSsmlAsync(ssml_chunk_final,
               result => {
-              if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-                const audioData = result.audioData;
-                const blob = new Blob([audioData], { type: 'audio/mp3' });
-                audioBlobs.push(blob);
-                resolve();
-              } else {
-                reject(new Error('Synthesis failed'));
-              }
+                if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                  const audioData = result.audioData;
+                  const blob = new Blob([audioData], { type: 'audio/mp3' });
+                  audioBlobs.push(blob);
+                  resolve();
+                } else {
+                  reject(new Error('Synthesis failed'));
+                }
               },
               error => reject(error)
-            );                
+            );
           });
         }
 
@@ -763,7 +763,7 @@ function App() {
       .replace(/[#:\-*]/g, ' ') // Remove special characters
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .trim(); // Remove leading/trailing spaces
-      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
+    callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
   };
   const generateGoogleTTS = () => {
     //   setReaderMode(true);
@@ -774,7 +774,7 @@ function App() {
       .replace(/[#:\-*]/g, ' ') // Remove special characters
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .trim(); // Remove leading/trailing spaces
-      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_GEMINI_API_URL);
+    callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_GEMINI_API_URL);
   };
   const generateGenAITTS = () => {
     //   setReaderMode(true);
@@ -1006,25 +1006,25 @@ function App() {
           </div>
         ) : (
           <div>
-                <button style={{ color: isLiveAudioPlaying ? 'orange' : 'grey', fontSize: '12px', border: isLiveAudioPlaying ? '3' : '0', backgroundColor: isLiveAudioPlaying ? 'black' : 'white' }} onClick={synthesizeSSMLSpeech}>Audio</button>
-                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowAudioApp(!showAudioApp)}>
-                  Queue
-                </button>
-                &nbsp;
-                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
-                  Articles
-                </button>
-                &nbsp;
-                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowGenAIApp(!showGenAIApp)}>
-                  Research
-                </button>
-                &nbsp;
-                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowCompleted(!showCompleted)}>
-                  Done
-                </button>
-                <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowFuture(!showFuture)}>
-                  Future
-                </button>
+            <button style={{ color: isLiveAudioPlaying ? 'orange' : 'grey', fontSize: '12px', border: isLiveAudioPlaying ? '3' : '0', backgroundColor: isLiveAudioPlaying ? 'black' : 'white' }} onClick={synthesizeSSMLSpeech}>Audio</button>
+            <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowAudioApp(!showAudioApp)}>
+              Queue
+            </button>
+            &nbsp;
+            <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
+              Articles
+            </button>
+            &nbsp;
+            <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowGenAIApp(!showGenAIApp)}>
+              Research
+            </button>
+            &nbsp;
+            <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowCompleted(!showCompleted)}>
+              Done
+            </button>
+            <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowFuture(!showFuture)}>
+              Future
+            </button>
             {audioUrl && (
               <div>
                 <br />
@@ -1138,6 +1138,16 @@ function App() {
                   selectedVoice={voiceName} // Current selected voice
                   onVoiceChange={setVoiceName} // Handler to update selected voice
                 /> &nbsp;
+
+                <div style={{ marginTop: '10px' }}>
+                  <label style={{ marginRight: '10px' }}>Speech Silence (ms):</label>
+                  <input
+                    type="number"
+                    value={speechSilence}
+                    onChange={(e) => setSpeechSilence(parseInt(e.target.value))}
+                    style={{ width: '80px', padding: '5px', fontSize: '14px' }}
+                  />
+                </div>
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
                 <br />
                 <br />
@@ -1147,7 +1157,7 @@ function App() {
                 {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
 
                 &nbsp;
-                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}><FaVolumeDown /></button>
+                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}>GenAITTS</button>
                 <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                   <FaPlay />
                 </button>
@@ -1172,7 +1182,7 @@ function App() {
                   <FaSync />
                 </button>
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGoogleTTS}> GoogleTTS </button>
-                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
+                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}>AzureTTS</button>
                 <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
                   <FaNotesMedical />
                 </button>
