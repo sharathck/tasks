@@ -3368,7 +3368,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         fontSize: '14px',
                         color: '#666',
                     }}>
-                        <ReactMarkdown>{noteText}</ReactMarkdown>
                     </div>
                 </div>
 

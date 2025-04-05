@@ -1011,7 +1011,7 @@ function App() {
                 </button>
                 &nbsp;
                 <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
-                  Read
+                  Articles
                 </button>
                 &nbsp;
                 <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowGenAIApp(!showGenAIApp)}>
