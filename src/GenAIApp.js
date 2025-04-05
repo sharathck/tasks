@@ -3533,7 +3533,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     <div style={{ color: "green", fontWeight: "bold" }}>
                                         {item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts' && (
                                             <>
-                                                {(!isiPhone && showPrint &&
+                                                {(!isiPhone && showPrint && (!item.voiceName || !item.voiceName?.length > 2) && 
                                                     <button
                                                         className={isLiveAudioPlaying[item.id] ? 'action_button_flashing' : 'action_button'}
                                                         onClick={async () => {
@@ -3552,7 +3552,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     </button>
                                                 )}
 
-                                                {showPrint && (<button
+                                                {showPrint && (!item.voiceName || !item.voiceName?.length > 2) && (<button
                                                     className={isGeneratingDownloadableAudio[item.id] ? 'action_button_flashing' : 'action_button'}
                                                     onClick={async () => {
                                                         setIsGeneratingDownloadableAudio(prev => ({ ...prev, [item.id]: true }));
@@ -3565,11 +3565,18 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                     </label>
                                                 </button>
                                                 )}
-                                                {showPrint && (<button
+                                                {showPrint && (!item.voiceName || !item.voiceName?.length > 2) && (<button
                                                     className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
                                                     onClick={() => callGenAITTSAPI(item.answer)}
                                                 >
                                                     <FaCloudDownloadAlt /> Gen AI Audio
+                                                </button>
+                                                )}
+                                                {showPrint && (!item.voiceName || !item.voiceName?.length > 2) && (<button
+                                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
+                                                    onClick={() => callTTSAPI(item.answer, process.env.REACT_APP_TTS_GEMINI_API_URL)}
+                                                >
+                                                    <FaCloudDownloadAlt /> Gemini Audio
                                                 </button>
                                                 )}
                                             </>
@@ -3593,7 +3600,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         {showPrint && (<span style={{ color: "darkblue", fontSize: "16px" }}> {item.answer?.length || 0} </span>
                                         )}
                                         &nbsp; &nbsp;
-                                        {showPrint && (
+                                        {showPrint && (!item.voiceName || (!item.voiceName || !item.voiceName?.length > 2)) && (
                                             <button
                                                 edge="end"
                                                 aria-label="print answer"
@@ -3687,7 +3694,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 <span style={{ color: "black", fontSize: "16px" }}> invocationType : <strong>{item.invocationType}</strong></span>
                                             )}
                                             &nbsp; &nbsp;
-                                            {(item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button className="action_button"
+                                            {((!item.voiceName || !item.voiceName?.length > 2) && item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts') && (!['homeWork', 'quiz_with_choices', 'quiz'].includes(item.invocationType)) && showDownloadTextButton && (<button className="action_button"
                                                 onClick={() => {
                                                     const plainText = (item.answer || '')
                                                         .replace(/[#*~`>-]/g, '')
@@ -3706,8 +3713,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                                 Download Text
                                             </button>
                                             )}
+                                            <br />
                                             {item.showRawAnswer ? item.id : ''}
                                             {item.showRawAnswer ? item.id : ''}
+                                            {item.voiceName?.length > 2 && (
+                                                <audio src={item.answer.match(/\((https?:\/\/[^\s)]+)\)/)[1]} controls style={{ marginBottom: '10px' }} />
+                                            )}
                                             {item.svg_url?.length > 10 && (
                                                 <img src={item.svg_url} alt="Generated" />
                                             )}
