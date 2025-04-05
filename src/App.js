@@ -27,6 +27,7 @@ const fetchMoreTasksLimit = 500;
 let voiceInstructions = 'Voice Affect: Professional news reader quality. \n\nPacing: slow pace with very Long pause after each period or sentence for user to comprehend.\n\nPronunciation: go easy on letter s in words so that you can avoid hissing sound.\n\nPauses: very Long pause after each task or period or sentence for user to comprehend.';
 let ttsGeneratedDocID = '';
 let genaiVoiceName = 'shimmer';
+let voiceModel = 'azure-tts';
 function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -89,6 +90,8 @@ function App() {
   const [loopCount, setLoopCount] = useState(0);
   const loopCountRef = useRef(0);
   const MAX_LOOPS = 10;
+  let ttsVoiceName = 'en-US-EvelynNeural';
+
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
@@ -241,10 +244,17 @@ function App() {
     message = message.replace(/&nbsp;/g, ' '); // Replace &nbsp; with space
     // replace -,*,#,_,`,~,=,^,>,< with empty string
     message = message.replace(/[-*#_`~=^><]/g, '');
-
+    message = message.replace(/https?:\/\/[^\s]+/g, '')
+    message = message.replace(/http?:\/\/[^\s]+/g, '') 
+    message = message.replace(/[#:\-*]/g, ' ')
+    message = message.trim();
     console.log('Calling TTS API with message:', message);
     console.log('Calling TTS API with appUrl:', appUrl, 'voiceName:', voiceName);
-
+    console.log('Calling TTS API with user:', user.uid);
+    ttsVoiceName = voiceName;
+    if (appUrl.includes('geminitts')) {
+      ttsVoiceName = 'en-US-Chirp-HD-F';
+  }
     try {
       const response = await fetch(appUrl, {
         method: 'POST',
@@ -252,8 +262,10 @@ function App() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: message, uid: user.uid, source: 'ta',
-          voice_name: voiceName,
+          message: message, 
+          uid: user.uid, 
+          source: 'ta',
+          voice_name: ttsVoiceName,
           silence_break: speechSilence,
           prosody_rate: speechRate
         })
@@ -741,7 +753,6 @@ function App() {
     });
     setEditTask(null);
   };
-
   const generateTTS = () => {
     //   setReaderMode(true);
     //log the exact date and time
@@ -751,22 +762,19 @@ function App() {
       .replace(/[#:\-*]/g, ' ') // Remove special characters
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .trim(); // Remove leading/trailing spaces
-
-    if (cleanedArticles.length > 2) {
-      /* const chunks = [];
-       for (let i = 0; i < promptInput.length; i += 3999) {
-         chunks.push(promptInput.substring(i, i + 3999));
-       }
-       for (const chunk of chunks) {
-         callTTSAPI(chunk);
-       }*/
       callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_SSML_API_URL);
-    }
-    else {
-      callTTSAPI(cleanedArticles, 'https://us-central1-reviewtext-ad5c6.cloudfunctions.net/function-18');
-    }
   };
-
+  const generateGoogleTTS = () => {
+    //   setReaderMode(true);
+    //log the exact date and time
+    const cleanedArticles = articles
+      .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/http?:\/\/[^\s]+/g, '') // Remove URLs
+      .replace(/[#:\-*]/g, ' ') // Remove special characters
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim(); // Remove leading/trailing spaces
+      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_GENAI_API_URL);
+  };
   const generateGenAITTS = () => {
     //   setReaderMode(true);
     //log the exact date and time
@@ -1136,6 +1144,7 @@ function App() {
                   ? (<FaSpinner className="spinning" />)
                   : (<FaVolumeUp />)}</button>}
                 {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
+
                 &nbsp;
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}><FaVolumeDown /></button>
                 <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
@@ -1161,6 +1170,7 @@ function App() {
                 <button className="app_button" onClick={handleRefresh}>
                   <FaSync />
                 </button>
+                <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGoogleTTS}> GoogleTTS </button>
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaHeadphones /></button>
                 <button className={showNotesApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowNotesApp(!showNotesApp)}>
                   <FaNotesMedical />

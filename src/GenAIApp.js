@@ -99,6 +99,7 @@ let newsSource = 'perplexity';
 let searchSource = 'perplexity';
 let reviewsPrompt = '';
 let vertexAIModelName = '';
+let ttsVoiceName = 'en-US-EvelynNeural';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -1849,6 +1850,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const callTTSAPI = async (message, apiUrl) => {
 
         setIsGeneratingTTS(true); // Set generating state to true
+        ttsVoiceName = voiceName;
         const cleanedArticles = message
             .replace(/https?:\/\/[^\s]+/g, '')
             .replace(/http?:\/\/[^\s]+/g, '')
@@ -1862,6 +1864,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
         console.log('Calling TTS API with message:', cleanedArticles, ' voiceName:', voiceName);
         console.log('speechSilence:', speechSilenceRef.current.valueOf(), 'speechRate:', speechRateRef.current.valueOf());
         console.log('API URL:', apiUrl);
+        if (!apiUrl) {
+            console.error('API URL is not defined');
+            return;
+        }
+        if (!cleanedArticles) {
+            console.error('Cleaned articles are empty');
+            return;
+        }
+        if (apiUrl.includes('geminitts')) {
+            ttsVoiceName = 'en-US-Chirp-HD-F';
+        }
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -1872,7 +1885,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     message: cleanedArticles,
                     uid: uid,
                     source: 'ai',
-                    voice_name: voiceName,
+                    voice_name: ttsVoiceName,
                     chunk_size: chunk_size,
                     silence_break: speechSilenceRef.current.valueOf(),
                     prosody_rate: speechRateRef.current.valueOf()
@@ -3273,7 +3286,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             {showPrint && showTTS &&
                                 <button
                                     className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
-                                    onClick={() => { setVoiceName('Gemini-Chirp'); callTTSAPI(promptInput, process.env.REACT_APP_TTS_GEMINI_API_URL); }}
+                                    onClick={() => { callTTSAPI(promptInput, process.env.REACT_APP_TTS_GEMINI_API_URL); }}
                                 >
                                     <FaCloudDownloadAlt /> Gemini Audio
                                 </button>
