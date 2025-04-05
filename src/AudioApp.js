@@ -119,7 +119,7 @@ function AudioApp() {
       const genaiCollection = collection(db, 'genai', userID, 'MyGenAI');
       let q = query(
         genaiCollection,
-        where('model', '==', 'azure-tts'),
+        where('model', 'in', ['azure-tts', 'genai-tts', 'google-tts','azure-SSML-tts', 'azure-new-SSML-tts']),
         orderBy('createdDateTime', 'desc'),
         limit(200)
       );

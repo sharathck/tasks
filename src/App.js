@@ -265,6 +265,7 @@ function App() {
           message: message, 
           uid: user.uid, 
           source: 'ta',
+          chunk_size: 2100,
           voice_name: ttsVoiceName,
           silence_break: speechSilence,
           prosody_rate: speechRate
