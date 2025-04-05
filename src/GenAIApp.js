@@ -100,6 +100,7 @@ let searchSource = 'perplexity';
 let reviewsPrompt = '';
 let vertexAIModelName = '';
 let ttsVoiceName = 'en-US-EvelynNeural';
+let googleTTSVoiceName = 'en-US-Chirp-HD-F';
 
 const GenAIApp = ({ sourceImageInformation }) => {
     // **State Variables**
@@ -1873,7 +1874,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             return;
         }
         if (apiUrl.includes('geminitts')) {
-            ttsVoiceName = 'en-US-Chirp-HD-F';
+            ttsVoiceName = googleTTSVoiceName;
         }
         try {
             const response = await fetch(apiUrl, {
