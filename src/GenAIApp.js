@@ -3270,6 +3270,14 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     <FaCloudDownloadAlt /> Gen AI Audio
                                 </button>
                             }
+                            {showPrint && showTTS &&
+                                <button
+                                    className={isGeneratingTTS ? 'action_button_flashing' : 'action_button'}
+                                    onClick={() => { setVoiceName('Gemini-Chirp'); callTTSAPI(promptInput, process.env.REACT_APP_TTS_GEMINI_API_URL); }}
+                                >
+                                    <FaCloudDownloadAlt /> Gemini Audio
+                                </button>
+                            }
                         </div>
                     )}
                     <div className="button-section" data-title="Practice Questions - Explanation - All Grades">
