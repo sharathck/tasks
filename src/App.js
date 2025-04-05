@@ -773,7 +773,7 @@ function App() {
       .replace(/[#:\-*]/g, ' ') // Remove special characters
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .trim(); // Remove leading/trailing spaces
-      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_GENAI_API_URL);
+      callTTSAPI(cleanedArticles, process.env.REACT_APP_TTS_GEMINI_API_URL);
   };
   const generateGenAITTS = () => {
     //   setReaderMode(true);
