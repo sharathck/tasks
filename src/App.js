@@ -91,6 +91,8 @@ function App() {
   const loopCountRef = useRef(0);
   const MAX_LOOPS = 10;
   let ttsVoiceName = 'en-US-EvelynNeural';
+  let googleTTSVoiceName = 'en-US-Chirp-HD-F';
+  let genAITTSVoiceName = 'shimmer';
 
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -253,7 +255,7 @@ function App() {
     console.log('Calling TTS API with user:', user.uid);
     ttsVoiceName = voiceName;
     if (appUrl.includes('geminitts')) {
-      ttsVoiceName = 'en-US-Chirp-HD-F';
+      ttsVoiceName = googleTTSVoiceName;
     }
     try {
       const response = await fetch(appUrl, {
@@ -329,7 +331,7 @@ function App() {
           message: cleanedArticles,
           uid: user.uid,
           source: 'ta',
-          voice_name: 'shimmer',
+          voice_name: genAITTSVoiceName,
           chunk_size: 7900,
           instructions: voiceInstructions,
         })
