@@ -2666,6 +2666,17 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <input
                                     type="radio"
                                     name="contentType"
+                                    value="draw-io"
+                                    onChange={() => {
+                                        promptName = 'draw-io';
+                                    }}
+                                />
+                                Workflow
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
                                     value="questions"
                                     onChange={() => {
                                         promptName = 'practice_questions';
