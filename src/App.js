@@ -1010,15 +1010,15 @@ function App() {
           <div>
             <button style={{ color: isLiveAudioPlaying ? 'orange' : 'grey', fontSize: '12px', border: isLiveAudioPlaying ? '3' : '0', backgroundColor: isLiveAudioPlaying ? 'black' : 'white' }} onClick={synthesizeSSMLSpeech}>Audio</button>
             <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowAudioApp(!showAudioApp)}>
-              Queue
+              Play
             </button>
             &nbsp;
             <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowTTSQueueApp(!showTTSQueueApp)}>
-              Articles
+              Log
             </button>
             &nbsp;
             <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowGenAIApp(!showGenAIApp)}>
-              Research
+              AI
             </button>
             &nbsp;
             <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => setShowCompleted(!showCompleted)}>
