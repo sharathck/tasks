@@ -2545,7 +2545,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         </button>
                     )}
                     {showGroq && (
-                        <button className={isGroq ? 'button_se</label>lected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
+                        <button className={isGroq ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
                             <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
                         </button>
                     )}
