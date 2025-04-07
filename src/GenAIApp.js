@@ -99,6 +99,7 @@ let newsSource = 'perplexity';
 let searchSource = 'perplexity';
 let reviewsPrompt = '';
 let vertexAIModelName = '';
+let vertexProAIModelName = '';
 let ttsVoiceName = 'en-US-EvelynNeural';
 let googleTTSVoiceName = 'en-US-Chirp-HD-F';
 
@@ -1697,7 +1698,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     temperature: temperatureRef.current.valueOf(),
                     top_p: top_pRef.current.valueOf()
                 };
-                const model = getGenerativeModel(vertexAI, { model: vertexAIModelName, generationConfig });
+                const model = getGenerativeModel(vertexAI, { model: selectedModel, generationConfig });
                 const result = await model.generateContent(promptText);
                 const text = await result.response.text();
                 const now = new Date();
@@ -1711,12 +1712,12 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     second: '2-digit',
                     hour12: false
                 }).replace(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/, '$3-$1-$2 $4:$5:$6');
-                console.log('Model Name :', vertexAIModelName,);
+                console.log('Model Name :', selectedModel,);
                 const docRef = await addDoc(collection(db, "genai", userID, "MyGenAI"), {
                     question: promptText,
                     inputPrompt: promptInput + ' ' + invocationType,
                     answer: text,
-                    model: vertexAIModelName,
+                    model: selectedModel,
                     createdDateTime: formattedDateTime,
                     invocationType: invocationType
                 });
@@ -2378,6 +2379,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     case 'fastGenAI':
                         vertexAIModelName = data.fullText;
                         break;
+                    case 'fastProGenAI':
+                        vertexProAIModelName = data.fullText;
+                        break;
                     case 'voice_instructions':
                         voiceInstructions = data.fullText;
                         break;
@@ -2867,6 +2871,21 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             Fast GenAI
                         </button>
                         <button
+                            onClick={async () => {
+                                setIsGeneratingGeminiFast(true);
+                                firebaseAPI = true;
+                                await callAPI(vertexProAIModelName);
+                                setIsGeneratingGeminiFast(false);
+                                firebaseAPI = false;
+                            }}
+                            className={
+                                (isGeneratingGeminiFast) ?
+                                    'action_button_flashing' : 'action_button'
+                            }
+                        >
+                            Fast Gemini Think
+                        </button>
+                                                <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 if (promptInput === undefined || promptInput.length < 5) {
