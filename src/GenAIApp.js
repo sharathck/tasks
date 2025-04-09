@@ -151,13 +151,13 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [isGptSearch, setIsGptSearch] = useState(false);
     const [isGeminiSearch, setIsGeminiSearch] = useState(true);
     const [isGeminiFlash, setIsGeminiFlash] = useState(false);
-    const [isPerplexityFast, setIsPerplexityFast] = useState(false);
+    const [isPerplexityThink, setIsPerplexityThink] = useState(false);
     const [isPerplexity, setIsPerplexity] = useState(false);
     const [isCodestral, setIsCodestral] = useState(false);
     const [isGeneratingGeminiFast, setIsGeneratingGeminiFast] = useState(false);
     const [isGeneratingGeminiSearch, setIsGeneratingGeminiSearch] = useState(false);
     const [isGeneratingGeminiFlash, setIsGeneratingGeminiFlash] = useState(false);
-    const [isGeneratingPerplexityFast, setIsGeneratingPerplexityFast] = useState(false);
+    const [isGeneratingPerplexityThink, setIsGeneratingPerplexityThink] = useState(false);
     const [isGeneratingTTS, setIsGeneratingTTS] = useState(false);
     const [iso1, setIso1] = useState(false); // New state for o1
     const [isGeneratingo, setisGeneratingo] = useState(false);
@@ -189,7 +189,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showChatGPT, setShowChatGPT] = useState(true);
     const [showGeminiSearch, setShowGeminiSearch] = useState(false);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
-    const [showPerplexityFast, setShowPerplexityFast] = useState(false);
+    const [showPerplexityThink, setShowPerplexityThink] = useState(false);
     const [showPerplexity, setShowPerplexity] = useState(false);
     const [showCodeStral, setShowCodeStral] = useState(false);
     const [showGemini, setShowGemini] = useState(false);
@@ -214,7 +214,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [modelGeminiFlash, setModelGeminiFlash] = useState('gemini-think');
     const [modelGptSearch, setModelGptSearch] = useState('gpt-search');
     const [modelImageDallE3, setModelImageDallE3] = useState('dall-e-3');
-    const [modelPerplexityFast, setModelPerplexityFast] = useState('perplexity-think');
+    const [modelPerplexityThink, setModelPerplexityThink] = useState('perplexity-think');
     const [modelPerplexity, setModelPerplexity] = useState('perplexity');
     const [modelCodestralApi, setModelCodestralApi] = useState('mistral-codestral-api'); // New state
     const [modelDeepSeekChat, setModelDeepSeekChat] = useState('deepseek-chat');
@@ -264,7 +264,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [labelGeminiFlash, setLabelGeminiFlash] = useState('Gemini Flash');
     const [labelChatGPT, setLabelChatGPT] = useState('ChatGPT');
     const [labelo, setLabelo] = useState('o1');
-    const [labelPerplexityFast, setLabelPerplexityFast] = useState('Perplexity-Fast');
+    const [labelPerplexityThink, setLabelPerplexityThink] = useState('Perplexity Think Search');
     const [labelPerplexity, setLabelPerplexity] = useState('Perplexity Search');
     const [labelCodestral, setLabelCodestral] = useState('CodeStral');
     const [labelDeepSeekChat, setLabelDeepSeekChat] = useState('DeepSeek');
@@ -638,8 +638,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.isGeminiFlash !== undefined) {
                     setIsGeminiFlash(data.isGeminiFlash);
                 }
-                if (data.isPerplexityFast !== undefined) {
-                    setIsPerplexityFast(data.isPerplexityFast);
+                if (data.isPerplexityThink !== undefined) {
+                    setIsPerplexityThink(data.isPerplexityThink);
                 }
                 if (data.isPerplexity !== undefined) {
                     setIsPerplexity(data.isPerplexity);
@@ -668,8 +668,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.showMistral !== undefined) {
                     setShowMistral(data.showMistral);
                 }
-                if (data.showPerplexityFast !== undefined) {
-                    setShowPerplexityFast(data.showPerplexityFast);
+                if (data.showPerplexityThink !== undefined) {
+                    setShowPerplexityThink(data.showPerplexityThink);
                 }
                 if (data.showPerplexity !== undefined) {
                     setShowPerplexity(data.showPerplexity);
@@ -744,8 +744,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
                 if (data.labelo !== undefined) {
                     setLabelo(data.labelo);
                 }
-                if (data.labelPerplexityFast !== undefined) {
-                    setLabelPerplexityFast(data.labelPerplexityFast);
+                if (data.labelPerplexityThink !== undefined) {
+                    setLabelPerplexityThink(data.labelPerplexityThink);
                 }
                 if (data.labelPerplexity !== undefined) {
                     setLabelPerplexity(data.labelPerplexity);
@@ -1340,7 +1340,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         }
 
         // Check if at least one model is selected
-        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptSearch && !isChatGPT && !isGeminiSearch && !isGeminiFlash && !isPerplexityFast && !isPerplexity && !isCodestral && !isDeepSeekChat && !isDeepSeekThink && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
+        if (!isOpenAI && !isAnthropic && !isGemini && !isoMini && !iso1 && !isLlama && !isMistral && !isGptSearch && !isChatGPT && !isGeminiSearch && !isGeminiFlash && !isPerplexityThink && !isPerplexity && !isCodestral && !isDeepSeekChat && !isDeepSeekThink && !isGroq && !isNova && !isCerebras && !isDeepSeek && !isGeminiFlashFast && !isClaudeThinking) {
             alert('Please select at least one model.');
             return;
         }
@@ -1420,9 +1420,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             callAPI(modelGptSearch);
         }
 
-        if (isPerplexityFast && showPerplexityFast) {
-            setIsGeneratingPerplexityFast(true); // Set generating state to true
-            callAPI(modelPerplexityFast);
+        if (isPerplexityThink && showPerplexityThink) {
+            setIsGeneratingPerplexityThink(true); // Set generating state to true
+            callAPI(modelPerplexityThink);
         }
 
         if (isPerplexity && showPerplexity) {
@@ -1474,7 +1474,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     isGptSearch,
                     isGeminiSearch,
                     isGeminiFlash,
-                    isPerplexityFast,
+                    isPerplexityThink,
                     isPerplexity,
                     isCodestral,
                     isDeepSeekChat,
@@ -1504,7 +1504,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     labelGeminiFlash,
                     labelChatGPT,
                     labelo,
-                    labelPerplexityFast,
+                    labelPerplexityThink,
                     labelPerplexity,
                     labelCodestral,
                     labelDeepSeekChat,
@@ -1534,7 +1534,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         isGptSearch,
                         isGeminiSearch,
                         isGeminiFlash,
-                        isPerplexityFast,
+                        isPerplexityThink,
                         isPerplexity,
                         isCodestral,
                         isDeepSeekChat,
@@ -1564,7 +1564,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         labelGeminiFlash,
                         labelChatGPT,
                         labelo,
-                        labelPerplexityFast,
+                        labelPerplexityThink,
                         labelPerplexity,
                         labelCodestral,
                         labelDeepSeekChat,
@@ -1811,8 +1811,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
             if (selectedModel === modelGeminiFlash) {
                 setIsGeneratingGeminiFlash(false);
             }
-            if (selectedModel === modelPerplexityFast) {
-                setIsGeneratingPerplexityFast(false);
+            if (selectedModel === modelPerplexityThink) {
+                setIsGeneratingPerplexityThink(false);
             }
             if (selectedModel === modelPerplexity) {
                 setIsGeneratingPerplexity(false);
@@ -2027,7 +2027,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
         setIsChatGPT(status);
         setIsGeminiSearch(status);
         setIsGeminiFlash(status);
-        setIsPerplexityFast(status);
+        setIsPerplexityThink(status);
         setIsPerplexity(status);
         setIsCodestral(status);
         setIsDeepSeekChat(status);
@@ -2590,10 +2590,10 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <label className={isGeneratingo ? 'flashing' : ''}>{labelo}</label>
                             </button>
                         )}
-                        {showPerplexityFast && (
-                            <button className={isPerplexityFast ? 'llm_button_selected' : 'button'}
-                                onClick={() => handleLLMChange(setIsPerplexityFast, !isPerplexityFast)}>
-                                <label className={isGeneratingPerplexityFast ? 'flashing' : ''}>{labelPerplexityFast}</label>
+                        {showPerplexityThink && (
+                            <button className={isPerplexityThink ? 'llm_button_selected' : 'button'}
+                                onClick={() => handleLLMChange(setIsPerplexityThink, !isPerplexityThink)}>
+                                <label className={isGeneratingPerplexityThink ? 'flashing' : ''}>{labelPerplexityThink}</label>
                             </button>
                         )}
                         {showClaudeThinking && (
@@ -2811,7 +2811,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                         isGeneratingGeminiSearch ||
                                         isGeneratingGeminiFlash ||
                                         isGeneratingPerplexity ||
-                                        isGeneratingPerplexityFast ||
+                                        isGeneratingPerplexityThink ||
                                         isGeneratingCodeStral ||
                                         isGeneratingChatGPT ||
                                         isGeneratingDeepSeekChat ||
@@ -2837,7 +2837,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     isGeneratingGeminiSearch ||
                                     isGeneratingGeminiFlash ||
                                     isGeneratingPerplexity ||
-                                    isGeneratingPerplexityFast ||
+                                    isGeneratingPerplexityThink ||
                                     isGeneratingCodeStral ||
                                     isGeneratingChatGPT ||
                                     isGeneratingDeepSeekChat ||
@@ -3468,7 +3468,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     <option value="gpt-4o-mini">ChatGPT</option>
                     <option value="gemini-search">GeminiSearch</option>
                     <option value="gemini-flash">Gemini Flash</option>
-                    <option value="perplexity-fast">PerplexityFast</option>
+                    <option value="perplexity-fast">PerplexityThink</option>
                     <option value="perplexity">Perplexity</option>
                     <option value="codestral">CodeStral</option>
                     <option value="Claude-Haiku">Claude-Haiku</option>
