@@ -1935,6 +1935,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/[&]/g, ' and ')
             .replace('```json', '')
             .replace(/[<>]/g, ' ')
+            .replace(/\(\[[^\]]*\]\)/g, ' ')
             //       .replace(/["]/g, '&quot;')
             //       .replace(/[']/g, '&apos;')
             .trim();
