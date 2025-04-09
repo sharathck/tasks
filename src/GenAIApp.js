@@ -189,8 +189,8 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [showChatGPT, setShowChatGPT] = useState(true);
     const [showGeminiSearch, setShowGeminiSearch] = useState(false);
     const [showGeminiFlash, setShowGeminiFlash] = useState(false);
-    const [showPerplexityThink, setShowPerplexityThink] = useState(false);
-    const [showPerplexity, setShowPerplexity] = useState(false);
+    const [showPerplexityThink, setShowPerplexityThink] = useState(true);
+    const [showPerplexity, setShowPerplexity] = useState(true);
     const [showCodeStral, setShowCodeStral] = useState(false);
     const [showGemini, setShowGemini] = useState(false);
     const [showClaudeThinking, setShowClaudeThinking] = useState(false);
@@ -1588,10 +1588,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     };
 
     const callAPI = async (selectedModel, invocationType = 'GenAI') => {
-        console.log('Calling API with model:', selectedModel + ' URL: ' + process.env.REACT_APP_GENAI_API_URL, ' youtubeSelected: ', youtubeSelected, ' youtubePromptInput:', youtubePromptInput, '  youtubeDescriptionPromptInput : ', youtubeDescriptionPromptInput);
-        console.log('youtube Content Input prompt:', youtubeContentInput);
-        console.log('imageGenerationPromptInput :', imageGenerationPromptInput);
-        console.log('imagePromptsGenerationInput:', imagePromptsGenerationInput);
+        console.log('Calling API with model:', selectedModel , ' URL: ' , process.env.REACT_APP_GENAI_API_URL);
         try {
             let response;
             let promptText = promptInput;
@@ -1860,6 +1857,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
             .replace(/[&]/g, ' and ')
             .replace('```json', '')
             .replace(/[<>]/g, ' ')
+            .replace(/\(\[[^\]]*\]\)/g, ' ')
             //       .replace(/["]/g, '&quot;')
             //       .replace(/[']/g, '&apos;')
             .trim();
