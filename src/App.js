@@ -7,7 +7,7 @@ import * as speechsdk from 'microsoft-cognitiveservices-speech-sdk';
 import AudioApp from './AudioApp';
 import TTSQueueApp from './TTSQueueApp';
 import GenAIApp from './GenAIApp';
-import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit } from 'firebase/firestore';
+import { doc, deleteDoc, collection, getDocs, startAfter, query, where, orderBy, onSnapshot, addDoc, updateDoc, limit, getDoc } from 'firebase/firestore';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from './Firebase';
 import VoiceSelect from './VoiceSelect';
@@ -648,6 +648,39 @@ function App() {
     setShowCurrent(!showCurrent);
   };
 
+  const handleSnooze = async (taskId, taskTitle, status, recurrence, dueDate) => {
+    // For non-recurrent tasks, just add 8 hrs to the due date
+    const taskDocRef = doc(db, fireBaseTasksCollection, taskId);
+    const taskSnapshot = await getDoc(taskDocRef);
+    if (taskSnapshot.exists()) {
+      const taskData = taskSnapshot.data();
+      let nextDueDate = new Date(taskData.dueDate.toDate());
+      if (taskData.recurrence === 'ad-hoc') {
+        nextDueDate.setHours(nextDueDate.getHours() + 4);
+        await updateDoc(taskDocRef, {
+          dueDate: nextDueDate,
+        });
+      }
+      else {
+        // add a new task with taskTitle and duedate is currentDateTime + 4 hrs
+        let newDueDate = new Date();
+        //add 4 hrs to currentDate
+         newDueDate.setHours(newDueDate.getHours() + 4);
+        await addDoc(collection(db, fireBaseTasksCollection), {
+          task: taskTitle,
+          recurrence: 'ad-hoc',
+          status: false,
+          userId: user.uid,
+          createdDate: new Date(),
+          dueDate: newDueDate,
+          uemail: user.email
+        });
+        // if above task is added successfully, then call handleToggleStatus
+        await handleToggleStatus(taskId, status, recurrence, dueDate);
+      }
+    }
+  };
+
   const handleToggleStatus = async (taskId, status, recurrence, dueDate) => {
     const taskDocRef = doc(db, fireBaseTasksCollection, taskId);
     const currentDate = new Date();
@@ -1112,6 +1145,12 @@ function App() {
                           {showEditButtons && (
                             <button style={{ color: 'grey', fontSize: '12px', border: '0', backgroundColor: 'white' }} onClick={() => handleEditTask(task)}>
                               edit
+                            </button>
+                          )}
+                          
+                          {showEditButtons && (
+                            <button style={{ color: 'grey', fontSize: '16px', border: '0', backgroundColor: 'white' }} onClick={() => handleSnooze(task.id, task.task, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
+                              snooze
                             </button>
                           )}
                         </>
