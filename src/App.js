@@ -655,18 +655,14 @@ function App() {
     const taskSnapshot = await getDoc(taskDocRef);
     if (taskSnapshot.exists()) {
       const taskData = taskSnapshot.data();
-      let nextDueDate = new Date(taskData.dueDate.toDate());
+      let newDueDate = new Date();
+      newDueDate.setHours(newDueDate.getHours() + afterHrs);
       if (taskData.recurrence === 'ad-hoc') {
-        nextDueDate.setHours(nextDueDate.getHours() + afterHrs);
         await updateDoc(taskDocRef, {
-          dueDate: nextDueDate,
+          dueDate: newDueDate,
         });
       }
       else {
-        // add a new task with taskTitle and duedate is currentDateTime + 4 hrs
-        let newDueDate = new Date();
-        //add 4 hrs to currentDate
-         newDueDate.setHours(newDueDate.getHours() + 4);
         await addDoc(collection(db, fireBaseTasksCollection), {
           task: taskTitle,
           recurrence: 'ad-hoc',
