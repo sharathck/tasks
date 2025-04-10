@@ -649,7 +649,7 @@ function App() {
     setShowCurrent(!showCurrent);
   };
 
-  const handleSnooze = async (taskId, taskTitle, status, recurrence, dueDate) => {
+  const handleSnooze = async (taskId, taskTitle, status, recurrence, dueDate, afterHrs) => {
     // For non-recurrent tasks, just add 8 hrs to the due date
     const taskDocRef = doc(db, fireBaseTasksCollection, taskId);
     const taskSnapshot = await getDoc(taskDocRef);
@@ -657,7 +657,7 @@ function App() {
       const taskData = taskSnapshot.data();
       let nextDueDate = new Date(taskData.dueDate.toDate());
       if (taskData.recurrence === 'ad-hoc') {
-        nextDueDate.setHours(nextDueDate.getHours() + 4);
+        nextDueDate.setHours(nextDueDate.getHours() + afterHrs);
         await updateDoc(taskDocRef, {
           dueDate: nextDueDate,
         });
@@ -1150,11 +1150,15 @@ function App() {
                           )}
                           
                           {showEditButtons && (
-                            <button style={{ color: 'grey', fontSize: '16px', border: '0', backgroundColor: 'white' }} onClick={() => handleSnooze(task.id, task.task, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString())}>
-                              snooze
+                            <button style={{ color: 'grey', fontSize: '14px', border: '0', backgroundColor: 'white' }} onClick={() => handleSnooze(task.id, task.task, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString(), 2)}>
+                              2 hrs
                             </button>
                           )}
-                        </>
+                          {showEditButtons && (
+                            <button style={{ color: 'grey', fontSize: '14px', border: '0', backgroundColor: 'white' }} onClick={() => handleSnooze(task.id, task.task, task.status, task.recurrence, task.dueDate.toDate().toLocaleDateString(), 8)}>
+                              8 hrs
+                            </button>
+                          )}                        </>
                       </li>
                     ))}
                 </ul>
