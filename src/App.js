@@ -56,6 +56,7 @@ function App() {
   const [adminUser, setAdminUser] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [speechRate, setSpeechRate] = useState('0%');
+  const [showSettings, setShowSettings] = useState(false);
   const [speechSilence, setSpeechSilence] = useState(3900);
   const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
   const [lastTask, setLastTask] = useState(null); // State for the limit of documents to show
@@ -1160,20 +1161,26 @@ function App() {
                 {showMoreButton && <button className="button" onClick={fetchMoreTasks}>Show More</button>}
                 <br />
                 <br />
+                <button style={{ color: 'grey', fontSize: '16px', border: '0', backgroundColor: 'white' }} onClick={handleSignOut}>
+                  sign out
+                </button>
+                &nbsp;
+                <button style={{ color: 'grey', fontSize: '16px', border: '0', backgroundColor: 'white' }} onClick={() => setShowSettings(!showSettings)}>
+                  settings
+                </button>    
+                <br />   
+                {showSettings && ( 
+                  <>
+                <button className={showSearchBox ? 'app_button_selected' : 'app_button'} onClick={handleSearchButtonClick}>
+                  <FaSearch />
+                </button>
+
                 <button className={showRecurrentTasks ? 'app_button_selected' : 'app_button'} onClick={handleHideRecurrentTasks}>
                   <FaConfluence />
                 </button>
 
                 <button className='app_button' onClick={generateDocx}><FaFileWord /></button>
                 <button className='app_button' onClick={generateText}><FaFileAlt /></button>
-                <button className={showSearchBox ? 'app_button_selected' : 'app_button'} onClick={handleSearchButtonClick}>
-                  <FaSearch />
-                </button>
-                <button className="app_button_signoutbutton" onClick={handleSignOut}>
-                  <FaSignOutAlt />
-                </button>
-                <br />
-                <br />
                 {/* Add the voice name input box */}
                 <VoiceSelect
                   selectedVoice={voiceName} // Current selected voice
@@ -1190,14 +1197,10 @@ function App() {
                   />
                 </div>
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={synthesizeSpeech}><FaHeadphones /></button>
-                <br />
-                <br />
                 {<button className={!isLiveAudioPlaying ? 'app_button' : 'app_button_selected'} onClick={synthesizeSpeech}>                                    {isLiveAudioPlaying
                   ? (<FaSpinner className="spinning" />)
                   : (<FaVolumeUp />)}</button>}
                 {!showCompleted && !showFuture && readerMode && (<button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateTTS}><FaReadme /></button>)}
-
-                &nbsp;
                 <button className={isGeneratingTTS ? 'app_button_selected' : 'app_button'} onClick={generateGenAITTS}>GenAITTS</button>
                 <button className={showAudioApp ? 'app_button_selected' : 'app_button'} onClick={() => setShowAudioApp(!showAudioApp)}>
                   <FaPlay />
@@ -1257,6 +1260,8 @@ function App() {
                     </button>
                   </div>
                 )}
+                </>
+              )}
                 <div>
                   <br />
                   <br />
