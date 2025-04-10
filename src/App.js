@@ -1140,7 +1140,7 @@ function App() {
                               <span style={{ color: 'grey' }}> ({task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)})</span>
                             )}
                             {showDueDates && (
-                              <span style={{ color: 'grey', fontSize: '12px' }}> - {task.dueDate.toDate().toLocaleDateString()}_{task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <span style={{ color: 'grey', fontSize: '12px' }}>  {task.dueDate.toDate().toLocaleDateString([], {month: '2-digit', day: '2-digit'})} {task.dueDate.toDate().toLocaleTimeString([], { hour: '2-digit' })}</span>
                             )}
                           </span>
                           {showEditButtons && (
