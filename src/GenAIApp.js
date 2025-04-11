@@ -1337,7 +1337,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     // **Handler for Generate Button Click**
     const handleGenerate = async () => {
         setShowSourceDocument(false);
-        if (!promptInput.trim()) {
+        if (!promptInput.trim() && !isFileAttached) {
             alert('Please enter a prompt.');
             return;
         }
