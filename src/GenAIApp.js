@@ -132,6 +132,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [uid, setUid] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [promptInput, setPromptInput] = useState('');
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -1588,7 +1589,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     };
 
     const callAPI = async (selectedModel, invocationType = 'GenAI') => {
-        console.log('Calling API with model:', selectedModel , ' URL: ' , process.env.REACT_APP_GENAI_API_URL);
+        console.log('Calling API with model:', selectedModel, ' URL: ', process.env.REACT_APP_GENAI_API_URL);
         try {
             let response;
             let promptText = promptInput;
@@ -2724,6 +2725,28 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <input
                                     type="radio"
                                     name="contentType"
+                                    value="mom"
+                                    onChange={() => {
+                                        promptName = 'Feedback';
+                                    }}
+                                />
+                                Review/Feedback
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
+                                    value="mom"
+                                    onChange={() => {
+                                        promptName = 'Summary';
+                                    }}
+                                />
+                                Summary/Highlights
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="contentType"
                                     value="search"
                                     onChange={() => {
                                         promptName = '';
@@ -2792,6 +2815,43 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <button className={autoPrompt ? 'llm_button_selected' : 'button'} onClick={() => setAutoPrompt(!autoPrompt)}>
                                 {genai_autoprompt_label || 'AutoPrompt'}
                             </button>
+                        )}
+                        &nbsp;
+                        {isUploading && (
+                            <FaSpinner className="spinning" />
+                        )}
+                        {showEditPromptButton && (
+                            <input
+                                type="file"
+                                accept=".pdf,.docx,.pptx,.xlsx,.xls"
+                                style={{ marginLeft: '8px', padding: '2px', fontSize: '18px' }}
+                                onChange={async (e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        const formData = new FormData();
+                                        formData.append('file', file);
+                                        formData.append('uid', uid);
+                                        try {
+                                            setIsUploading(true); // Show spinning wheel
+                                            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}md`, {
+                                                method: 'POST',
+                                                body: formData
+                                            });
+
+                                            if (!response.ok) {
+                                                const errorData = await response.json();
+                                                throw new Error(errorData.error || 'Failed to upload document.');
+                                            }
+                                            const data = await response.json();
+                                            setPromptInput(data.markdown);
+                                            setIsUploading(false); // Hide spinning wheel
+                                        } catch (error) {
+                                            console.error('Error uploading document:', error);
+                                            alert(`Error: ${error.message}`);
+                                        }
+                                    }
+                                }}
+                            />
                         )}
                         {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
                             <button
@@ -2884,7 +2944,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         >
                             Fast Gemini Think
                         </button>
-                                                <button
+                        <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
                             onClick={async () => {
                                 if (promptInput === undefined || promptInput.length < 5) {
@@ -3563,7 +3623,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     <div style={{ color: "green", fontWeight: "bold" }}>
                                         {item.model !== modelImageDallE3 && item.model !== modelGeminiImage && item.model !== 'azure-tts' && (
                                             <>
-                                                {(!isiPhone && showPrint && (!item.voiceName || !item.voiceName?.length > 2) && 
+                                                {(!isiPhone && showPrint && (!item.voiceName || !item.voiceName?.length > 2) &&
                                                     <button
                                                         className={isLiveAudioPlaying[item.id] ? 'action_button_flashing' : 'action_button'}
                                                         onClick={async () => {
