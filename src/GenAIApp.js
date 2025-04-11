@@ -2703,17 +2703,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 <input
                                     type="radio"
                                     name="contentType"
-                                    value="quiz_with_choices"
-                                    onChange={() => {
-                                        promptName = 'quiz_with_choices';
-                                    }}
-                                />
-                                Quiz(Choices)
-                            </label>
-                            <label className="radio-label">
-                                <input
-                                    type="radio"
-                                    name="contentType"
                                     value="mom"
                                     onChange={() => {
                                         promptName = 'mom';
