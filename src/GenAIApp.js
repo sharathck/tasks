@@ -1452,7 +1452,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
             setIsGeneratingGeminiFlashFast(true);
             callAPI(modelGeminiFlashFast);
         }
-        updateConfiguration();
     };
 
     const updateConfiguration = async () => {
@@ -2465,6 +2464,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
+
                     {showCerebras && (
                         <button
                             className={isCerebras ? 'llm_button_selected' : 'button'}
@@ -2473,6 +2473,11 @@ const GenAIApp = ({ sourceImageInformation }) => {
                             <label className={isGeneratingCerebras ? 'flashing' : ''}>
                                 {labelCerebras}
                             </label>
+                        </button>
+                    )}
+                    {showGroq && (
+                        <button className={isGroq ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
+                            <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
                         </button>
                     )}
                     {showGemini && (
@@ -2545,11 +2550,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         <button className={isDeepSeekChat ? 'llm_button_selected' : 'button'}
                             onClick={() => handleLLMChange(setIsDeepSeekChat, !isDeepSeekChat)}>
                             <label className={isGeneratingDeepSeekChat ? 'flashing' : ''}>{labelDeepSeekChat}</label>
-                        </button>
-                    )}
-                    {showGroq && (
-                        <button className={isGroq ? 'llm_button_selected' : 'button'} onClick={() => handleLLMChange(setIsGroq, !isGroq)}>
-                            <label className={isGeneratingGroq ? 'flashing' : ''}>{labelGroq}</label>
                         </button>
                     )}
                     {showDeepSeek && (
@@ -2843,7 +2843,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                         )}
                         {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
                             <button
-                                onClick={handleGenerate}
+                                onClick={() => handleGenerate()}
                                 className={
                                     isGenerating ||
                                         isGeneratingGemini ||
