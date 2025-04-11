@@ -46,7 +46,7 @@
 }
 .promptInput
 {
-  width: 99%;
+  width: 60%;
   padding: 2px;
   font-size: 16px;
   height:140px; /* Increase the height */
@@ -55,7 +55,7 @@
 }
 .promptFullTextInput
 {
-  width: 99%;
+  width: 60%;
   padding: 2px;
   font-size: 16px;
   height:400px; /* Increase the height */
@@ -368,7 +368,7 @@ html, body {
 
 .popupContent input,
 .popupContent textarea {
-  width: 100%;
+  width: 60%;
   padding: 8px;
   margin-top: 4px;
   box-sizing: border-box;

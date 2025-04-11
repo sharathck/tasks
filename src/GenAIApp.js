@@ -2464,7 +2464,105 @@ const GenAIApp = ({ sourceImageInformation }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
+                    &nbsp;
+                    {isUploading && (
+                        <FaSpinner className="spinning" />
+                    )}
+                    {showEditPromptButton && (
+                        <input
+                            type="file"
+                            accept=".pdf,.docx,.pptx,.xlsx,.xls"
+                            style={{ marginLeft: '6px', marginBottom: '6px',padding: '2px', fontSize: '18px' }}
+                            onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+                                    formData.append('uid', uid);
+                                    try {
+                                        setIsUploading(true); // Show spinning wheel
+                                        const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}md`, {
+                                            method: 'POST',
+                                            body: formData
+                                        });
 
+                                        if (!response.ok) {
+                                            const errorData = await response.json();
+                                            throw new Error(errorData.error || 'Failed to upload document.');
+                                        }
+                                        const data = await response.json();
+                                        setPromptInput(data.markdown);
+                                        setIsUploading(false); // Hide spinning wheel
+                                    } catch (error) {
+                                        console.error('Error uploading document:', error);
+                                        alert(`Error: ${error.message}`);
+                                    }
+                                }
+                            }}
+                        />
+                    )}
+                                            {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
+                            <button
+                                onClick={() => handleGenerate()}
+                                className={
+                                    isGenerating ||
+                                        isGeneratingGemini ||
+                                        isGeneratingAnthropic ||
+                                        isGeneratingoMini ||
+                                        isGeneratingo ||
+                                        isGeneratingImage_Dall_e_3 ||
+                                        isGeneratingTTS ||
+                                        isGeneratingMistral ||
+                                        isGeneratingLlama ||
+                                        isGeneratingGptSearch ||
+                                        isGeneratingGeminiSearch ||
+                                        isGeneratingGeminiFlash ||
+                                        isGeneratingPerplexity ||
+                                        isGeneratingPerplexityThink ||
+                                        isGeneratingCodeStral ||
+                                        isGeneratingChatGPT ||
+                                        isGeneratingDeepSeekChat ||
+                                        isGeneratingDeepSeekThink ||
+                                        isGeneratingGroq ||
+                                        isGeneratingNova ||
+                                        isGeneratingCerebras ||
+                                        isGeneratingDeepSeek ||
+                                        isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? 'action_button_flashing' : 'action_button'
+                                }
+                                style={{ backgroundColor: 'lightblue' }}
+                                disabled={
+                                    isGenerating ||
+                                    isGeneratingGemini ||
+                                    isGeneratingAnthropic ||
+                                    isGeneratingoMini ||
+                                    isGeneratingo ||
+                                    isGeneratingImage_Dall_e_3 ||
+                                    isGeneratingTTS ||
+                                    isGeneratingMistral ||
+                                    isGeneratingLlama ||
+                                    isGeneratingGptSearch ||
+                                    isGeneratingGeminiSearch ||
+                                    isGeneratingGeminiFlash ||
+                                    isGeneratingPerplexity ||
+                                    isGeneratingPerplexityThink ||
+                                    isGeneratingCodeStral ||
+                                    isGeneratingChatGPT ||
+                                    isGeneratingDeepSeekChat ||
+                                    isGeneratingDeepSeekThink ||
+                                    isGeneratingGroq ||
+                                    isGeneratingNova ||
+                                    isGeneratingCerebras ||
+                                    isGeneratingDeepSeek ||
+                                    isExplain ||
+                                    isLyrics ||
+                                    isGeneratingGeminiFlashFast ||
+                                    isGeneratingClaudeThinking
+                                }
+                            >
+                                <strong>GenAI</strong>
+                            </button>
+                        )}
+                    <br />
                     {showCerebras && (
                         <button
                             className={isCerebras ? 'llm_button_selected' : 'button'}
@@ -2804,104 +2902,6 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                 {genai_autoprompt_label || 'AutoPrompt'}
                             </button>
                         )}
-                        &nbsp;
-                        {isUploading && (
-                            <FaSpinner className="spinning" />
-                        )}
-                        {showEditPromptButton && (
-                            <input
-                                type="file"
-                                accept=".pdf,.docx,.pptx,.xlsx,.xls"
-                                style={{ marginLeft: '8px', padding: '2px', fontSize: '18px' }}
-                                onChange={async (e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                        const formData = new FormData();
-                                        formData.append('file', file);
-                                        formData.append('uid', uid);
-                                        try {
-                                            setIsUploading(true); // Show spinning wheel
-                                            const response = await fetch(`${process.env.REACT_APP_GENAI_API_URL}md`, {
-                                                method: 'POST',
-                                                body: formData
-                                            });
-
-                                            if (!response.ok) {
-                                                const errorData = await response.json();
-                                                throw new Error(errorData.error || 'Failed to upload document.');
-                                            }
-                                            const data = await response.json();
-                                            setPromptInput(data.markdown);
-                                            setIsUploading(false); // Hide spinning wheel
-                                        } catch (error) {
-                                            console.error('Error uploading document:', error);
-                                            alert(`Error: ${error.message}`);
-                                        }
-                                    }
-                                }}
-                            />
-                        )}
-                        {!isAISearch && !ishomeWork && !isQuiz && showGenAIButton && (
-                            <button
-                                onClick={() => handleGenerate()}
-                                className={
-                                    isGenerating ||
-                                        isGeneratingGemini ||
-                                        isGeneratingAnthropic ||
-                                        isGeneratingoMini ||
-                                        isGeneratingo ||
-                                        isGeneratingImage_Dall_e_3 ||
-                                        isGeneratingTTS ||
-                                        isGeneratingMistral ||
-                                        isGeneratingLlama ||
-                                        isGeneratingGptSearch ||
-                                        isGeneratingGeminiSearch ||
-                                        isGeneratingGeminiFlash ||
-                                        isGeneratingPerplexity ||
-                                        isGeneratingPerplexityThink ||
-                                        isGeneratingCodeStral ||
-                                        isGeneratingChatGPT ||
-                                        isGeneratingDeepSeekChat ||
-                                        isGeneratingDeepSeekThink ||
-                                        isGeneratingGroq ||
-                                        isGeneratingNova ||
-                                        isGeneratingCerebras ||
-                                        isGeneratingDeepSeek ||
-                                        isExplain || isLyrics || isGeneratingGeminiFlashFast || isGeneratingClaudeThinking ? 'action_button_flashing' : 'action_button'
-                                }
-                                style={{ backgroundColor: 'lightblue' }}
-                                disabled={
-                                    isGenerating ||
-                                    isGeneratingGemini ||
-                                    isGeneratingAnthropic ||
-                                    isGeneratingoMini ||
-                                    isGeneratingo ||
-                                    isGeneratingImage_Dall_e_3 ||
-                                    isGeneratingTTS ||
-                                    isGeneratingMistral ||
-                                    isGeneratingLlama ||
-                                    isGeneratingGptSearch ||
-                                    isGeneratingGeminiSearch ||
-                                    isGeneratingGeminiFlash ||
-                                    isGeneratingPerplexity ||
-                                    isGeneratingPerplexityThink ||
-                                    isGeneratingCodeStral ||
-                                    isGeneratingChatGPT ||
-                                    isGeneratingDeepSeekChat ||
-                                    isGeneratingDeepSeekThink ||
-                                    isGeneratingGroq ||
-                                    isGeneratingNova ||
-                                    isGeneratingCerebras ||
-                                    isGeneratingDeepSeek ||
-                                    isExplain ||
-                                    isLyrics ||
-                                    isGeneratingGeminiFlashFast ||
-                                    isGeneratingClaudeThinking
-                                }
-                            >
-                                <strong>GenAI</strong>
-                            </button>
-                        )}
                         <button
                             onClick={async () => {
                                 setIsGeneratingGeminiFast(true);
@@ -2930,7 +2930,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                     'action_button_flashing' : 'action_button'
                             }
                         >
-                            Fast Gemini Think
+                            Fast Gemini
                         </button>
                         <button
                             className={(isGeneratingGeminiSearch || isGeneratingPerplexity) ? 'action_button_flashing' : 'action_button'}
