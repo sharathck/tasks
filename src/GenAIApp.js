@@ -48,6 +48,7 @@ let usaNewsPrompt = '';
 let techNewsPrompt = '';
 let reviewsPromptInput = '';
 let firebaseAPI = false;
+let attachmentInformation = '';
 let voiceInstructions = 'Voice Affect: Professional news reader quality pronunciation.\n\nTone: Confident and cheerful.\n\nPacing: Steady and measured.\n\nEmotion: Happy tone.\n\nPronunciation: go easy on letter s in words so that you can avoid hissing sound.\n\nPauses: Use thoughtful pauses.';
 let imagesSearchPrompt = 'For the following content, I would like to search for images for my reserach project. Please divide following content in 5-10 logical and relevant image descriptions that I can use to search in google images.::: For each image description, include clickable url to search google images ::::: below is the full content ::::: ';
 let fullPromptInput = '';
@@ -121,6 +122,7 @@ const GenAIApp = ({ sourceImageInformation }) => {
     const [genOpenAIImage, setGenOpenAIImage] = useState(true);
     const [sourceImageParameter, setSourceImageParameter] = useState(sourceImageInformation);
     const [genaiData, setGenaiData] = useState([]);
+    const [isFileAttached, setIsFileAttached] = useState(false);
     const [isDownloading, setIsDownloading] = useState();
     const [isLoading, setIsLoading] = useState(false);
     const [lastVisible, setLastVisible] = useState(null); // State for the last visible document
@@ -1594,6 +1596,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
             let promptText = promptInput;
             // Get prompt text from Firebase if promptName is not blank
             let promptNameText = '';
+            if (isFileAttached) {
+                promptText = attachmentInformation + autoPromptSeparator + promptText;
+            }
             console.log('Prompt Name:', promptName);
             if (promptName) {
                 try {
@@ -2491,8 +2496,9 @@ const GenAIApp = ({ sourceImageInformation }) => {
                                             throw new Error(errorData.error || 'Failed to upload document.');
                                         }
                                         const data = await response.json();
-                                        setPromptInput(data.markdown);
+                                        attachmentInformation = data.markdown;
                                         setIsUploading(false); // Hide spinning wheel
+                                        setIsFileAttached(true);
                                     } catch (error) {
                                         console.error('Error uploading document:', error);
                                         alert(`Error: ${error.message}`);
